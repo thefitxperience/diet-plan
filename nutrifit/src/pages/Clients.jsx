@@ -177,7 +177,7 @@ export default function Clients() {
                 {showGym && <td>{c.gyms?.name || '—'}</td>}
                 <td><b>{c.first_name} {c.last_name}</b></td>
                 <td>{fmtDate(c.dob)}</td>
-                <td dir="ltr">{c.phone}</td>
+                <td><bdi dir="ltr">{c.phone}</bdi></td>
                 <td>{c.email}</td>
               </tr>
             ))}
