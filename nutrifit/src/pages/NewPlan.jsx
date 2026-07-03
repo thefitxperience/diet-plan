@@ -93,7 +93,7 @@ export default function NewPlan() {
 
   const stepValid = {
     1: form.activityId && form.dietaryTypeId && client.dob && client.gender,
-    2: form.height && form.weight && form.muscle && form.fat && form.lbm && form.bmr && form.calories,
+    2: form.calories, // only daily calories is required; body-comp fields optional
     3: form.noConditions || form.conditionIds.length >= 0, // conditions optional
   }
 
@@ -169,14 +169,13 @@ export default function NewPlan() {
       <h1>{t('wizard.title')} — {client.first_name} {client.last_name}</h1>
       <Alert kind="error">{error}</Alert>
 
-      <div className="row" style={{ marginBottom: '1rem' }}>
+      <div className="step-progress">
+        <div className="step-progress-line" style={{ width: `${((step - 1) / 2) * 100}%` }} />
         {[1, 2, 3].map((n) => (
-          <span key={n} className="badge" style={{
-            background: step === n ? 'var(--grad)' : 'var(--border)',
-            color: step === n ? 'white' : 'var(--muted)',
-          }}>
-            {n}. {t(`wizard.step${n}`)}
-          </span>
+          <div key={n} className={`step-item ${step === n ? 'active' : ''} ${step > n ? 'completed' : ''}`}>
+            <div className="step-circle">{n}</div>
+            <div className="step-label">{t(`wizard.step${n}`)}</div>
+          </div>
         ))}
       </div>
 
@@ -184,17 +183,6 @@ export default function NewPlan() {
         <div className="card">
           {!lookups && <Alert kind="warn">Lookups not loaded — check the network / proxy.</Alert>}
           <div className="grid cols-2">
-            <Field label={t('wizard.goal')} required>
-              <select value={form.goal} onChange={set('goal')}>
-                {['maintain', 'lose', 'gain'].map((g) => <option key={g} value={g}>{t(`wizard.goal.${g}`)}</option>)}
-              </select>
-            </Field>
-            <Field label={t('wizard.planStyle')} required>
-              <select value={form.planStyle} onChange={set('planStyle')}>
-                <option value="normal">{t('wizard.planStyle.normal')}</option>
-                <option value="if">{t('wizard.planStyle.if')}</option>
-              </select>
-            </Field>
             <Field label={t('wizard.activity')} required>
               <select value={form.activityId} onChange={set('activityId')}>
                 <option value="">—</option>
@@ -212,6 +200,33 @@ export default function NewPlan() {
               </select>
             </Field>
           </div>
+
+          <label className="field">
+            <span>{t('wizard.planStyle')} *</span>
+            <div className="radio-cards cols-2">
+              {['normal', 'if'].map((s) => (
+                <div className="radio-card" key={s}>
+                  <input type="radio" id={`ps-${s}`} name="planStyle" checked={form.planStyle === s}
+                    onChange={() => setForm({ ...form, planStyle: s })} />
+                  <label htmlFor={`ps-${s}`}>{t(`wizard.planStyle.${s}`)}</label>
+                </div>
+              ))}
+            </div>
+          </label>
+
+          <label className="field">
+            <span>{t('wizard.goal')} *</span>
+            <div className="radio-cards cols-3">
+              {['maintain', 'lose', 'gain'].map((g) => (
+                <div className="radio-card" key={g}>
+                  <input type="radio" id={`goal-${g}`} name="goal" checked={form.goal === g}
+                    onChange={() => setForm({ ...form, goal: g })} />
+                  <label htmlFor={`goal-${g}`}>{t(`wizard.goal.${g}`)}</label>
+                </div>
+              ))}
+            </div>
+          </label>
+
           {(!client.dob || !client.gender) && (
             <Alert kind="warn">Client date of birth and gender are required — edit the client profile first.</Alert>
           )}
@@ -235,12 +250,12 @@ export default function NewPlan() {
             <Alert kind="info">{t('wizard.noInbody')}</Alert>
           )}
           <div className="grid cols-3">
-            <Field label={t('wizard.height')} required><input type="number" step="0.1" min="50" max="300" value={form.height} onChange={setNum('height')} /></Field>
-            <Field label={t('wizard.weight')} required><input type="number" step="0.1" min="30" max="300" value={form.weight} onChange={setNum('weight')} /></Field>
-            <Field label={t('wizard.muscle')} required><input type="number" step="0.1" min="0" max="200" value={form.muscle} onChange={setNum('muscle')} /></Field>
-            <Field label={t('wizard.fat')} required><input type="number" step="0.1" min="0" max="200" value={form.fat} onChange={setNum('fat')} /></Field>
-            <Field label={t('wizard.lbm')} required><input type="number" step="0.1" min="0" max="300" value={form.lbm} onChange={setNum('lbm')} /></Field>
-            <Field label={t('wizard.bmr')} required><input type="number" step="1" min="0" max="10000" value={form.bmr} onChange={setNum('bmr')} /></Field>
+            <Field label={t('wizard.height')}><input type="number" step="0.1" min="50" max="300" value={form.height} onChange={setNum('height')} /></Field>
+            <Field label={t('wizard.weight')}><input type="number" step="0.1" min="30" max="300" value={form.weight} onChange={setNum('weight')} /></Field>
+            <Field label={t('wizard.muscle')}><input type="number" step="0.1" min="0" max="200" value={form.muscle} onChange={setNum('muscle')} /></Field>
+            <Field label={t('wizard.fat')}><input type="number" step="0.1" min="0" max="200" value={form.fat} onChange={setNum('fat')} /></Field>
+            <Field label={t('wizard.lbm')}><input type="number" step="0.1" min="0" max="300" value={form.lbm} onChange={setNum('lbm')} /></Field>
+            <Field label={t('wizard.bmr')}><input type="number" step="1" min="0" max="10000" value={form.bmr} onChange={setNum('bmr')} /></Field>
           </div>
           <Field label={t('wizard.calories')} required hint={t('wizard.caloriesHint')}>
             <input type="number" step="1" min="500" max="10000" value={form.calories} onChange={setNum('calories')} />

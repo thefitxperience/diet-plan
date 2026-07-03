@@ -180,6 +180,98 @@ input:focus, select:focus, textarea:focus {
 }
 input.invalid { border-color: var(--danger); }
 
+/* 3-step progress indicator (ported from fit-demo) */
+.step-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 2rem;
+  position: relative;
+  padding: 0 10px;
+}
+.step-progress::before {
+  content: '';
+  position: absolute;
+  top: 18px;
+  inset-inline-start: 10px;
+  inset-inline-end: 10px;
+  height: 2px;
+  background: var(--border);
+  z-index: 0;
+}
+.step-progress-line {
+  position: absolute;
+  top: 18px;
+  inset-inline-start: 10px;
+  height: 2px;
+  background: var(--teal);
+  transition: width 0.4s ease;
+  z-index: 1;
+}
+.step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  position: relative;
+  z-index: 2;
+  flex: 1;
+}
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: white;
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--muted);
+  transition: all 0.3s ease;
+}
+.step-item.active .step-circle,
+.step-item.completed .step-circle {
+  border-color: var(--teal);
+  background: var(--teal);
+  color: white;
+}
+.step-item .step-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.2;
+}
+.step-item.active .step-label,
+.step-item.completed .step-label { color: var(--text); }
+
+/* Radio cards (goal / plan style) */
+.radio-cards { display: grid; gap: 0.75rem; }
+.radio-cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.radio-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.radio-card input { position: absolute; opacity: 0; pointer-events: none; }
+.radio-card label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.8rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-align: center;
+  background: white;
+  transition: all 0.2s ease;
+  margin: 0;
+  height: 100%;
+}
+.radio-card input:checked + label { background: var(--teal); color: white; border-color: var(--teal); }
+.radio-card label:hover { border-color: var(--teal); }
+@media (max-width: 600px) { .radio-cards.cols-3 { grid-template-columns: 1fr; } }
+
 .checkbox-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
