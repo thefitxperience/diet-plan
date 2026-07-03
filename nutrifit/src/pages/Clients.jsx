@@ -108,8 +108,8 @@ export default function Clients() {
 
   return (
     <div>
-      <div className="row between">
-        <h1>{t('clients.title')}</h1>
+      <div className="row between" style={{ marginBottom: '1rem' }}>
+        <h1 style={{ margin: 0 }}>{t('clients.title')}</h1>
         <div className="row">
           <GymFilter value={gymFilter} onChange={setGymFilter} />
           {canEdit && (

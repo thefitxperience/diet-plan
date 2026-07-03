@@ -137,7 +137,8 @@ button.btn, a.btn {
   gap: 0.4rem;
   background: var(--grad);
   color: white;
-  border: none;
+  /* transparent border (not none) so height matches bordered selects/inputs next to it */
+  border: 1px solid transparent;
   padding: 0.55rem 1.1rem;
   border-radius: 8px;
   font-weight: 700;

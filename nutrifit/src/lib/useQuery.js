@@ -20,7 +20,10 @@ export function useQuery(key, fetcher, deps = []) {
     if (key == null) return
     let cancelled = false
     const cached = cache.has(key)
-    setData(cached ? cache.get(key) : undefined)
+    // Keep the previous data on screen while a new key (e.g. a changed filter)
+    // loads — only blank out on the very first load with nothing cached. This
+    // avoids the whole page flashing to a spinner when you change a filter.
+    setData((prev) => (cached ? cache.get(key) : prev))
     setLoading(!cached)
     ;(async () => {
       try {

@@ -36,8 +36,8 @@ export default function Plans() {
 
   return (
     <div>
-      <div className="row between">
-        <h1>{t('plans.title')}</h1>
+      <div className="row between" style={{ marginBottom: '1rem' }}>
+        <h1 style={{ margin: 0 }}>{t('plans.title')}</h1>
         <div className="row">
           <GymFilter value={gymFilter} onChange={setGymFilter} />
           <select style={{ width: 'auto' }} value={status} onChange={(e) => setStatus(e.target.value)}>

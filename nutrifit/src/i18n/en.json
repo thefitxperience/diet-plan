@@ -237,6 +237,11 @@
   "dashboard.recentActivity": "Recent activity",
   "dashboard.clients": "Clients",
   "dashboard.nutritionists": "Nutritionists",
+  "dashboard.totalGyms": "Total gyms",
+  "dashboard.totalNutritionists": "Total nutritionists",
+  "dashboard.totalPlansSent": "Total plans sent",
+  "dashboard.waitingGym": "Waiting for gym approval",
+  "dashboard.waitingNutritionist": "Waiting for nutritionist approval",
 
   "filter.allGyms": "All gyms",
   "dashboard.plansTotal": "Total plans",

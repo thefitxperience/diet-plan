@@ -237,6 +237,11 @@
   "dashboard.recentActivity": "النشاط الأخير",
   "dashboard.clients": "العملاء",
   "dashboard.nutritionists": "أخصائيو التغذية",
+  "dashboard.totalGyms": "إجمالي الأندية",
+  "dashboard.totalNutritionists": "إجمالي أخصائيي التغذية",
+  "dashboard.totalPlansSent": "إجمالي الخطط المرسلة",
+  "dashboard.waitingGym": "بانتظار موافقة النادي",
+  "dashboard.waitingNutritionist": "بانتظار موافقة أخصائي التغذية",
 
   "filter.allGyms": "كل الأندية",
   "dashboard.plansTotal": "إجمالي الخطط",
