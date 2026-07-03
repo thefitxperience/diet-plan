@@ -34,11 +34,15 @@ export default function Layout() {
   return (
     <div className="shell">
       <aside className="sidebar">
-        <div className="sidebar-brand">{t('app.name')}</div>
-        <div className="sidebar-role">
-          {profile?.full_name}
-          {gym ? ` · ${gym.name}` : ''}
+        <div className="sidebar-brand">
+          <img
+            src={`${import.meta.env.BASE_URL}assets/fit-logo.png`}
+            alt={t('app.name')}
+            className="sidebar-logo"
+          />
         </div>
+        {profile?.full_name && <div className="sidebar-user">{profile.full_name}</div>}
+        {gym?.name && <div className="sidebar-gym">{gym.name}</div>}
         <nav>
           {links.map(([to, key]) => (
             <NavLink key={to} to={to} end={to === '/'}>

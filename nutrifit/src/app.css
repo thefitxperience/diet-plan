@@ -53,19 +53,32 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
   height: 100vh;
 }
 
+/* FIT logo is teal+navy — needs a white chip to read on the dark gradient */
 .sidebar-brand {
-  font-size: 1.3rem;
-  font-weight: 700;
-  padding: 0 0.75rem 1.25rem;
-  letter-spacing: 0.02em;
+  background: white;
+  border-radius: 10px;
+  padding: 0.6rem 0.75rem;
+  margin: 0 0.25rem 0.75rem;
+  display: flex;
+  justify-content: center;
 }
 
-.sidebar-role {
-  font-size: 0.72rem;
-  opacity: 0.75;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  padding: 0 0.75rem 0.75rem;
+.sidebar-logo {
+  height: 46px;
+  width: auto;
+  display: block;
+}
+
+.sidebar-user {
+  padding: 0 0.75rem;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.sidebar-gym {
+  padding: 0 0.75rem 0.9rem;
+  font-size: 0.8rem;
+  opacity: 0.8;
 }
 
 .sidebar nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
@@ -278,6 +291,11 @@ table.data tr.clickable:hover { background: #f8fafc; }
   width: 10px; height: 10px;
   border-radius: 50%;
   background: var(--teal);
+}
+/* No line trailing off below the final (or only) item */
+.timeline li:last-child {
+  border-inline-start-color: transparent;
+  padding-bottom: 0;
 }
 
 /* ── editor layout ── */
