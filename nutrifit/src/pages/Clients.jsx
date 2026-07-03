@@ -93,8 +93,10 @@ export default function Clients() {
   const [showForm, setShowForm] = useState(false)
   const canEdit = role === 'nutritionist' || role === 'platform_admin'
 
+  const showGym = role === 'platform_admin' && !gymFilter
+
   const { data: clients, refresh } = useQuery(`clients:${gymFilter || 'all'}`, async () => {
-    let q = supabase.from('clients').select('*').order('created_at', { ascending: false })
+    let q = supabase.from('clients').select('*, gyms:gym_id(name)').order('created_at', { ascending: false })
     if (gymFilter) q = q.eq('gym_id', gymFilter)
     const { data } = await q
     return data || []
@@ -134,6 +136,7 @@ export default function Clients() {
         <table className="data">
           <thead>
             <tr>
+              {showGym && <th>{t('admin.gym')}</th>}
               <th>{t('common.name')}</th>
               <th>{t('clients.dob')}</th>
               <th>{t('clients.phone')}</th>
@@ -143,6 +146,7 @@ export default function Clients() {
           <tbody>
             {filtered.map((c) => (
               <tr key={c.id} className="clickable" onClick={() => navigate(`/clients/${c.id}`)}>
+                {showGym && <td>{c.gyms?.name || '—'}</td>}
                 <td><b>{c.first_name} {c.last_name}</b></td>
                 <td>{fmtDate(c.dob)}</td>
                 <td dir="ltr">{c.phone}</td>

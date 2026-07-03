@@ -124,7 +124,7 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
 .grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 
 /* Dashboard stat tiles: always exactly 4 per row (8 tiles → 2 rows of 4) */
-.stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 0.5rem; }
+.stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); row-gap: 0.5rem; margin-bottom: 1.75rem; }
 .stat-grid .card { margin-bottom: 0; }
 @media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
@@ -140,7 +140,7 @@ button.btn, a.btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--grad);
+  background: var(--teal);
   color: white;
   /* transparent border (not none) so height matches bordered selects/inputs next to it */
   border: 1px solid transparent;

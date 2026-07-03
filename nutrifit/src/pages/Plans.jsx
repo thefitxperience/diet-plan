@@ -16,9 +16,11 @@ export default function Plans() {
   const [status, setStatus] = useState('')
   const [gymFilter, setGymFilter] = useState('')
 
+  const showGym = role === 'platform_admin' && !gymFilter
+
   const { data: plans } = useQuery(`plans:${status || 'all'}:${gymFilter || 'all'}`, async () => {
     let q = supabase.from('plans')
-      .select('id, status, version, updated_at, clients(first_name, last_name)')
+      .select('id, status, version, updated_at, clients(first_name, last_name), gyms:gym_id(name)')
       .order('updated_at', { ascending: false })
     if (status) q = q.eq('status', status)
     if (gymFilter) q = q.eq('gym_id', gymFilter)
@@ -53,6 +55,7 @@ export default function Plans() {
         <table className="data">
           <thead>
             <tr>
+              {showGym && <th>{t('admin.gym')}</th>}
               <th>{t('plans.client')}</th>
               <th>{t('common.status')}</th>
               <th>{t('plans.version')}</th>
@@ -62,6 +65,7 @@ export default function Plans() {
           <tbody>
             {plans.map((p) => (
               <tr key={p.id} className="clickable" onClick={() => openPlan(p)}>
+                {showGym && <td>{p.gyms?.name || '—'}</td>}
                 <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
                 <td><StatusBadge status={p.status} /></td>
                 <td>v{p.version}</td>

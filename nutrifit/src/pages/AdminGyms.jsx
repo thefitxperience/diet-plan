@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
-import { Field, Alert, Loading } from '../components/ui'
+import { Alert, Loading } from '../components/ui'
 
 export default function AdminGyms() {
   const { t } = useI18n()
@@ -29,11 +29,14 @@ export default function AdminGyms() {
     <div>
       <h1>{t('admin.gyms')}</h1>
       <Alert kind="error">{error}</Alert>
-      <form className="card row" onSubmit={create}>
-        <Field label={t('admin.newGym')} className="row" >
-          <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ minWidth: 240 }} />
-        </Field>
-        <button className="btn">{t('common.add')}</button>
+      <form className="card" onSubmit={create}>
+        <div className="row" style={{ alignItems: 'flex-end' }}>
+          <label className="field" style={{ marginBottom: 0 }}>
+            <span>{t('admin.newGym')}</span>
+            <input type="text" value={name} onChange={(e) => setName(e.target.value)} required style={{ minWidth: 240 }} />
+          </label>
+          <button className="btn">{t('common.add')}</button>
+        </div>
       </form>
       <table className="data">
         <thead><tr><th>{t('common.name')}</th><th>ID</th></tr></thead>
