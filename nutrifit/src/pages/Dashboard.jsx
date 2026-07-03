@@ -86,7 +86,7 @@ export default function Dashboard() {
       {returned.length > 0 && role !== 'gym_admin' && (
         <>
           <h2>{t('approvals.toFix')}</h2>
-          <table className="data">
+          <table className="data" style={{ marginBottom: '1.75rem' }}>
             <tbody>
               {returned.map((p) => (
                 <tr key={p.id}>
@@ -104,7 +104,7 @@ export default function Dashboard() {
       {role === 'gym_admin' && pending.length > 0 && (
         <>
           <h2>{t('dashboard.pendingApprovals')}</h2>
-          <table className="data">
+          <table className="data" style={{ marginBottom: '1.75rem' }}>
             <tbody>
               {pending.map((p) => (
                 <tr key={p.id}>
