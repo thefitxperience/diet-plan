@@ -185,7 +185,7 @@ export default function NewPlan() {
           <div className="grid cols-2">
             <Field label={t('wizard.activity')} required>
               <select value={form.activityId} onChange={set('activityId')}>
-                <option value="">—</option>
+                <option value="">{t('wizard.selectActivity')}</option>
                 {activities.map((a) => (
                   <option key={a.enumId} value={a.enumId}>{activityDisplayName(a.description)}</option>
                 ))}
@@ -193,7 +193,7 @@ export default function NewPlan() {
             </Field>
             <Field label={t('wizard.dietaryType')} required>
               <select value={form.dietaryTypeId} onChange={set('dietaryTypeId')}>
-                <option value="">—</option>
+                <option value="">{t('wizard.selectDietary')}</option>
                 {(lookups?.dietaryTypes || []).map((d) => (
                   <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName)}</option>
                 ))}
@@ -249,7 +249,7 @@ export default function NewPlan() {
           ) : (
             <Alert kind="info">{t('wizard.noInbody')}</Alert>
           )}
-          <div className="grid cols-3">
+          <div className="bodycomp-grid">
             <Field label={t('wizard.height')}><input type="number" step="0.1" min="50" max="300" value={form.height} onChange={setNum('height')} /></Field>
             <Field label={t('wizard.weight')}><input type="number" step="0.1" min="30" max="300" value={form.weight} onChange={setNum('weight')} /></Field>
             <Field label={t('wizard.muscle')}><input type="number" step="0.1" min="0" max="200" value={form.muscle} onChange={setNum('muscle')} /></Field>
@@ -257,46 +257,50 @@ export default function NewPlan() {
             <Field label={t('wizard.lbm')}><input type="number" step="0.1" min="0" max="300" value={form.lbm} onChange={setNum('lbm')} /></Field>
             <Field label={t('wizard.bmr')}><input type="number" step="1" min="0" max="10000" value={form.bmr} onChange={setNum('bmr')} /></Field>
           </div>
-          <Field label={t('wizard.calories')} required hint={t('wizard.caloriesHint')}>
-            <input type="number" step="1" min="500" max="10000" value={form.calories} onChange={setNum('calories')} />
-          </Field>
+          <div style={{ maxWidth: 500, margin: '0 auto' }}>
+            <Field label={t('wizard.calories')} required hint={t('wizard.caloriesHint')}>
+              <input type="number" step="1" min="500" max="10000" value={form.calories} onChange={setNum('calories')} />
+            </Field>
+          </div>
         </div>
       )}
 
       {step === 3 && (
         <div className="card">
-          <Field label={t('wizard.conditions')}>
-            <div className="checkbox-list">
-              <label className="exclusive">
-                <input type="checkbox" checked={form.noConditions}
-                  onChange={(e) => setForm({ ...form, noConditions: e.target.checked, conditionIds: [] })} />
-                {t('wizard.noConditions')}
-              </label>
-              {conditions.map((c) => (
-                <label key={c.conditionId}>
-                  <input type="checkbox" checked={form.conditionIds.includes(c.conditionId)}
-                    onChange={() => toggleList('conditionIds', c.conditionId, 'noConditions')} />
-                  {c.conditionName}
+          <div className="grid cols-2">
+            <Field label={t('wizard.conditions')}>
+              <div className="checkbox-list one-col">
+                <label className="exclusive">
+                  <input type="checkbox" checked={form.noConditions}
+                    onChange={(e) => setForm({ ...form, noConditions: e.target.checked, conditionIds: [] })} />
+                  {t('wizard.noConditions')}
                 </label>
-              ))}
-            </div>
-          </Field>
-          <Field label={t('wizard.allergies')}>
-            <div className="checkbox-list">
-              <label className="exclusive">
-                <input type="checkbox" checked={form.noAllergies}
-                  onChange={(e) => setForm({ ...form, noAllergies: e.target.checked, allergyIds: [] })} />
-                {t('wizard.noAllergies')}
-              </label>
-              {allergies.map((a) => (
-                <label key={a.allergyId}>
-                  <input type="checkbox" checked={form.allergyIds.includes(a.allergyId)}
-                    onChange={() => toggleList('allergyIds', a.allergyId, 'noAllergies')} />
-                  {a.allergyName}
+                {conditions.map((c) => (
+                  <label key={c.conditionId}>
+                    <input type="checkbox" checked={form.conditionIds.includes(c.conditionId)}
+                      onChange={() => toggleList('conditionIds', c.conditionId, 'noConditions')} />
+                    {c.conditionName}
+                  </label>
+                ))}
+              </div>
+            </Field>
+            <Field label={t('wizard.allergies')}>
+              <div className="checkbox-list one-col">
+                <label className="exclusive">
+                  <input type="checkbox" checked={form.noAllergies}
+                    onChange={(e) => setForm({ ...form, noAllergies: e.target.checked, allergyIds: [] })} />
+                  {t('wizard.noAllergies')}
                 </label>
-              ))}
-            </div>
-          </Field>
+                {allergies.map((a) => (
+                  <label key={a.allergyId}>
+                    <input type="checkbox" checked={form.allergyIds.includes(a.allergyId)}
+                      onChange={() => toggleList('allergyIds', a.allergyId, 'noAllergies')} />
+                    {a.allergyName}
+                  </label>
+                ))}
+              </div>
+            </Field>
+          </div>
         </div>
       )}
 

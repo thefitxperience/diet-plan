@@ -272,16 +272,26 @@ input.invalid { border-color: var(--danger); }
 .radio-card label:hover { border-color: var(--teal); }
 @media (max-width: 600px) { .radio-cards.cols-3 { grid-template-columns: 1fr; } }
 
+/* Body-composition inputs: fixed 3 across (matches fit-demo step 2) */
+.bodycomp-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1rem;
+}
+@media (max-width: 640px) { .bodycomp-grid { grid-template-columns: 1fr 1fr; } }
+
 .checkbox-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 2px;
-  max-height: 260px;
+  max-height: 300px;
   overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: 8px;
   padding: 0.5rem;
 }
+.checkbox-list.one-col { grid-template-columns: 1fr; }
 .checkbox-list label {
   display: flex;
   align-items: center;
