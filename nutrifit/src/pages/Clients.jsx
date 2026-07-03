@@ -66,7 +66,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   }
 
   return (
-    <form onSubmit={save} className="card">
+    <form onSubmit={save} className="card" noValidate>
       <Alert kind="error">{error}</Alert>
       <div className="grid cols-2">
         <Field label={t('clients.firstName')} required error={errors.first_name} hint={errors.first_name}>
