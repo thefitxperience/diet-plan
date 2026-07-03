@@ -1,0 +1,95 @@
+import { useEffect, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../auth/AuthProvider'
+import { useI18n } from '../lib/i18n'
+import { Loading, StatusBadge, fmtDate, fmtDateTime } from '../components/ui'
+import { ClientForm } from './Clients'
+
+export default function ClientProfile() {
+  const { id } = useParams()
+  const { t, lang } = useI18n()
+  const { role } = useAuth()
+  const [client, setClient] = useState(null)
+  const [inbody, setInbody] = useState([])
+  const [plans, setPlans] = useState([])
+  const [editing, setEditing] = useState(false)
+  const canEdit = role === 'nutritionist' || role === 'platform_admin'
+
+  async function load() {
+    const [{ data: c }, { data: ib }, { data: pl }] = await Promise.all([
+      supabase.from('clients').select('*').eq('id', id).single(),
+      supabase.from('inbody_results').select('*').eq('client_id', id).order('created_at', { ascending: false }),
+      supabase.from('plans').select('id, status, version, created_at, updated_at').eq('client_id', id).order('created_at', { ascending: false }),
+    ])
+    setClient(c)
+    setInbody(ib || [])
+    setPlans(pl || [])
+  }
+  useEffect(() => { load() }, [id])
+
+  if (!client) return <Loading />
+
+  // history timeline: merge inbody + plans by date
+  const timeline = [
+    ...inbody.map((r) => ({ at: r.created_at, kind: 'inbody', row: r })),
+    ...plans.map((p) => ({ at: p.updated_at, kind: 'plan', row: p })),
+  ].sort((a, b) => new Date(b.at) - new Date(a.at))
+
+  return (
+    <div>
+      <div className="row between">
+        <h1>{client.first_name} {client.last_name}</h1>
+        {canEdit && (
+          <div className="row">
+            <Link className="btn secondary" to={`/clients/${id}/inbody`}>{t('clients.uploadInbody')}</Link>
+            <Link className="btn" to={`/clients/${id}/new-plan`}>{t('clients.newPlan')}</Link>
+          </div>
+        )}
+      </div>
+
+      {editing ? (
+        <ClientForm initial={client} onSaved={(c) => { setClient(c); setEditing(false) }} onCancel={() => setEditing(false)} />
+      ) : (
+        <div className="card">
+          <div className="grid cols-4">
+            <div><div className="muted small">{t('clients.dob')}</div><b>{fmtDate(client.dob, lang) || '—'}</b></div>
+            <div><div className="muted small">{t('clients.gender')}</div><b>{client.gender === 'F' ? t('clients.female') : t('clients.male')}</b></div>
+            <div><div className="muted small">{t('clients.phone')}</div><b dir="ltr">{client.phone || '—'}</b></div>
+            <div><div className="muted small">{t('clients.email')}</div><b>{client.email || '—'}</b></div>
+          </div>
+          {client.notes && <p className="muted" style={{ marginBottom: 0 }}>{client.notes}</p>}
+          {canEdit && (
+            <div className="row end">
+              <button className="btn ghost sm" onClick={() => setEditing(true)}>{t('common.edit')}</button>
+            </div>
+          )}
+        </div>
+      )}
+
+      <h2>{t('clients.history')}</h2>
+      {timeline.length === 0 && <div className="card muted">{t('common.none')}</div>}
+      <ul className="timeline">
+        {timeline.map((item, i) => (
+          <li key={i}>
+            {item.kind === 'inbody' ? (
+              <div>
+                <b>InBody</b> · {item.row.model} · {fmtDate(item.row.test_date, lang)}
+                {item.row.confirmed?.weight != null && (
+                  <span className="muted"> — {item.row.confirmed.weight} kg, PBF {item.row.confirmed.pbf ?? '—'}%</span>
+                )}
+                <div className="muted small">{fmtDateTime(item.at, lang)}</div>
+              </div>
+            ) : (
+              <div>
+                <Link to={`/plans/${item.row.id}`}><b>{t('plans.title')} v{item.row.version}</b></Link>{' '}
+                <StatusBadge status={item.row.status} />
+                <div className="muted small">{fmtDateTime(item.at, lang)}</div>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}

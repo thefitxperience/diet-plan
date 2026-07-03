@@ -1,0 +1,196 @@
+// Read-only plan view: full preview + event log; delivery panel appears for
+// gym admins once the plan is GYM_APPROVED (plan §1 step 9).
+
+import { useEffect, useRef, useState } from 'react'
+import { Link, useParams } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../auth/AuthProvider'
+import { useI18n } from '../lib/i18n'
+import { Alert, Loading, Spinner, StatusBadge, fmtDateTime, Field } from '../components/ui'
+import DeepFitTemplate from '../components/DeepFitTemplate'
+import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
+import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl } from '../lib/delivery'
+
+export function EventLog({ planId, refresh }) {
+  const { t, lang } = useI18n()
+  const [events, setEvents] = useState([])
+  useEffect(() => {
+    supabase.from('plan_events')
+      .select('*, profiles:actor(full_name)')
+      .eq('plan_id', planId).order('created_at', { ascending: false })
+      .then(({ data }) => setEvents(data || []))
+  }, [planId, refresh])
+  if (!events.length) return null
+  return (
+    <div className="card">
+      <h2>{t('dashboard.recentActivity')}</h2>
+      <ul className="timeline">
+        {events.map((ev) => (
+          <li key={ev.id}>
+            <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
+            {ev.comment && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
+            <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+export default function PlanView() {
+  const { id } = useParams()
+  const { t } = useI18n()
+  const { profile, role, gym } = useAuth()
+  const [row, setRow] = useState(null)
+  const [client, setClient] = useState(null)
+  const [planGym, setPlanGym] = useState(null)
+  const [lang2, setLang2] = useState('en')
+  const [busy, setBusy] = useState(null)
+  const [error, setError] = useState(null)
+  const [notice, setNotice] = useState(null)
+  const [deliveries, setDeliveries] = useState([])
+  const [refresh, setRefresh] = useState(0)
+  const canvasRef = useRef()
+
+  async function load() {
+    const { data: p, error: e } = await supabase.from('plans').select('*').eq('id', id).single()
+    if (e) { setError(e.message); return }
+    setRow(p)
+    const [{ data: c }, { data: g }, { data: d }] = await Promise.all([
+      supabase.from('clients').select('*').eq('id', p.client_id).single(),
+      supabase.from('gyms').select('*').eq('id', p.gym_id).maybeSingle(),
+      supabase.from('deliveries').select('*').eq('plan_id', id).order('created_at', { ascending: false }),
+    ])
+    setClient(c)
+    setPlanGym(g)
+    setDeliveries(d || [])
+  }
+  useEffect(() => { load() }, [id])
+
+  if (error && !row) return <Alert kind="error">{error}</Alert>
+  if (!row || !client) return <Loading />
+
+  const canDeliver = (role === 'gym_admin' || role === 'platform_admin') &&
+    ['GYM_APPROVED', 'SENT'].includes(row.status)
+  const editable = ['DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED'].includes(row.status) &&
+    (role === 'nutritionist' || role === 'platform_admin')
+
+  async function makePdf() {
+    const blob = await renderPlanPdf(canvasRef.current)
+    return blob
+  }
+
+  async function deliver(channel) {
+    setBusy(channel)
+    setError(null)
+    setNotice(null)
+    try {
+      const blob = await makePdf()
+      const pdfPath = await uploadPdfSnapshot(row.gym_id, row.id, blob, lang2)
+      const fileName = `${row.plan_data.header.fullName || 'Client'} - Diet Plan.pdf`
+      let recipient = ''
+
+      if (channel === 'download') {
+        downloadBlob(blob, fileName)
+      } else if (channel === 'whatsapp_link') {
+        downloadBlob(blob, fileName) // gym attaches it manually in WhatsApp
+        recipient = client.phone || ''
+        const msg = t('delivery.message', { name: client.first_name, gym: planGym?.name || 'your gym' })
+        window.open(waLink(client.phone, msg), '_blank')
+      } else if (channel === 'email') {
+        recipient = client.email || ''
+        if (!recipient) throw new Error('Client has no email address')
+        const url = await signedPdfUrl(pdfPath)
+        await sendEmail({
+          toEmail: recipient,
+          toName: `${client.first_name} ${client.last_name}`,
+          message: t('delivery.message', { name: client.first_name, gym: planGym?.name || 'your gym' }),
+          pdfUrl: url,
+        })
+      }
+
+      await recordDelivery({
+        gymId: row.gym_id, planId: row.id, actorId: profile.id,
+        channel, recipient, language: lang2, pdfPath,
+      })
+      if (row.status !== 'SENT') {
+        const { error: trErr } = await supabase.rpc('transition_plan', { p_plan_id: row.id, p_action: 'sent' })
+        if (trErr) throw trErr
+        setRow({ ...row, status: 'SENT' })
+      }
+      setNotice(t('delivery.recorded'))
+      setRefresh((r) => r + 1)
+      const { data: d } = await supabase.from('deliveries').select('*').eq('plan_id', id).order('created_at', { ascending: false })
+      setDeliveries(d || [])
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(null)
+    }
+  }
+
+  return (
+    <div>
+      <div className="row between">
+        <div className="row">
+          <h1 style={{ margin: 0 }}>
+            {row.plan_data?.header?.fullName} — v{row.version}
+          </h1>
+          <StatusBadge status={row.status} />
+        </div>
+        <div className="row">
+          <button className="btn secondary sm" onClick={() => setLang2(lang2 === 'en' ? 'ar' : 'en')}>
+            {lang2 === 'en' ? t('editor.arabic') : t('editor.english')}
+          </button>
+          {editable && <Link className="btn sm" to={`/plans/${id}/edit`}>{t('common.edit')}</Link>}
+        </div>
+      </div>
+
+      <Alert kind="error">{error}</Alert>
+      <Alert kind="ok">{notice}</Alert>
+
+      {canDeliver && (
+        <div className="card">
+          <h2>{t('delivery.title')}</h2>
+          <div className="row">
+            <Field label={t('delivery.language')}>
+              <select style={{ width: 'auto' }} value={lang2} onChange={(e) => setLang2(e.target.value)}>
+                <option value="en">{t('delivery.lang.en')}</option>
+                <option value="ar">{t('delivery.lang.ar')}</option>
+              </select>
+            </Field>
+            <button className="btn secondary" disabled={!!busy} onClick={() => deliver('download')}>
+              {busy === 'download' ? <Spinner /> : t('delivery.download')}
+            </button>
+            <button className="btn" disabled={!!busy || !client.phone} onClick={() => deliver('whatsapp_link')}>
+              {busy === 'whatsapp_link' ? <Spinner /> : t('delivery.whatsapp')}
+            </button>
+            <button className="btn secondary" disabled={!!busy || !emailConfigured} onClick={() => deliver('email')}
+              title={emailConfigured ? '' : t('delivery.emailNotConfigured')}>
+              {busy === 'email' ? <Spinner /> : t('delivery.email')}
+            </button>
+          </div>
+          <p className="muted small">{t('delivery.whatsappHint')}</p>
+          {deliveries.length > 0 && (
+            <>
+              <h3>{t('delivery.history')}</h3>
+              <ul className="small">
+                {deliveries.map((d) => (
+                  <li key={d.id}>
+                    {d.channel} · {d.language} · {d.recipient || '—'} · {fmtDateTime(d.created_at)}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+      )}
+
+      <div className="editor-canvas" ref={canvasRef} style={{ maxHeight: 'none', marginBottom: '1rem' }}>
+        <DeepFitTemplate plan={row.plan_data} lang={lang2} gym={planGym} />
+      </div>
+
+      <EventLog planId={id} refresh={refresh} />
+    </div>
+  )
+}

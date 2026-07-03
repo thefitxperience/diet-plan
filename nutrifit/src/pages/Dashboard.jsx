@@ -1,0 +1,120 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
+import { useAuth } from '../auth/AuthProvider'
+import { useI18n } from '../lib/i18n'
+import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
+
+function Stat({ num, label, to }) {
+  const inner = (
+    <div className="card stat">
+      <div className="num">{num}</div>
+      <div className="lbl">{label}</div>
+    </div>
+  )
+  return to ? <Link to={to} style={{ textDecoration: 'none', color: 'inherit' }}>{inner}</Link> : inner
+}
+
+export default function Dashboard() {
+  const { t, lang } = useI18n()
+  const { role } = useAuth()
+  const [data, setData] = useState(null)
+
+  useEffect(() => {
+    ;(async () => {
+      const [plans, clients, events] = await Promise.all([
+        supabase.from('plans').select('id, status, version, updated_at, clients(first_name, last_name)').order('updated_at', { ascending: false }).limit(200),
+        supabase.from('clients').select('id', { count: 'exact', head: true }),
+        supabase.from('plan_events').select('*, profiles:actor(full_name)').order('created_at', { ascending: false }).limit(12),
+      ])
+      setData({
+        plans: plans.data || [],
+        clientCount: clients.count || 0,
+        events: events.data || [],
+      })
+    })()
+  }, [])
+
+  if (!data) return <Loading />
+
+  const byStatus = (statuses) => data.plans.filter((p) => statuses.includes(p.status))
+  const inProgress = byStatus(['DRAFT', 'GENERATED', 'IN_REVIEW'])
+  const returned = byStatus(['CHANGES_REQUESTED'])
+  const pending = byStatus(['NUTRITIONIST_APPROVED'])
+  const sent = byStatus(['SENT'])
+
+  return (
+    <div>
+      <h1>{t('dashboard.title')}</h1>
+
+      <div className="grid cols-4">
+        {role === 'gym_admin' ? (
+          <>
+            <Stat num={pending.length} label={t('dashboard.pendingApprovals')} to="/approvals" />
+            <Stat num={sent.length} label={t('dashboard.recentlySent')} />
+            <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
+            <Stat num={data.plans.length} label={t('dashboard.plansTotal')} />
+          </>
+        ) : (
+          <>
+            <Stat num={inProgress.length} label={t('dashboard.inProgress')} to="/plans" />
+            <Stat num={returned.length} label={t('dashboard.returned')} to="/plans" />
+            <Stat num={sent.length} label={t('dashboard.recentlySent')} to="/plans" />
+            <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
+          </>
+        )}
+      </div>
+
+      {returned.length > 0 && role !== 'gym_admin' && (
+        <>
+          <h2>{t('approvals.toFix')}</h2>
+          <table className="data">
+            <tbody>
+              {returned.map((p) => (
+                <tr key={p.id}>
+                  <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
+                  <td><StatusBadge status={p.status} /></td>
+                  <td>{fmtDateTime(p.updated_at, lang)}</td>
+                  <td><Link className="btn sm" to={`/plans/${p.id}/edit`}>{t('common.edit')}</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      {role === 'gym_admin' && pending.length > 0 && (
+        <>
+          <h2>{t('dashboard.pendingApprovals')}</h2>
+          <table className="data">
+            <tbody>
+              {pending.map((p) => (
+                <tr key={p.id}>
+                  <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
+                  <td>v{p.version}</td>
+                  <td>{fmtDateTime(p.updated_at, lang)}</td>
+                  <td><Link className="btn sm" to={`/approvals/${p.id}`}>{t('plans.open')}</Link></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      <h2>{t('dashboard.recentActivity')}</h2>
+      {data.events.length === 0 ? (
+        <div className="card muted">{t('common.none')}</div>
+      ) : (
+        <ul className="timeline">
+          {data.events.map((ev) => (
+            <li key={ev.id}>
+              <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
+              {ev.comment && ev.action === 'rejected' && <span className="small"> — “{ev.comment}”</span>}
+              <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}

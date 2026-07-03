@@ -1,0 +1,209 @@
+/* deepFIT plan template — ported from fit-demo index.html, incl. RTL overrides.
+   True page proportions: 595×842 px (A4 at 72dpi). */
+
+.deepfit-page {
+  width: 595px;
+  min-height: 842px;
+  background: white var(--deepfit-bg, none) no-repeat center bottom;
+  background-size: 105%;
+  position: relative;
+  overflow: visible;
+  page-break-after: always;
+  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  flex-shrink: 0;
+}
+
+.deepfit-header {
+  background: #0c2b49;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 40px;
+  position: relative;
+  overflow: visible;
+}
+
+.deepfit-header-title {
+  color: white;
+  font-size: 25px;
+  font-weight: 700;
+  letter-spacing: 0;
+  position: relative;
+}
+
+.deepfit-header-arrow {
+  position: absolute;
+  left: 33.25px;
+  top: -153px;
+  width: 409px;
+  height: 409px;
+  pointer-events: none;
+}
+
+.deepfit-header-logo {
+  height: 63px;
+  margin-left: auto;
+}
+
+.deepfit-header-gym-logo {
+  height: 44px;
+  max-width: 90px;
+  object-fit: contain;
+  margin-left: 12px;
+  background: white;
+  border-radius: 4px;
+  padding: 2px;
+}
+
+.deepfit-content {
+  padding: 2px 40px 30px 40px;
+  position: relative;
+  min-height: 712px;
+}
+
+.deepfit-meal-page { padding-top: 8px; }
+
+.deepfit-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 400px;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.deepfit-footer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0;
+  font-size: 10px;
+  color: #1B3448;
+}
+
+.deepfit-footer-left { display: flex; align-items: center; gap: 4px; }
+.deepfit-footer-left-content { display: flex; align-items: center; margin-left: 10px; }
+.deepfit-footer-right { display: flex; align-items: center; gap: 6px; }
+.deepfit-footer-icon { height: 14px; width: 14px; }
+.deepfit-footer-right span { margin-right: 10px; }
+.deepfit-footer-arrow { height: 24px; display: block; }
+
+.deepfit-info-row {
+  display: flex;
+  gap: 100px;
+  margin-bottom: 15px;
+  font-size: 12px;
+  color: #000;
+}
+.deepfit-info-left { flex: 1; line-height: 1.187; }
+.deepfit-info-right { flex: 1; line-height: 1.187; padding-top: 3px; }
+.deepfit-info-label { font-weight: 700; display: inline; }
+
+.deepfit-diet-type {
+  font-size: 12px;
+  color: #000;
+  margin-bottom: 2px;
+  margin-top: 8px;
+  line-height: 1.187;
+}
+
+.deepfit-diet-intro {
+  font-size: 10px;
+  line-height: 1.125;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.deepfit-meal-header { position: relative; margin: 0; }
+.deepfit-meal-icon {
+  position: absolute;
+  left: -38px;
+  top: -2px;
+  height: 36px;
+  width: 36px;
+}
+.deepfit-meal-header-content { width: 100%; position: relative; padding-bottom: 8px; }
+.deepfit-meal-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+.deepfit-meal-title { font-size: 18px; font-weight: 700; color: #000; }
+.deepfit-meal-title small { font-weight: 700; font-size: 12px; }
+.deepfit-meal-underline {
+  position: absolute;
+  top: -146px;
+  width: 265px;
+  height: 343px;
+  pointer-events: none;
+}
+
+.deepfit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  margin-bottom: 20px;
+  border: 0.8px solid #58838C;
+}
+.deepfit-table th {
+  background: transparent;
+  padding: 8px;
+  text-align: left;
+  font-weight: 700;
+  border: 0.8px solid #58838C;
+  font-size: 12px;
+}
+.deepfit-table th .deepfit-kcal { color: #58838C; }
+.deepfit-table td {
+  padding: 10px 8px 6px 8px;
+  border: 0.8px solid #58838C;
+  vertical-align: middle;
+  line-height: 1.15;
+}
+.deepfit-table ul { margin: 0; padding-left: 15px; list-style: disc; }
+.deepfit-table li { margin-bottom: 3px; line-height: 1.15; }
+
+.deepfit-option-name { font-weight: 700; display: block; margin-bottom: 3px; line-height: 1.15; }
+.deepfit-option-desc { font-size: 9px; color: #555; line-height: 1.15; display: block; }
+
+/* editor selection affordances */
+.deepfit-row-selectable { cursor: pointer; }
+.deepfit-row-selectable:hover td { background: rgba(91, 159, 164, 0.08); }
+.deepfit-row-selected td { background: rgba(91, 159, 164, 0.16) !important; outline: 2px solid #5B9FA4; outline-offset: -2px; }
+.deepfit-row-warning td:first-child { box-shadow: inset 3px 0 0 #e8a020; }
+
+.deepfit-guidelines-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #000; }
+.deepfit-guidelines-section { margin-bottom: 10px; }
+.deepfit-guidelines-section h3 { font-size: 12px; font-weight: 700; margin-bottom: 3px; color: #000; }
+.deepfit-guidelines-section p {
+  font-size: 12px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  color: #333;
+  text-align: justify;
+}
+.deepfit-guidelines-section ul { margin: 0; padding-left: 0; list-style: none; font-size: 12px; line-height: 1.2; }
+.deepfit-guidelines-section ol { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.2; }
+.deepfit-two-column { display: flex; gap: 30px; margin-top: 5px; }
+.deepfit-column { flex: 1; }
+.deepfit-column h4 { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.deepfit-column ul { margin: 0; padding-left: 0; list-style: none; font-size: 12px; line-height: 1.2; }
+
+/* ── Arabic / RTL overrides (ported; html2canvas-safe: bullets and ordinals
+      are inlined as text by the component when lang=ar) ─────────────── */
+.deepfit-root[dir='rtl'] { font-family: Tahoma, Arial, sans-serif; }
+.deepfit-root[dir='rtl'] .deepfit-header-logo { margin-left: 0; margin-right: auto; }
+.deepfit-root[dir='rtl'] .deepfit-header-gym-logo { margin-left: 0; margin-right: 12px; }
+.deepfit-root[dir='rtl'] .deepfit-header-arrow { left: auto; right: 33.25px; transform: scaleX(-1); }
+.deepfit-root[dir='rtl'] .deepfit-meal-icon { left: auto; right: -38px; }
+.deepfit-root[dir='rtl'] .deepfit-meal-underline { transform: scaleX(-1); }
+.deepfit-root[dir='rtl'] .deepfit-table th,
+.deepfit-root[dir='rtl'] .deepfit-table td { text-align: right; }
+.deepfit-root[dir='rtl'] .deepfit-two-column { direction: rtl; }
+.deepfit-root[dir='rtl'] .deepfit-guidelines-section > ol,
+.deepfit-root[dir='rtl'] .deepfit-guidelines-section > ul { padding-left: 0; padding-right: 0; list-style: none; }
+.deepfit-root[dir='rtl'] .deepfit-diet-intro { text-align: right; }
+.deepfit-root[dir='rtl'] .deepfit-table ul { padding: 0; margin: 0; list-style: none; }
