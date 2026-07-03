@@ -9,6 +9,8 @@ export function AuthProvider({ children }) {
   const [gym, setGym] = useState(null)
   const [loading, setLoading] = useState(true)
   const [profileError, setProfileError] = useState(null)
+  const [needsOnboarding, setNeedsOnboarding] = useState(false)
+  const [reloadKey, setReloadKey] = useState(0)
 
   useEffect(() => {
     if (!supabaseConfigured) { setLoading(false); return }
@@ -36,21 +38,18 @@ export function AuthProvider({ children }) {
     ;(async () => {
       setLoading(true)
       setProfileError(null)
+      setNeedsOnboarding(false)
       try {
-        let { data: prof } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
-        if (!prof) {
-          // first user ever becomes platform_admin; others must be invited
-          const { data, error } = await supabase.rpc('ensure_profile', {
-            p_full_name: session?.user?.user_metadata?.full_name || session?.user?.email,
-          })
-          if (error) throw error
-          prof = data
-        }
+        const { data: prof } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
         if (cancelled) return
+        // No profile row → the user hasn't registered a role/gym yet.
+        if (!prof) { setProfile(null); setGym(null); setNeedsOnboarding(true); return }
         setProfile(prof)
-        if (prof?.gym_id) {
+        if (prof.gym_id) {
           const { data: g } = await supabase.from('gyms').select('*').eq('id', prof.gym_id).maybeSingle()
           if (!cancelled) setGym(g)
+        } else {
+          setGym(null)
         }
       } catch (e) {
         if (!cancelled) setProfileError(e.message || String(e))
@@ -59,7 +58,7 @@ export function AuthProvider({ children }) {
       }
     })()
     return () => { cancelled = true }
-  }, [userId])
+  }, [userId, reloadKey])
 
   const value = useMemo(() => ({
     session,
@@ -68,13 +67,16 @@ export function AuthProvider({ children }) {
     gym,
     setGym,
     role: profile?.role ?? null,
+    status: profile?.status ?? null,
+    needsOnboarding,
     loading,
     profileError,
+    reloadProfile: () => setReloadKey((k) => k + 1),
     signIn: (email, password) => supabase.auth.signInWithPassword({ email, password }),
     signUp: (email, password, fullName) =>
       supabase.auth.signUp({ email, password, options: { data: { full_name: fullName } } }),
     signOut: () => supabase.auth.signOut(),
-  }), [session, profile, gym, loading, profileError])
+  }), [session, profile, gym, loading, profileError, needsOnboarding])
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

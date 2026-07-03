@@ -29,6 +29,7 @@ Implements `../diet-plan-system-plan.md` (v2).
    - `supabase/migrations/001_schema.sql` (tables, enums, storage buckets)
    - `supabase/migrations/002_rls.sql` (row-level security policies)
    - `supabase/migrations/003_functions.sql` (status-transition RPC, profile bootstrap)
+   - `supabase/migrations/004_self_signup.sql` (self-service signup + approval)
 3. Authentication → Providers → Email: enable. (Disable "Confirm email" for
    the fastest start, or keep it on — both work.)
 
@@ -40,20 +41,26 @@ npm install
 npm run dev
 ```
 
-### 3. First user & tenants
+### 3. First user & self-service signup
 
-1. Sign up in the app — **the first account automatically becomes
-   `platform_admin`** (see `ensure_profile()` in 003).
-2. As platform admin: **Gyms** → create the gym; **Users** → after teammates
-   sign up, they'll see "no profile provisioned" — insert their profile, then
-   manage role/gym from the Users page. SQL one-liner (SQL Editor):
+No manual SQL to add people — everyone signs up and picks a role:
 
-   ```sql
-   insert into profiles (id, role, gym_id, full_name)
-   values ('<auth user uuid>', 'nutritionist', '<gym uuid>', 'Name');
-   ```
+1. **First user:** sign up in the app. The very first account is bootstrapped
+   to **`platform_admin`** automatically (onboarding detects an empty system).
+2. As platform admin you can create gyms up front (**Gyms**), or let gym
+   owners create their own on signup.
+3. **Everyone after that**, on first login, chooses a role in the onboarding
+   screen:
+   - **Nutritionist** → picks their gym → account is **pending** until that
+     **gym's admin** approves them (gym admin's **Team** page).
+   - **Gym owner/admin** → creates a new gym (or joins an existing one) →
+     account is **pending** until the **platform admin** approves them
+     (platform admin's **Users** page). Approving a gym owner who requested a
+     new gym creates that gym automatically.
 
-   (Find the auth uuid under Authentication → Users.)
+Pending users see a "waiting for approval" screen and have no data access
+(enforced by RLS — `pending` accounts have no effective role). Approvers see a
+**Pending approval** section on their Team / Users page with Approve / Reject.
 
 ### 4. GitHub Pages deploy
 

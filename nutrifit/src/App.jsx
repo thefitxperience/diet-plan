@@ -3,6 +3,8 @@ import { useAuth } from './auth/AuthProvider'
 import { Loading, Alert } from './components/ui'
 import Layout from './components/Layout'
 import Login from './pages/Login'
+import Onboarding from './pages/Onboarding'
+import AccountStatus from './pages/AccountStatus'
 import Dashboard from './pages/Dashboard'
 import Clients from './pages/Clients'
 import ClientProfile from './pages/ClientProfile'
@@ -26,10 +28,11 @@ function RequireRole({ roles, children }) {
 }
 
 export default function App() {
-  const { session, profile, loading, profileError, signOut } = useAuth()
+  const { session, profile, loading, profileError, needsOnboarding, status, signOut } = useAuth()
 
   if (loading) return <Loading />
   if (!session) return <Login />
+  if (needsOnboarding) return <Onboarding />
   if (profileError || !profile) {
     return (
       <div className="center">
@@ -38,6 +41,8 @@ export default function App() {
       </div>
     )
   }
+  // Self-registered accounts wait for approval before they can use the app.
+  if (status === 'pending' || status === 'rejected') return <AccountStatus status={status} />
 
   const NUTRI = ['nutritionist', 'platform_admin']
   const GYM = ['gym_admin']
