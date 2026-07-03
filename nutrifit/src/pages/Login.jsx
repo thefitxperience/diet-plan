@@ -9,7 +9,7 @@ const DEMO_ACCOUNTS = [
   { key: 'gym_admin', email: 'gymadmin@demo.thefitxperience.com' },
   { key: 'fit_admin', label: 'FIT Admin', email: 'fitadmin@demo.thefitxperience.com' },
 ]
-const DEMO_PASSWORD = 'FitDemo2024!'
+const DEMO_PASSWORD = 'FITdemo2026!'
 
 export default function Login() {
   const { signIn, signUp } = useAuth()

@@ -6,7 +6,7 @@
 --   nutritionist@demo.thefitxperience.com  → nutritionist (Demo Gym)
 --   gymadmin@demo.thefitxperience.com      → gym_admin    (Demo Gym)
 --   fitadmin@demo.thefitxperience.com      → platform_admin
---   password for all three: FitDemo2024!
+--   password for all three: FITdemo2026!
 
 do $$
 declare
