@@ -11,6 +11,7 @@ import ClientProfile from './pages/ClientProfile'
 import InBodyUpload from './pages/InBodyUpload'
 import NewPlan from './pages/NewPlan'
 import Plans from './pages/Plans'
+import SubmitQueue from './pages/SubmitQueue'
 import PlanEditor from './pages/PlanEditor'
 import Approvals from './pages/Approvals'
 import ApprovalDetail from './pages/ApprovalDetail'
@@ -57,6 +58,7 @@ export default function App() {
         <Route path="/clients/:id/inbody" element={<RequireRole roles={NUTRI}><InBodyUpload /></RequireRole>} />
         <Route path="/clients/:id/new-plan" element={<RequireRole roles={NUTRI}><NewPlan /></RequireRole>} />
         <Route path="/plans" element={<Plans />} />
+        <Route path="/to-submit" element={<RequireRole roles={NUTRI}><SubmitQueue /></RequireRole>} />
         <Route path="/plans/:id" element={<PlanView />} />
         <Route path="/plans/:id/edit" element={<RequireRole roles={NUTRI}><PlanEditor /></RequireRole>} />
         <Route path="/approvals" element={<RequireRole roles={GYM}><Approvals /></RequireRole>} />

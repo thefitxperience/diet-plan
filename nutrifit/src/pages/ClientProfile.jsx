@@ -41,8 +41,8 @@ export default function ClientProfile() {
 
   return (
     <div>
-      <div className="row between">
-        <h1>{client.first_name} {client.last_name}</h1>
+      <div className="row between" style={{ marginBottom: '1.25rem' }}>
+        <h1 style={{ margin: 0 }}>{client.first_name} {client.last_name}</h1>
         {canEdit && (
           <div className="row">
             <Link className="btn secondary" to={`/clients/${id}/inbody`}>{t('clients.uploadInbody')}</Link>

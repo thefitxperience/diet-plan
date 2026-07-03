@@ -307,6 +307,18 @@ table.data tr.clickable:hover { background: #f8fafc; }
 }
 
 /* ── editor layout ── */
+/* Editor toolbar stays pinned so its actions never scroll out of reach */
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: var(--bg);
+  padding: 0.75rem 0;
+  margin-bottom: 0.25rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
 .editor-shell {
   display: grid;
   grid-template-columns: 130px 1fr 340px;
@@ -361,6 +373,7 @@ table.data tr.clickable:hover { background: #f8fafc; }
 .inspector-bilingual { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .inspector-bilingual .ar-missing input, input.ar-missing { border-color: var(--warn); background: #fffbeb; }
 .ingredient-row { display: grid; grid-template-columns: 1fr 1fr 64px 28px; gap: 4px; margin-bottom: 4px; align-items: center; }
+.ingredient-row.two { grid-template-columns: 1fr 64px 28px; }
 .ingredient-row button { border: none; background: none; color: var(--danger); cursor: pointer; font-size: 1rem; }
 
 @media (max-width: 1100px) {

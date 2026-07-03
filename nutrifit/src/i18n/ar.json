@@ -65,6 +65,8 @@
   "team.pending": "بانتظار الموافقة",
   "team.noPending": "لا أحد بانتظار الموافقة",
 
+  "submit.empty": "لا يوجد ما يُرسل — كل خططك لدى النادي أو تم إرسالها",
+
   "role.nutritionist": "أخصائي تغذية",
   "role.gym_admin": "مدير النادي",
   "role.platform_admin": "مسؤول المنصة",
@@ -93,6 +95,7 @@
   "clients.notes": "ملاحظات",
   "clients.consent": "يوافق العميل على حفظ بياناته الصحية لإعداد الخطة الغذائية",
   "clients.consentRequired": "الموافقة مطلوبة لحفظ البيانات الصحية",
+  "clients.phoneInvalid": "أدخل رقم هاتف صحيح",
   "clients.empty": "لا يوجد عملاء بعد. أنشئ أول عميل للبدء.",
   "clients.history": "السجل",
   "clients.newPlan": "خطة غذائية جديدة",

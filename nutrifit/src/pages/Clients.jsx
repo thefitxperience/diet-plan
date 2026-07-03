@@ -18,10 +18,16 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   const [error, setError] = useState(null)
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
+  // Phone: keep digits and phone punctuation only — block letters entirely.
+  const setPhone = (e) => setForm({ ...form, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') })
+
+  const today = new Date().toISOString().slice(0, 10)
 
   async function save(e) {
     e.preventDefault()
     if (!form.consent) { setError(t('clients.consentRequired')); return }
+    const digits = (form.phone || '').replace(/\D/g, '')
+    if (digits.length < 7) { setError(t('clients.phoneInvalid')); return }
     setBusy(true)
     setError(null)
     try {
@@ -53,8 +59,8 @@ export function ClientForm({ initial, onSaved, onCancel }) {
         <Field label={t('clients.lastName')} required>
           <input type="text" value={form.last_name} onChange={set('last_name')} required />
         </Field>
-        <Field label={t('clients.dob')}>
-          <input type="date" value={form.dob || ''} onChange={set('dob')} />
+        <Field label={t('clients.dob')} required>
+          <input type="date" value={form.dob || ''} onChange={set('dob')} required max={today} />
         </Field>
         <Field label={t('clients.gender')} required>
           <select value={form.gender || 'M'} onChange={set('gender')}>
@@ -62,10 +68,10 @@ export function ClientForm({ initial, onSaved, onCancel }) {
             <option value="F">{t('clients.female')}</option>
           </select>
         </Field>
-        <Field label={t('clients.phone')} hint="+9665xxxxxxxx">
-          <input type="tel" value={form.phone || ''} onChange={set('phone')} />
+        <Field label={t('clients.phone')} required hint="+9665xxxxxxxx">
+          <input type="tel" inputMode="tel" value={form.phone || ''} onChange={setPhone} required />
         </Field>
-        <Field label={t('clients.email')}>
+        <Field label={`${t('clients.email')} (${t('common.optional')})`}>
           <input type="email" value={form.email || ''} onChange={set('email')} />
         </Field>
       </div>

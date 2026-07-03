@@ -6,6 +6,7 @@ import { useI18n } from '../lib/i18n'
 const NAV = {
   nutritionist: [
     ['/', 'nav.dashboard'],
+    ['/to-submit', 'nav.approvals'],
     ['/clients', 'nav.clients'],
     ['/plans', 'nav.plans'],
   ],

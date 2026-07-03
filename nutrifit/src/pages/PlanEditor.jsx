@@ -10,7 +10,7 @@ import { Field, Alert, Loading, Spinner, StatusBadge } from '../components/ui'
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
   blankOption, duplicateOption, kcalWarning, allergenWarnings,
-  missingTranslations, autofillArabic, MAX_OPTIONS_PER_MEAL,
+  autofillArabic, MAX_OPTIONS_PER_MEAL,
 } from '../lib/planModel'
 import { generatePlan } from '../lib/fitApi'
 import { buildPlanModel } from '../lib/planModel'
@@ -67,8 +67,6 @@ export default function PlanEditor() {
     const keys = new Set([...kcal, ...allergen].map((w) => `${w.mealId}:${w.optionId}`))
     return { kcal, allergen, keys }
   }, [plan, row])
-
-  const missingAr = useMemo(() => plan ? missingTranslations(plan) : [], [plan])
 
   if (error && !row) return <Alert kind="error">{error}</Alert>
   if (!row || !plan) return <Loading />
@@ -172,7 +170,7 @@ export default function PlanEditor() {
 
   return (
     <div>
-      <div className="row between" style={{ marginBottom: '0.75rem' }}>
+      <div className="editor-toolbar row between">
         <div className="row">
           <h1 style={{ margin: 0 }}>{t('editor.title')}</h1>
           <StatusBadge status={row.status} />
@@ -237,42 +235,6 @@ export default function PlanEditor() {
 
         {/* inspector */}
         <div className="editor-inspector">
-          <div className="card">
-            <h3>{t('editor.header')}</h3>
-            <Field label={t('editor.fullName')}>
-              <input type="text" value={plan.header.fullName}
-                onChange={(e) => mutate((p) => { p.header.fullName = e.target.value })} />
-            </Field>
-            <div className="grid cols-2">
-              <Field label={t('editor.testDate')}>
-                <input type="date" value={plan.header.testDate?.slice(0, 10) || ''}
-                  onChange={(e) => mutate((p) => { p.header.testDate = e.target.value })} />
-              </Field>
-              <Field label={t('editor.nextCheckup')}>
-                <input type="date" value={plan.header.nextCheckup?.slice(0, 10) || ''}
-                  onChange={(e) => mutate((p) => { p.header.nextCheckup = e.target.value })} />
-              </Field>
-              <Field label={t('editor.dailyKcal')}>
-                <input type="number" value={plan.header.dailyKcal || ''}
-                  onChange={(e) => mutate((p) => { p.header.dailyKcal = parseInt(e.target.value) || 0 })} />
-              </Field>
-              <Field label={t('editor.dietType')}>
-                <input type="text" value={plan.header.dietType}
-                  onChange={(e) => mutate((p) => { p.header.dietType = e.target.value })} />
-              </Field>
-            </div>
-            {missingAr.length > 0 && (
-              <div className="row between">
-                <span className="small" style={{ color: 'var(--warn)' }}>
-                  ⚠ {t('editor.missingAr')} ×{missingAr.length}
-                </span>
-                <button className="btn ghost sm" onClick={() => mutate((p) => autofillArabic(p))}>
-                  {t('editor.autofillAr')}
-                </button>
-              </div>
-            )}
-          </div>
-
           {/* per-meal add buttons */}
           <div className="card">
             {plan.meals.map((meal) => (
@@ -303,6 +265,7 @@ export default function PlanEditor() {
           ) : (
             <OptionInspector
               t={t}
+              lang={previewLang}
               meal={selMeal}
               option={selOption}
               kcalWarn={kcalWarning(selOption)}
@@ -331,8 +294,15 @@ function ThumbPage({ plan, pageIndex, lang, gym }) {
   )
 }
 
-function OptionInspector({ t, meal, option, kcalWarn, updateOption, mutate, selection, setSelection }) {
+function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate, selection, setSelection }) {
   const idx = meal.options.findIndex((o) => o.id === option.id)
+  // Edit only the currently-previewed language's fields (the other language is
+  // preserved untouched behind the scenes).
+  const ar = lang === 'ar'
+  const nameKey = ar ? 'name_ar' : 'name_en'
+  const descKey = ar ? 'desc_ar' : 'desc_en'
+  const ingKey = ar ? 'name_ar' : 'name_en'
+  const dir = ar ? 'rtl' : 'ltr'
 
   const move = (dir) => mutate((p) => {
     const m = p.meals.find((x) => x.id === meal.id)
@@ -356,31 +326,20 @@ function OptionInspector({ t, meal, option, kcalWarn, updateOption, mutate, sele
         <Alert kind="warn">{t('editor.kcalWarning', { est: kcalWarn.estimated, stated: kcalWarn.stated })}</Alert>
       )}
 
-      <div className="inspector-bilingual">
-        <Field label={`${t('editor.optionName')} (EN)`}>
-          <input type="text" value={option.name_en} onChange={(e) => updateOption((o) => { o.name_en = e.target.value })} />
-        </Field>
-        <Field label={`${t('editor.optionName')} (AR)`}>
-          <input type="text" dir="rtl" className={option.name_en && !option.name_ar ? 'ar-missing' : ''}
-            value={option.name_ar} onChange={(e) => updateOption((o) => { o.name_ar = e.target.value })} />
-        </Field>
-        <Field label={`${t('editor.optionDesc')} (EN)`}>
-          <textarea rows={2} value={option.desc_en} onChange={(e) => updateOption((o) => { o.desc_en = e.target.value })} />
-        </Field>
-        <Field label={`${t('editor.optionDesc')} (AR)`}>
-          <textarea rows={2} dir="rtl" className={option.desc_en && !option.desc_ar ? 'ar-missing' : ''}
-            value={option.desc_ar} onChange={(e) => updateOption((o) => { o.desc_ar = e.target.value })} />
-        </Field>
-      </div>
+      <Field label={t('editor.optionName')}>
+        <input type="text" dir={dir} value={option[nameKey]}
+          onChange={(e) => updateOption((o) => { o[nameKey] = e.target.value })} />
+      </Field>
+      <Field label={t('editor.optionDesc')}>
+        <textarea rows={2} dir={dir} value={option[descKey]}
+          onChange={(e) => updateOption((o) => { o[descKey] = e.target.value })} />
+      </Field>
 
       <h3>{t('editor.ingredients')}</h3>
       {option.ingredients.map((ing, i) => (
-        <div className="ingredient-row" key={i}>
-          <input type="text" placeholder="EN" value={ing.name_en}
-            onChange={(e) => updateOption((o) => { o.ingredients[i].name_en = e.target.value })} />
-          <input type="text" dir="rtl" placeholder="AR" className={ing.name_en && !ing.name_ar ? 'ar-missing' : ''}
-            value={ing.name_ar}
-            onChange={(e) => updateOption((o) => { o.ingredients[i].name_ar = e.target.value })} />
+        <div className="ingredient-row two" key={i}>
+          <input type="text" dir={dir} value={ing[ingKey]}
+            onChange={(e) => updateOption((o) => { o.ingredients[i][ingKey] = e.target.value })} />
           <input type="number" placeholder={t('editor.grams')} value={ing.grams}
             onChange={(e) => updateOption((o) => { o.ingredients[i].grams = parseFloat(e.target.value) || 0 })} />
           <button title={t('common.delete')} onClick={() => updateOption((o) => { o.ingredients.splice(i, 1) })}>✕</button>
