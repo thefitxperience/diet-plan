@@ -17,24 +17,31 @@ export function AuthProvider({ children }) {
       if (!data.session) setLoading(false)
     })
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
-      setSession(s)
+      // Supabase auto-refreshes the access token when the tab regains focus
+      // and fires TOKEN_REFRESHED with a NEW session object for the SAME user.
+      // Ignore those: keeping the previous session reference means the profile
+      // effect below (keyed on the user id) won't re-run and `loading` won't
+      // flip — so the app never unmounts and in-progress editor state survives.
+      setSession((prev) => (prev?.user?.id === s?.user?.id ? prev : s))
       if (!s) { setProfile(null); setGym(null); setLoading(false) }
     })
     return () => sub.subscription.unsubscribe()
   }, [])
 
+  const userId = session?.user?.id
+
   useEffect(() => {
-    if (!session) return
+    if (!userId) return
     let cancelled = false
     ;(async () => {
       setLoading(true)
       setProfileError(null)
       try {
-        let { data: prof } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle()
+        let { data: prof } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
         if (!prof) {
           // first user ever becomes platform_admin; others must be invited
           const { data, error } = await supabase.rpc('ensure_profile', {
-            p_full_name: session.user.user_metadata?.full_name || session.user.email,
+            p_full_name: session?.user?.user_metadata?.full_name || session?.user?.email,
           })
           if (error) throw error
           prof = data
@@ -52,7 +59,7 @@ export function AuthProvider({ children }) {
       }
     })()
     return () => { cancelled = true }
-  }, [session])
+  }, [userId])
 
   const value = useMemo(() => ({
     session,
