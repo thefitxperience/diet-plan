@@ -460,11 +460,7 @@ table.data tr.clickable:hover { background: #f8fafc; }
 }
 
 /* ── editor layout ── */
-/* Editor toolbar stays pinned so its actions never scroll out of reach */
 .editor-toolbar {
-  position: sticky;
-  top: 0;
-  z-index: 20;
   background: var(--bg);
   padding: 0.75rem 0;
   margin-bottom: 0.25rem;
@@ -477,6 +473,30 @@ table.data tr.clickable:hover { background: #f8fafc; }
   grid-template-columns: 130px 1fr 340px;
   gap: 1rem;
   align-items: start;
+}
+
+/* Wide screens: lock the page to the viewport — only the 3 columns scroll,
+   never the whole page. The toolbar stays fixed at the top. */
+@media (min-width: 1101px) {
+  .editor-page {
+    height: calc(100vh - 3rem);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .editor-page .editor-shell {
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+  }
+  .editor-page .editor-thumbs,
+  .editor-page .editor-canvas,
+  .editor-page .editor-inspector {
+    position: static;
+    height: 100%;
+    max-height: none;
+    overflow-y: auto;
+  }
 }
 .editor-thumbs {
   display: flex;
@@ -527,6 +547,12 @@ table.data tr.clickable:hover { background: #f8fafc; }
 .inspector-bilingual .ar-missing input, input.ar-missing { border-color: var(--warn); background: #fffbeb; }
 .ingredient-row { display: grid; grid-template-columns: 1fr 1fr 64px 28px; gap: 4px; margin-bottom: 4px; align-items: center; }
 .ingredient-row.two { grid-template-columns: 1fr 64px 28px; }
+
+/* Macros: protein / carbs / fats / kcal all on one compact line */
+.macros-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.macros-grid .field { margin-bottom: 0; }
+.macros-grid .field > span { font-size: 0.7rem; margin-bottom: 2px; }
+.macros-grid input { padding: 0.35rem 0.3rem; font-size: 0.85rem; text-align: center; }
 .ingredient-row button { border: none; background: none; color: var(--danger); cursor: pointer; font-size: 1rem; }
 
 @media (max-width: 1100px) {

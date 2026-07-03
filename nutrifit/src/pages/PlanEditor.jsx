@@ -169,7 +169,7 @@ export default function PlanEditor() {
   const pages = planPageList(plan)
 
   return (
-    <div>
+    <div className="editor-page">
       <div className="editor-toolbar row between">
         <div className="row">
           <h1 style={{ margin: 0 }}>{t('editor.title')}</h1>
@@ -352,9 +352,9 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
       </button>
 
       <h3 style={{ marginTop: '0.9rem' }}>{t('editor.macros')}</h3>
-      <div className="grid cols-4">
+      <div className="macros-grid">
         {[['protein', 'editor.protein'], ['carbs', 'editor.carbs'], ['fats', 'editor.fats']].map(([k, lk]) => (
-          <Field key={k} label={`${t(lk)} (g)`}>
+          <Field key={k} label={t(lk)}>
             <input type="number" step="0.1" value={option.macros[k] ?? ''}
               onChange={(e) => updateOption((o) => { o.macros[k] = e.target.value === '' ? null : parseFloat(e.target.value) })} />
           </Field>
