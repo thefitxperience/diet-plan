@@ -462,8 +462,7 @@ table.data tr.clickable:hover { background: #f8fafc; }
 /* ── editor layout ── */
 .editor-toolbar {
   background: var(--bg);
-  padding: 0.75rem 0;
-  margin-bottom: 0.25rem;
+  padding: 0 0 0.5rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
