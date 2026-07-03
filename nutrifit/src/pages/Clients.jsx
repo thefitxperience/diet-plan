@@ -34,7 +34,12 @@ export function ClientForm({ initial, onSaved, onCancel }) {
     const errs = {}
     if (!form.first_name.trim()) errs.first_name = t('common.required')
     if (!form.last_name.trim()) errs.last_name = t('common.required')
-    if (!form.dob) errs.dob = t('common.required')
+    if (!form.dob) {
+      errs.dob = t('common.required')
+    } else {
+      const d = new Date(form.dob)
+      if (isNaN(d) || d > new Date() || d < new Date('1900-01-01')) errs.dob = t('clients.dobInvalid')
+    }
     if ((form.phone || '').replace(/\D/g, '').length < 7) errs.phone = t('clients.phoneInvalid')
     if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t('clients.emailInvalid')
     return errs
@@ -76,7 +81,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
           <input type="text" className={errors.last_name ? 'invalid' : ''} value={form.last_name} onChange={set('last_name')} />
         </Field>
         <Field label={t('clients.dob')} required error={errors.dob} hint={errors.dob}>
-          <input type="date" className={errors.dob ? 'invalid' : ''} value={form.dob || ''} onChange={set('dob')} max={today} />
+          <input type="date" className={errors.dob ? 'invalid' : ''} value={form.dob || ''} onChange={set('dob')} min="1900-01-01" max={today} />
         </Field>
         <Field label={t('clients.gender')} required>
           <select value={form.gender || 'M'} onChange={set('gender')}>
@@ -97,7 +102,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
       </Field>
       <label className="field" style={{ display: 'flex', gap: 8, alignItems: 'flex-start' }}>
         <input type="checkbox" checked={!!form.consent} onChange={set('consent')} style={{ width: 'auto', marginTop: 3 }} />
-        <span style={{ fontWeight: 400 }}>{t('clients.consent')} *</span>
+        <span style={{ fontWeight: 400 }}>{t('clients.consent')}*</span>
       </label>
       <div className="row end">
         {onCancel && <button type="button" className="btn secondary" onClick={onCancel}>{t('common.cancel')}</button>}

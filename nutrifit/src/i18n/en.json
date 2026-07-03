@@ -97,6 +97,7 @@
   "clients.consentRequired": "Consent is required to store health data",
   "clients.phoneInvalid": "Enter a valid phone number",
   "clients.emailInvalid": "Enter a valid email address",
+  "clients.dobInvalid": "Enter a valid date of birth",
   "clients.empty": "No clients yet. Create your first client to get started.",
   "clients.history": "History",
   "clients.newPlan": "New diet plan",

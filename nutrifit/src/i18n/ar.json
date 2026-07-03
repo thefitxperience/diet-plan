@@ -97,6 +97,7 @@
   "clients.consentRequired": "الموافقة مطلوبة لحفظ البيانات الصحية",
   "clients.phoneInvalid": "أدخل رقم هاتف صحيح",
   "clients.emailInvalid": "أدخل بريداً إلكترونياً صحيحاً",
+  "clients.dobInvalid": "أدخل تاريخ ميلاد صحيح",
   "clients.empty": "لا يوجد عملاء بعد. أنشئ أول عميل للبدء.",
   "clients.history": "السجل",
   "clients.newPlan": "خطة غذائية جديدة",
