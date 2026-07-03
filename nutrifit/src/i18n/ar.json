@@ -65,6 +65,13 @@
   "team.pending": "بانتظار الموافقة",
   "team.noPending": "لا أحد بانتظار الموافقة",
 
+  "role.nutritionist": "أخصائي تغذية",
+  "role.gym_admin": "مدير النادي",
+  "role.platform_admin": "مسؤول المنصة",
+  "acct.active": "نشط",
+  "acct.pending": "قيد الانتظار",
+  "acct.rejected": "مرفوض",
+
   "status.DRAFT": "مسودة",
   "status.GENERATED": "تم الإنشاء",
   "status.IN_REVIEW": "قيد المراجعة",

@@ -65,7 +65,7 @@ export default function AdminUsers() {
             {pending.map((u) => (
               <tr key={u.id}>
                 <td><b>{u.full_name}</b></td>
-                <td>{u.role}</td>
+                <td>{t(`role.${u.role}`)}</td>
                 <td>{u.gym_id ? gymName(u.gym_id) : (u.requested_gym_name ? `＋ ${u.requested_gym_name}` : '—')}</td>
                 <td>
                   <div className="row">
@@ -94,7 +94,7 @@ export default function AdminUsers() {
               <td><b>{u.full_name}</b><div className="muted small"><code>{u.id}</code></div></td>
               <td>
                 <select value={u.role} onChange={(e) => update(u.id, { role: e.target.value })}>
-                  {ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                  {ROLES.map((r) => <option key={r} value={r}>{t(`role.${r}`)}</option>)}
                 </select>
               </td>
               <td>

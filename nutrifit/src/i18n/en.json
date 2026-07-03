@@ -65,6 +65,13 @@
   "team.pending": "Pending approval",
   "team.noPending": "No one is waiting for approval",
 
+  "role.nutritionist": "Nutritionist",
+  "role.gym_admin": "Gym Admin",
+  "role.platform_admin": "Platform Admin",
+  "acct.active": "Active",
+  "acct.pending": "Pending",
+  "acct.rejected": "Rejected",
+
   "status.DRAFT": "Draft",
   "status.GENERATED": "Generated",
   "status.IN_REVIEW": "In review",

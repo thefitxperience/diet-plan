@@ -46,7 +46,7 @@ export default function Team() {
             {pending.map((m) => (
               <tr key={m.id}>
                 <td><b>{m.full_name}</b></td>
-                <td>{m.role}</td>
+                <td>{t(`role.${m.role}`)}</td>
                 <td>
                   <div className="row">
                     <button className="btn sm" disabled={!!busy} onClick={() => review(m.id, 'approve')}>
@@ -70,8 +70,8 @@ export default function Team() {
           {active.map((m) => (
             <tr key={m.id}>
               <td><b>{m.full_name}</b></td>
-              <td>{m.role}</td>
-              <td>{m.status}</td>
+              <td>{t(`role.${m.role}`)}</td>
+              <td>{t(`acct.${m.status}`)}</td>
             </tr>
           ))}
         </tbody>
