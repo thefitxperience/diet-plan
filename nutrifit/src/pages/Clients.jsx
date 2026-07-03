@@ -16,18 +16,21 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
+  const [errors, setErrors] = useState({})
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
   // Phone: keep digits and phone punctuation only — block letters entirely.
-  const setPhone = (e) => setForm({ ...form, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') })
+  const setPhone = (e) => {
+    setForm({ ...form, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') })
+    setErrors((x) => ({ ...x, phone: false }))
+  }
 
   const today = new Date().toISOString().slice(0, 10)
 
   async function save(e) {
     e.preventDefault()
-    if (!form.consent) { setError(t('clients.consentRequired')); return }
     const digits = (form.phone || '').replace(/\D/g, '')
-    if (digits.length < 7) { setError(t('clients.phoneInvalid')); return }
+    if (digits.length < 7) { setErrors({ phone: true }); return }
     setBusy(true)
     setError(null)
     try {
@@ -68,8 +71,10 @@ export function ClientForm({ initial, onSaved, onCancel }) {
             <option value="F">{t('clients.female')}</option>
           </select>
         </Field>
-        <Field label={t('clients.phone')} required hint="+9665xxxxxxxx">
-          <input type="tel" inputMode="tel" value={form.phone || ''} onChange={setPhone} required />
+        <Field label={t('clients.phone')} required error={errors.phone}
+          hint={errors.phone ? t('clients.phoneInvalid') : undefined}>
+          <input type="tel" inputMode="tel" className={errors.phone ? 'invalid' : ''}
+            value={form.phone || ''} onChange={setPhone} />
         </Field>
         <Field label={`${t('clients.email')} (${t('common.optional')})`}>
           <input type="email" value={form.email || ''} onChange={set('email')} />
@@ -84,7 +89,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
       </label>
       <div className="row end">
         {onCancel && <button type="button" className="btn secondary" onClick={onCancel}>{t('common.cancel')}</button>}
-        <button className="btn" disabled={busy}>{t('common.save')}</button>
+        <button className="btn" disabled={busy || !form.consent}>{t('common.save')}</button>
       </div>
     </form>
   )

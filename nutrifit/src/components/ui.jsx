@@ -19,12 +19,12 @@ export function Loading() {
   )
 }
 
-export function Field({ label, hint, required, children, className }) {
+export function Field({ label, hint, required, error, children, className }) {
   return (
     <label className={`field ${className || ''}`}>
-      <span>{label}{required && ' *'}</span>
+      <span style={error ? { color: 'var(--danger)' } : undefined}>{label}{required && ' *'}</span>
       {children}
-      {hint && <div className="hint">{hint}</div>}
+      {hint && <div className="hint" style={error ? { color: 'var(--danger)' } : undefined}>{hint}</div>}
     </label>
   )
 }
