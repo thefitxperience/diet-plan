@@ -15,7 +15,10 @@ permissions:
 
 concurrency:
   group: pages
-  cancel-in-progress: true
+  # Never cancel an in-flight run: cancelling mid-deploy leaves GitHub's Pages
+  # backend in a state that makes the NEXT deploy fail with "Deployment failed,
+  # try again later." Let production deploys finish (GitHub's own recommendation).
+  cancel-in-progress: false
 
 defaults:
   run:
