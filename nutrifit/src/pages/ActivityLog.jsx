@@ -22,7 +22,7 @@ export default function ActivityLog() {
         {events.map((ev) => (
           <li key={ev.id}>
             <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
-            {ev.plans?.clients && <span className="muted"> · {ev.plans.clients.first_name} {ev.plans.clients.last_name}</span>}
+            {ev.plans?.clients ? ` ${t('event.for', { name: `${ev.plans.clients.first_name} ${ev.plans.clients.last_name}` })}` : ''}
             {ev.comment && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
             <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
           </li>

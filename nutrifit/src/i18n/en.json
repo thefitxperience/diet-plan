@@ -88,7 +88,7 @@
   "clients.gender": "Gender",
   "clients.male": "Male",
   "clients.female": "Female",
-  "clients.phone": "Phone (WhatsApp)",
+  "clients.phone": "Phone Number",
   "clients.email": "Email",
   "clients.notes": "Notes",
   "clients.consent": "Client consents to storing their health data for diet plan preparation",
@@ -220,6 +220,10 @@
   "delivery.language": "Plan language",
   "delivery.lang.en": "English",
   "delivery.lang.ar": "Arabic",
+  "delivery.lang.both": "Both",
+  "delivery.channel.download": "Download",
+  "delivery.channel.whatsapp_link": "WhatsApp",
+  "delivery.channel.email": "Email",
   "delivery.recorded": "Delivery recorded",
   "delivery.history": "Delivery history",
   "delivery.generating": "Rendering PDF…",
@@ -254,8 +258,10 @@
   "event.created": "created the plan",
   "event.generated": "generated the plan",
   "event.edited": "edited the plan",
-  "event.submitted": "submitted for gym approval",
+  "event.submitted": "submitted the plan for gym approval",
   "event.approved_gym": "approved the plan",
   "event.rejected": "requested changes",
-  "event.sent": "sent the plan to the client"
+  "event.sent": "sent the plan",
+  "event.toClient": "to the client",
+  "event.for": "for {name}"
 }

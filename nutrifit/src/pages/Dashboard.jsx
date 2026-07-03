@@ -23,7 +23,7 @@ export default function Dashboard() {
     const [plans, clients, events] = await Promise.all([
       supabase.from('plans').select('id, status, version, updated_at, clients(first_name, last_name)').order('updated_at', { ascending: false }).limit(200),
       supabase.from('clients').select('id', { count: 'exact', head: true }),
-      supabase.from('plan_events').select('*, profiles:actor(full_name)').order('created_at', { ascending: false }).limit(12),
+      supabase.from('plan_events').select('*, profiles:actor(full_name), plans(clients(first_name, last_name))').order('created_at', { ascending: false }).limit(12),
     ])
     return {
       plans: plans.data || [],
@@ -103,13 +103,18 @@ export default function Dashboard() {
         <div className="card muted">{t('common.none')}</div>
       ) : (
         <ul className="timeline">
-          {data.events.map((ev) => (
-            <li key={ev.id}>
-              <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
-              {ev.comment && ev.action === 'rejected' && <span className="small"> — “{ev.comment}”</span>}
-              <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
-            </li>
-          ))}
+          {data.events.map((ev) => {
+            const c = ev.plans?.clients
+            const clientName = c ? `${c.first_name} ${c.last_name}` : null
+            return (
+              <li key={ev.id}>
+                <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
+                {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                {ev.comment && ev.action === 'rejected' && <span className="small"> — “{ev.comment}”</span>}
+                <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
+              </li>
+            )
+          })}
         </ul>
       )}
     </div>

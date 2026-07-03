@@ -6,7 +6,7 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
-import { Alert, Loading, Spinner, StatusBadge, fmtDateTime, Field } from '../components/ui'
+import { Alert, Loading, Spinner, StatusBadge, fmtDateTime } from '../components/ui'
 import DeepFitTemplate from '../components/DeepFitTemplate'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl } from '../lib/delivery'
@@ -39,7 +39,7 @@ export function EventLog({ planId, refresh }) {
 
 export default function PlanView() {
   const { id } = useParams()
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { profile, role, gym } = useAuth()
   const [row, setRow] = useState(null)
   const [client, setClient] = useState(null)
@@ -131,19 +131,14 @@ export default function PlanView() {
 
   return (
     <div>
-      <div className="row between">
+      <div className="row between" style={{ marginBottom: '1rem' }}>
         <div className="row">
           <h1 style={{ margin: 0 }}>
             {row.plan_data?.header?.fullName} — v{row.version}
           </h1>
           <StatusBadge status={row.status} />
         </div>
-        <div className="row">
-          <button className="btn secondary sm" onClick={() => setLang2(lang2 === 'en' ? 'ar' : 'en')}>
-            {lang2 === 'en' ? t('editor.arabic') : t('editor.english')}
-          </button>
-          {editable && <Link className="btn sm" to={`/plans/${id}/edit`}>{t('common.edit')}</Link>}
-        </div>
+        {editable && <Link className="btn sm" to={`/plans/${id}/edit`}>{t('common.edit')}</Link>}
       </div>
 
       <Alert kind="error">{error}</Alert>
@@ -152,32 +147,34 @@ export default function PlanView() {
       {canDeliver && (
         <div className="card">
           <h2>{t('delivery.title')}</h2>
-          <div className="row">
-            <Field label={t('delivery.language')}>
+          <div className="row between" style={{ alignItems: 'center' }}>
+            <label className="row" style={{ gap: 8, fontWeight: 600, margin: 0 }}>
+              {t('delivery.language')}
               <select style={{ width: 'auto' }} value={lang2} onChange={(e) => setLang2(e.target.value)}>
                 <option value="en">{t('delivery.lang.en')}</option>
                 <option value="ar">{t('delivery.lang.ar')}</option>
               </select>
-            </Field>
-            <button className="btn secondary" disabled={!!busy} onClick={() => deliver('download')}>
-              {busy === 'download' ? <Spinner /> : t('delivery.download')}
-            </button>
-            <button className="btn" disabled={!!busy || !client.phone} onClick={() => deliver('whatsapp_link')}>
-              {busy === 'whatsapp_link' ? <Spinner /> : t('delivery.whatsapp')}
-            </button>
-            <button className="btn secondary" disabled={!!busy || !emailConfigured} onClick={() => deliver('email')}
-              title={emailConfigured ? '' : t('delivery.emailNotConfigured')}>
-              {busy === 'email' ? <Spinner /> : t('delivery.email')}
-            </button>
+            </label>
+            <div className="row">
+              <button className="btn secondary" disabled={!!busy} onClick={() => deliver('download')}>
+                {busy === 'download' ? <Spinner /> : t('delivery.download')}
+              </button>
+              <button className="btn" disabled={!!busy || !client.phone} onClick={() => deliver('whatsapp_link')}>
+                {busy === 'whatsapp_link' ? <Spinner /> : t('delivery.whatsapp')}
+              </button>
+              <button className="btn secondary" disabled={!!busy || !emailConfigured} onClick={() => deliver('email')}
+                title={emailConfigured ? '' : t('delivery.emailNotConfigured')}>
+                {busy === 'email' ? <Spinner /> : t('delivery.email')}
+              </button>
+            </div>
           </div>
-          <p className="muted small">{t('delivery.whatsappHint')}</p>
           {deliveries.length > 0 && (
             <>
               <h3>{t('delivery.history')}</h3>
               <ul className="small">
                 {deliveries.map((d) => (
                   <li key={d.id}>
-                    {d.channel} · {d.language} · {d.recipient || '—'} · {fmtDateTime(d.created_at)}
+                    {t(`delivery.channel.${d.channel}`)} · {t(`delivery.lang.${d.language}`)} · {d.recipient || '—'} · {fmtDateTime(d.created_at, lang)}
                   </li>
                 ))}
               </ul>

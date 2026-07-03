@@ -88,7 +88,7 @@
   "clients.gender": "الجنس",
   "clients.male": "ذكر",
   "clients.female": "أنثى",
-  "clients.phone": "الهاتف (واتساب)",
+  "clients.phone": "رقم الهاتف",
   "clients.email": "البريد الإلكتروني",
   "clients.notes": "ملاحظات",
   "clients.consent": "يوافق العميل على حفظ بياناته الصحية لإعداد الخطة الغذائية",
@@ -220,6 +220,10 @@
   "delivery.language": "لغة الخطة",
   "delivery.lang.en": "الإنجليزية",
   "delivery.lang.ar": "العربية",
+  "delivery.lang.both": "كلاهما",
+  "delivery.channel.download": "تنزيل",
+  "delivery.channel.whatsapp_link": "واتساب",
+  "delivery.channel.email": "بريد إلكتروني",
   "delivery.recorded": "تم تسجيل التسليم",
   "delivery.history": "سجل التسليم",
   "delivery.generating": "جارٍ إنشاء PDF…",
@@ -254,8 +258,10 @@
   "event.created": "أنشأ الخطة",
   "event.generated": "أنشأ الخطة",
   "event.edited": "عدّل الخطة",
-  "event.submitted": "أرسلها لموافقة النادي",
+  "event.submitted": "أرسل الخطة لموافقة النادي",
   "event.approved_gym": "وافق على الخطة",
   "event.rejected": "طلب تعديلات",
-  "event.sent": "أرسل الخطة للعميل"
+  "event.sent": "أرسل الخطة",
+  "event.toClient": "إلى العميل",
+  "event.for": "لـ {name}"
 }
