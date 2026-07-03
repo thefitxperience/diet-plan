@@ -1,5 +1,8 @@
 name: Deploy to GitHub Pages
 
+# The app lives in the nutrifit/ subfolder; this workflow MUST sit at the repo
+# root (.github/workflows/) or GitHub will not register it.
+
 on:
   push:
     branches: [main]
@@ -14,6 +17,10 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+defaults:
+  run:
+    working-directory: nutrifit
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -23,6 +30,7 @@ jobs:
         with:
           node-version: 20
           cache: npm
+          cache-dependency-path: nutrifit/package-lock.json
       - run: npm ci
       - run: npm run build
         env:
@@ -35,11 +43,11 @@ jobs:
           VITE_EMAILJS_TEMPLATE_ID: ${{ vars.VITE_EMAILJS_TEMPLATE_ID }}
           VITE_EMAILJS_PUBLIC_KEY: ${{ vars.VITE_EMAILJS_PUBLIC_KEY }}
           VITE_BASE: /${{ github.event.repository.name }}/
-      # SPA fallback: GitHub Pages 404 → index.html so deep links work
+      # SPA fallback so refreshes/deep links resolve to index.html
       - run: cp dist/index.html dist/404.html
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: dist
+          path: nutrifit/dist
   deploy:
     needs: build
     runs-on: ubuntu-latest
