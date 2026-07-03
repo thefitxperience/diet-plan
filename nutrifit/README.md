@@ -127,5 +127,3 @@ src/pages/             Dashboard, Clients, ClientProfile, InBodyUpload, NewPlan,
 src/i18n/              en.json / ar.json (system UI), plan-ar.json (plan content)
 public/assets/deep-fit deepFIT template artwork (from the demo)
 ```
-
-## End
