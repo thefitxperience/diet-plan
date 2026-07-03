@@ -365,7 +365,7 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
         </Field>
       </div>
 
-      <div className="row end">
+      <div className="row end" style={{ marginTop: '1rem' }}>
         <button className="btn secondary sm" onClick={() => mutate((p) => {
           const m = p.meals.find((x) => x.id === meal.id)
           if (m.options.length >= MAX_OPTIONS_PER_MEAL) return
