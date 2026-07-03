@@ -373,6 +373,19 @@ table.data tr.clickable:hover { background: #f8fafc; }
   justify-content: center;
   background: var(--grad);
   padding: 1rem;
+  position: relative;
+  overflow: hidden;
+}
+/* faint brand image over the gradient (matches fit-demo: center/cover, 15%) */
+.login-bg {
+  position: absolute;
+  inset: 0;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.15;
+  z-index: 0;
+  pointer-events: none;
 }
 .login-card {
   background: white;
@@ -381,6 +394,8 @@ table.data tr.clickable:hover { background: #f8fafc; }
   width: 100%;
   max-width: 400px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+  position: relative;
+  z-index: 1;
 }
 .login-card h1 { text-align: center; color: var(--navy); }
 

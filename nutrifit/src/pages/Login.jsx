@@ -37,12 +37,8 @@ export default function Login() {
   }
 
   return (
-    <div
-      className="login-wrap"
-      style={{
-        background: `linear-gradient(135deg, rgba(91,159,164,0.55) 0%, rgba(27,52,72,0.65) 100%), url(${import.meta.env.BASE_URL}assets/background.png) center/cover no-repeat`,
-      }}
-    >
+    <div className="login-wrap">
+      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/background.png)` }} />
       <div className="login-card">
         <h1>{t('app.name')}</h1>
         {!supabaseConfigured && (
