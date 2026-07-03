@@ -18,7 +18,10 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   const [error, setError] = useState(null)
   const [errors, setErrors] = useState({})
 
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
+  const set = (k) => (e) => {
+    setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
+    setErrors((x) => ({ ...x, [k]: false }))
+  }
   // Phone: keep digits and phone punctuation only — block letters entirely.
   const setPhone = (e) => {
     setForm({ ...form, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') })
@@ -27,10 +30,20 @@ export function ClientForm({ initial, onSaved, onCancel }) {
 
   const today = new Date().toISOString().slice(0, 10)
 
+  function validate() {
+    const errs = {}
+    if (!form.first_name.trim()) errs.first_name = t('common.required')
+    if (!form.last_name.trim()) errs.last_name = t('common.required')
+    if (!form.dob) errs.dob = t('common.required')
+    if ((form.phone || '').replace(/\D/g, '').length < 7) errs.phone = t('clients.phoneInvalid')
+    if (form.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) errs.email = t('clients.emailInvalid')
+    return errs
+  }
+
   async function save(e) {
     e.preventDefault()
-    const digits = (form.phone || '').replace(/\D/g, '')
-    if (digits.length < 7) { setErrors({ phone: true }); return }
+    const errs = validate()
+    if (Object.keys(errs).length) { setErrors(errs); return }
     setBusy(true)
     setError(null)
     try {
@@ -56,14 +69,14 @@ export function ClientForm({ initial, onSaved, onCancel }) {
     <form onSubmit={save} className="card">
       <Alert kind="error">{error}</Alert>
       <div className="grid cols-2">
-        <Field label={t('clients.firstName')} required>
-          <input type="text" value={form.first_name} onChange={set('first_name')} required />
+        <Field label={t('clients.firstName')} required error={errors.first_name} hint={errors.first_name}>
+          <input type="text" className={errors.first_name ? 'invalid' : ''} value={form.first_name} onChange={set('first_name')} />
         </Field>
-        <Field label={t('clients.lastName')} required>
-          <input type="text" value={form.last_name} onChange={set('last_name')} required />
+        <Field label={t('clients.lastName')} required error={errors.last_name} hint={errors.last_name}>
+          <input type="text" className={errors.last_name ? 'invalid' : ''} value={form.last_name} onChange={set('last_name')} />
         </Field>
-        <Field label={t('clients.dob')} required>
-          <input type="date" value={form.dob || ''} onChange={set('dob')} required max={today} />
+        <Field label={t('clients.dob')} required error={errors.dob} hint={errors.dob}>
+          <input type="date" className={errors.dob ? 'invalid' : ''} value={form.dob || ''} onChange={set('dob')} max={today} />
         </Field>
         <Field label={t('clients.gender')} required>
           <select value={form.gender || 'M'} onChange={set('gender')}>
@@ -71,13 +84,12 @@ export function ClientForm({ initial, onSaved, onCancel }) {
             <option value="F">{t('clients.female')}</option>
           </select>
         </Field>
-        <Field label={t('clients.phone')} required error={errors.phone}
-          hint={errors.phone ? t('clients.phoneInvalid') : undefined}>
+        <Field label={t('clients.phone')} required error={errors.phone} hint={errors.phone}>
           <input type="tel" inputMode="tel" className={errors.phone ? 'invalid' : ''}
             value={form.phone || ''} onChange={setPhone} />
         </Field>
-        <Field label={`${t('clients.email')} (${t('common.optional')})`}>
-          <input type="email" value={form.email || ''} onChange={set('email')} />
+        <Field label={`${t('clients.email')} (${t('common.optional')})`} error={errors.email} hint={errors.email}>
+          <input type="email" className={errors.email ? 'invalid' : ''} value={form.email || ''} onChange={set('email')} />
         </Field>
       </div>
       <Field label={t('clients.notes')}>

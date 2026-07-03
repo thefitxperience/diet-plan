@@ -96,6 +96,7 @@
   "clients.consent": "Client consents to storing their health data for diet plan preparation",
   "clients.consentRequired": "Consent is required to store health data",
   "clients.phoneInvalid": "Enter a valid phone number",
+  "clients.emailInvalid": "Enter a valid email address",
   "clients.empty": "No clients yet. Create your first client to get started.",
   "clients.history": "History",
   "clients.newPlan": "New diet plan",
