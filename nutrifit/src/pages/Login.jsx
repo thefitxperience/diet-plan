@@ -61,12 +61,12 @@ export default function Login() {
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </Field>
           <button className="btn" style={{ width: '100%', justifyContent: 'center' }} disabled={busy || !supabaseConfigured}>
-            {busy ? t('auth.signingIn') : t('auth.signin')}
+            {busy ? t('auth.signingIn') : (mode === 'signup' ? t('auth.signup') : t('auth.signin'))}
           </button>
         </form>
         <div className="row between" style={{ marginTop: '1rem' }}>
           <button className="btn ghost sm" onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}>
-            {mode === 'signin' ? 'Create account' : 'Have an account? Sign in'}
+            {mode === 'signin' ? t('auth.createAccount') : t('auth.haveAccount')}
           </button>
           <button className="btn ghost sm" onClick={() => setLang(lang === 'en' ? 'ar' : 'en')}>
             {lang === 'en' ? 'العربية' : 'English'}

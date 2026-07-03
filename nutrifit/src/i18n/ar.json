@@ -12,6 +12,9 @@
   "nav.signout": "تسجيل الخروج",
 
   "auth.signin": "تسجيل الدخول",
+  "auth.signup": "إنشاء حساب",
+  "auth.createAccount": "إنشاء حساب",
+  "auth.haveAccount": "لديك حساب؟ تسجيل الدخول",
   "auth.email": "البريد الإلكتروني",
   "auth.password": "كلمة المرور",
   "auth.fullname": "الاسم الكامل",

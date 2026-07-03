@@ -12,6 +12,9 @@
   "nav.signout": "Sign out",
 
   "auth.signin": "Sign in",
+  "auth.signup": "Sign up",
+  "auth.createAccount": "Create account",
+  "auth.haveAccount": "Have an account? Sign in",
   "auth.email": "Email",
   "auth.password": "Password",
   "auth.fullname": "Full name",
