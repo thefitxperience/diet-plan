@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
+import GymFilter from '../components/GymFilter'
 import { Field, Alert, Loading, fmtDate } from '../components/ui'
 
 export function ClientForm({ initial, onSaved, onCancel }) {
@@ -88,13 +89,16 @@ export default function Clients() {
   const { role } = useAuth()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
+  const [gymFilter, setGymFilter] = useState('')
   const [showForm, setShowForm] = useState(false)
   const canEdit = role === 'nutritionist' || role === 'platform_admin'
 
-  const { data: clients, refresh } = useQuery('clients', async () => {
-    const { data } = await supabase.from('clients').select('*').order('created_at', { ascending: false })
+  const { data: clients, refresh } = useQuery(`clients:${gymFilter || 'all'}`, async () => {
+    let q = supabase.from('clients').select('*').order('created_at', { ascending: false })
+    if (gymFilter) q = q.eq('gym_id', gymFilter)
+    const { data } = await q
     return data || []
-  })
+  }, [gymFilter])
 
   if (!clients) return <Loading />
 
@@ -106,11 +110,14 @@ export default function Clients() {
     <div>
       <div className="row between">
         <h1>{t('clients.title')}</h1>
-        {canEdit && (
-          <button className="btn" onClick={() => setShowForm(!showForm)}>
-            + {t('clients.new')}
-          </button>
-        )}
+        <div className="row">
+          <GymFilter value={gymFilter} onChange={setGymFilter} />
+          {canEdit && (
+            <button className="btn" onClick={() => setShowForm(!showForm)}>
+              + {t('clients.new')}
+            </button>
+          )}
+        </div>
       </div>
       {showForm && (
         <ClientForm

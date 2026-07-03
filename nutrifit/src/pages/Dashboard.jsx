@@ -20,14 +20,18 @@ export default function Dashboard() {
   const { role } = useAuth()
 
   const { data } = useQuery('dashboard', async () => {
-    const [plans, clients, events] = await Promise.all([
+    const [plans, clients, nutritionists, events] = await Promise.all([
       supabase.from('plans').select('id, status, version, updated_at, clients(first_name, last_name)').order('updated_at', { ascending: false }).limit(200),
       supabase.from('clients').select('id', { count: 'exact', head: true }),
-      supabase.from('plan_events').select('*, profiles:actor(full_name), plans(clients(first_name, last_name))').order('created_at', { ascending: false }).limit(12),
+      supabase.from('profiles').select('id', { count: 'exact', head: true }).eq('role', 'nutritionist').eq('status', 'active'),
+      supabase.from('plan_events')
+        .select('*, profiles:actor(full_name), plans(clients(first_name, last_name)), gyms:gym_id(name)')
+        .order('created_at', { ascending: false }).limit(12),
     ])
     return {
       plans: plans.data || [],
       clientCount: clients.count || 0,
+      nutritionistCount: nutritionists.count || 0,
       events: events.data || [],
     }
   })
@@ -48,7 +52,7 @@ export default function Dashboard() {
         {role === 'gym_admin' ? (
           <>
             <Stat num={pending.length} label={t('dashboard.pendingApprovals')} to="/approvals" />
-            <Stat num={sent.length} label={t('dashboard.recentlySent')} />
+            <Stat num={data.nutritionistCount} label={t('dashboard.nutritionists')} to="/team" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
             <Stat num={data.plans.length} label={t('dashboard.plansTotal')} />
           </>
@@ -110,6 +114,7 @@ export default function Dashboard() {
               <li key={ev.id}>
                 <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
                 {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                {role === 'platform_admin' && ev.gyms?.name ? <span className="muted"> ({ev.gyms.name})</span> : ''}
                 {ev.comment && ev.action === 'rejected' && <span className="small"> — “{ev.comment}”</span>}
                 <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
               </li>

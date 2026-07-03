@@ -41,7 +41,9 @@ export default function Layout() {
             className="sidebar-logo"
           />
         </div>
-        {profile?.full_name && <div className="sidebar-user">{profile.full_name}</div>}
+        {profile?.full_name && (
+          <div className={`sidebar-user${gym?.name ? '' : ' no-gym'}`}>{profile.full_name}</div>
+        )}
         {gym?.name && <div className="sidebar-gym">{gym.name}</div>}
         <nav>
           {links.map(([to, key]) => (

@@ -236,6 +236,9 @@
   "dashboard.pendingApprovals": "Pending approvals",
   "dashboard.recentActivity": "Recent activity",
   "dashboard.clients": "Clients",
+  "dashboard.nutritionists": "Nutritionists",
+
+  "filter.allGyms": "All gyms",
   "dashboard.plansTotal": "Total plans",
 
   "team.title": "Team",

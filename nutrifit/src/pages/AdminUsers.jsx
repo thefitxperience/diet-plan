@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
+import GymFilter from '../components/GymFilter'
 import { Alert, Loading, Spinner } from '../components/ui'
 
 const ROLES = ['nutritionist', 'gym_admin', 'platform_admin']
@@ -14,6 +15,7 @@ export default function AdminUsers() {
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
   const [busy, setBusy] = useState(null)
+  const [gymFilter, setGymFilter] = useState('')
 
   const { data, setData, refresh } = useQuery('admin:users', async () => {
     const [u, g] = await Promise.all([
@@ -46,12 +48,16 @@ export default function AdminUsers() {
 
   if (!users) return <Loading />
 
-  const pending = users.filter((u) => u.status === 'pending')
-  const active = users.filter((u) => u.status !== 'pending')
+  const inGym = (u) => !gymFilter || u.gym_id === gymFilter
+  const pending = users.filter((u) => u.status === 'pending' && inGym(u))
+  const active = users.filter((u) => u.status !== 'pending' && inGym(u))
 
   return (
     <div>
-      <h1>{t('admin.users')}</h1>
+      <div className="row between">
+        <h1>{t('admin.users')}</h1>
+        <GymFilter value={gymFilter} onChange={setGymFilter} />
+      </div>
       <Alert kind="error">{error}</Alert>
       <Alert kind="ok">{notice}</Alert>
 

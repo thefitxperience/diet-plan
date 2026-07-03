@@ -236,6 +236,9 @@
   "dashboard.pendingApprovals": "موافقات معلقة",
   "dashboard.recentActivity": "النشاط الأخير",
   "dashboard.clients": "العملاء",
+  "dashboard.nutritionists": "أخصائيو التغذية",
+
+  "filter.allGyms": "كل الأندية",
   "dashboard.plansTotal": "إجمالي الخطط",
 
   "team.title": "الفريق",

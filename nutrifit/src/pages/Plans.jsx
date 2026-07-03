@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
+import GymFilter from '../components/GymFilter'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
 const STATUSES = ['', 'DRAFT', 'GENERATED', 'IN_REVIEW', 'NUTRITIONIST_APPROVED', 'CHANGES_REQUESTED', 'GYM_APPROVED', 'SENT']
@@ -13,15 +14,17 @@ export default function Plans() {
   const { role } = useAuth()
   const navigate = useNavigate()
   const [status, setStatus] = useState('')
+  const [gymFilter, setGymFilter] = useState('')
 
-  const { data: plans } = useQuery(`plans:${status || 'all'}`, async () => {
+  const { data: plans } = useQuery(`plans:${status || 'all'}:${gymFilter || 'all'}`, async () => {
     let q = supabase.from('plans')
       .select('id, status, version, updated_at, clients(first_name, last_name)')
       .order('updated_at', { ascending: false })
     if (status) q = q.eq('status', status)
+    if (gymFilter) q = q.eq('gym_id', gymFilter)
     const { data } = await q
     return data || []
-  }, [status])
+  }, [status, gymFilter])
 
   if (!plans) return <Loading />
 
@@ -35,11 +38,14 @@ export default function Plans() {
     <div>
       <div className="row between">
         <h1>{t('plans.title')}</h1>
-        <select style={{ width: 'auto' }} value={status} onChange={(e) => setStatus(e.target.value)}>
-          {STATUSES.map((s) => (
-            <option key={s} value={s}>{s ? t(`status.${s}`) : t('common.status')}</option>
-          ))}
-        </select>
+        <div className="row">
+          <GymFilter value={gymFilter} onChange={setGymFilter} />
+          <select style={{ width: 'auto' }} value={status} onChange={(e) => setStatus(e.target.value)}>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{s ? t(`status.${s}`) : t('common.status')}</option>
+            ))}
+          </select>
+        </div>
       </div>
       {plans.length === 0 ? (
         <div className="card muted">{t('plans.empty')}</div>
