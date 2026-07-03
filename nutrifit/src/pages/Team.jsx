@@ -1,17 +1,16 @@
-import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Loading, Alert } from '../components/ui'
 
 export default function Team() {
   const { t } = useI18n()
   const { profile } = useAuth()
-  const [members, setMembers] = useState(null)
 
-  useEffect(() => {
-    supabase.from('profiles').select('*').eq('gym_id', profile.gym_id)
-      .then(({ data }) => setMembers(data || []))
+  const { data: members } = useQuery(`team:${profile.gym_id}`, async () => {
+    const { data } = await supabase.from('profiles').select('*').eq('gym_id', profile.gym_id)
+    return data || []
   }, [profile.gym_id])
 
   if (!members) return <Loading />

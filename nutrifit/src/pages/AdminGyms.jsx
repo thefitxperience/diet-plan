@@ -1,16 +1,18 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Field, Alert, Loading } from '../components/ui'
 
 export default function AdminGyms() {
   const { t } = useI18n()
-  const [gyms, setGyms] = useState(null)
   const [name, setName] = useState('')
   const [error, setError] = useState(null)
 
-  const load = () => supabase.from('gyms').select('*').order('created_at').then(({ data }) => setGyms(data || []))
-  useEffect(() => { load() }, [])
+  const { data: gyms, refresh } = useQuery('admin:gyms', async () => {
+    const { data } = await supabase.from('gyms').select('*').order('created_at')
+    return data || []
+  })
 
   async function create(e) {
     e.preventDefault()
@@ -18,7 +20,7 @@ export default function AdminGyms() {
     const { error: err } = await supabase.from('gyms').insert({ name })
     if (err) { setError(err.message); return }
     setName('')
-    load()
+    refresh()
   }
 
   if (!gyms) return <Loading />

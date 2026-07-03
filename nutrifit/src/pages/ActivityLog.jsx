@@ -1,18 +1,17 @@
-import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Loading, fmtDateTime } from '../components/ui'
 
 export default function ActivityLog() {
   const { t, lang } = useI18n()
-  const [events, setEvents] = useState(null)
 
-  useEffect(() => {
-    supabase.from('plan_events')
+  const { data: events } = useQuery('activity', async () => {
+    const { data } = await supabase.from('plan_events')
       .select('*, profiles:actor(full_name), plans(clients(first_name, last_name))')
       .order('created_at', { ascending: false }).limit(200)
-      .then(({ data }) => setEvents(data || []))
-  }, [])
+    return data || []
+  })
 
   if (!events) return <Loading />
 

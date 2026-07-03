@@ -1,8 +1,8 @@
-import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
 function Stat({ num, label, to }) {
@@ -18,22 +18,19 @@ function Stat({ num, label, to }) {
 export default function Dashboard() {
   const { t, lang } = useI18n()
   const { role } = useAuth()
-  const [data, setData] = useState(null)
 
-  useEffect(() => {
-    ;(async () => {
-      const [plans, clients, events] = await Promise.all([
-        supabase.from('plans').select('id, status, version, updated_at, clients(first_name, last_name)').order('updated_at', { ascending: false }).limit(200),
-        supabase.from('clients').select('id', { count: 'exact', head: true }),
-        supabase.from('plan_events').select('*, profiles:actor(full_name)').order('created_at', { ascending: false }).limit(12),
-      ])
-      setData({
-        plans: plans.data || [],
-        clientCount: clients.count || 0,
-        events: events.data || [],
-      })
-    })()
-  }, [])
+  const { data } = useQuery('dashboard', async () => {
+    const [plans, clients, events] = await Promise.all([
+      supabase.from('plans').select('id, status, version, updated_at, clients(first_name, last_name)').order('updated_at', { ascending: false }).limit(200),
+      supabase.from('clients').select('id', { count: 'exact', head: true }),
+      supabase.from('plan_events').select('*, profiles:actor(full_name)').order('created_at', { ascending: false }).limit(12),
+    ])
+    return {
+      plans: plans.data || [],
+      clientCount: clients.count || 0,
+      events: events.data || [],
+    }
+  })
 
   if (!data) return <Loading />
 

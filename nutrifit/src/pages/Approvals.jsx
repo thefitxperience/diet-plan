@@ -1,24 +1,23 @@
 // Gym approval queue (plan §1 step 8): read-only preview + Approve /
 // Request Changes (comment mandatory on reject).
 
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
 export default function Approvals() {
   const { t, lang } = useI18n()
   const navigate = useNavigate()
-  const [plans, setPlans] = useState(null)
 
-  useEffect(() => {
-    supabase.from('plans')
+  const { data: plans } = useQuery('approvals', async () => {
+    const { data } = await supabase.from('plans')
       .select('id, status, version, updated_at, clients(first_name, last_name)')
       .eq('status', 'NUTRITIONIST_APPROVED')
       .order('updated_at', { ascending: true })
-      .then(({ data }) => setPlans(data || []))
-  }, [])
+    return data || []
+  })
 
   if (!plans) return <Loading />
 

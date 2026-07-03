@@ -1,35 +1,34 @@
 // Platform admin: assign roles/gyms to profiles. Auth users are created via
 // Supabase (sign-up or dashboard invite); this page manages their profile row.
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Alert, Loading } from '../components/ui'
 
 const ROLES = ['nutritionist', 'gym_admin', 'platform_admin']
 
 export default function AdminUsers() {
   const { t } = useI18n()
-  const [users, setUsers] = useState(null)
-  const [gyms, setGyms] = useState([])
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
 
-  useEffect(() => {
-    Promise.all([
+  const { data, setData } = useQuery('admin:users', async () => {
+    const [u, g] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at'),
       supabase.from('gyms').select('id, name').order('name'),
-    ]).then(([u, g]) => {
-      setUsers(u.data || [])
-      setGyms(g.data || [])
-    })
-  }, [])
+    ])
+    return { users: u.data || [], gyms: g.data || [] }
+  })
+  const users = data?.users
+  const gyms = data?.gyms || []
 
   async function update(id, patch) {
     setError(null)
     setNotice(null)
-    const { data, error: err } = await supabase.from('profiles').update(patch).eq('id', id).select().single()
+    const { data: updated, error: err } = await supabase.from('profiles').update(patch).eq('id', id).select().single()
     if (err) { setError(err.message); return }
-    setUsers(users.map((u) => (u.id === id ? data : u)))
+    setData({ ...data, users: users.map((u) => (u.id === id ? updated : u)) })
     setNotice('Updated')
   }
 

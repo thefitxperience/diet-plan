@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
+import { useQuery } from '../lib/useQuery'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
 const STATUSES = ['', 'DRAFT', 'GENERATED', 'IN_REVIEW', 'NUTRITIONIST_APPROVED', 'CHANGES_REQUESTED', 'GYM_APPROVED', 'SENT']
@@ -11,15 +12,15 @@ export default function Plans() {
   const { t, lang } = useI18n()
   const { role } = useAuth()
   const navigate = useNavigate()
-  const [plans, setPlans] = useState(null)
   const [status, setStatus] = useState('')
 
-  useEffect(() => {
+  const { data: plans } = useQuery(`plans:${status || 'all'}`, async () => {
     let q = supabase.from('plans')
       .select('id, status, version, updated_at, clients(first_name, last_name)')
       .order('updated_at', { ascending: false })
     if (status) q = q.eq('status', status)
-    q.then(({ data }) => setPlans(data || []))
+    const { data } = await q
+    return data || []
   }, [status])
 
   if (!plans) return <Loading />
