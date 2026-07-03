@@ -40,7 +40,7 @@ export default function Login() {
     <div
       className="login-wrap"
       style={{
-        background: `linear-gradient(135deg, rgba(91,159,164,0.90) 0%, rgba(27,52,72,0.94) 100%), url(${import.meta.env.BASE_URL}assets/background.png) center/cover no-repeat`,
+        background: `linear-gradient(135deg, rgba(91,159,164,0.55) 0%, rgba(27,52,72,0.65) 100%), url(${import.meta.env.BASE_URL}assets/background.png) center/cover no-repeat`,
       }}
     >
       <div className="login-card">
