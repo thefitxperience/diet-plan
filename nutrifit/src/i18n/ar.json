@@ -15,6 +15,7 @@
   "auth.signup": "إنشاء حساب",
   "auth.createAccount": "إنشاء حساب",
   "auth.haveAccount": "لديك حساب؟ تسجيل الدخول",
+  "auth.demoAccounts": "جرّب حساباً تجريبياً",
   "auth.email": "البريد الإلكتروني",
   "auth.password": "كلمة المرور",
   "auth.fullname": "الاسم الكامل",

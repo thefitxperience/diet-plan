@@ -15,6 +15,7 @@
   "auth.signup": "Sign up",
   "auth.createAccount": "Create account",
   "auth.haveAccount": "Have an account? Sign in",
+  "auth.demoAccounts": "Try a demo account",
   "auth.email": "Email",
   "auth.password": "Password",
   "auth.fullname": "Full name",
