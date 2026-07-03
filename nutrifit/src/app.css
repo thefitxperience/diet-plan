@@ -123,6 +123,10 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
 .grid.cols-3 { grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
 .grid.cols-4 { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
 
+/* Dashboard stat tiles: always exactly 4 per row (8 tiles → 2 rows of 4) */
+.stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 .row { display: flex; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
 .row.between { justify-content: space-between; }
 .row.end { justify-content: flex-end; }

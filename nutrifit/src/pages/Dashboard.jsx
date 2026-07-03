@@ -52,7 +52,7 @@ export default function Dashboard() {
     <div>
       <h1>{t('dashboard.title')}</h1>
 
-      <div className="grid cols-4">
+      <div className="grid stat-grid">
         {role === 'gym_admin' && (
           <>
             <Stat num={pending.length} label={t('dashboard.pendingApprovals')} to="/approvals" />
