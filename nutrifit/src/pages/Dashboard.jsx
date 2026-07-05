@@ -49,6 +49,7 @@ export default function Dashboard() {
   const awaiting = byStatus(['GENERATED', 'IN_REVIEW'])
   const pending = byStatus(['NUTRITIONIST_APPROVED'])
   const sent = byStatus(['SENT'])
+  const deliveryRate = data.plans.length ? Math.round((sent.length / data.plans.length) * 100) : 0
 
   return (
     <div>
@@ -72,6 +73,7 @@ export default function Dashboard() {
             <Stat num={data.nutritionistCount} label={t('dashboard.totalNutritionists')} to="/admin/users" />
             <Stat num={sent.length} label={t('dashboard.totalPlansSent')} to="/plans" />
             <Stat num={inReview.length} label={t('dashboard.waitingNutritionist')} to="/plans" />
+            <Stat num={`${deliveryRate}%`} label={t('dashboard.deliveryRate')} to="/plans" />
           </>
         )}
         {role === 'nutritionist' && (

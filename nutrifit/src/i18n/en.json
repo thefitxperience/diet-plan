@@ -286,6 +286,7 @@
   "dashboard.totalPlansSent": "Total plans sent",
   "dashboard.waitingGym": "Waiting for gym approval",
   "dashboard.waitingNutritionist": "Waiting for nutritionist approval",
+  "dashboard.deliveryRate": "Delivery rate",
 
   "filter.allGyms": "All gyms",
   "dashboard.plansTotal": "Total plans",
