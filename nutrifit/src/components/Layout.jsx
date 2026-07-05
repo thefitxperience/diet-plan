@@ -12,7 +12,7 @@ const NAV = {
   ],
   gym_admin: [
     ['/', 'nav.dashboard'],
-    ['/approvals', 'nav.approvals'],
+    ['/plans', 'nav.plans'],
     ['/clients', 'nav.clients'],
     ['/team', 'nav.team'],
     ['/settings', 'nav.settings'],

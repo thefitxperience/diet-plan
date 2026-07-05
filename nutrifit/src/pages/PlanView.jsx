@@ -1,5 +1,5 @@
-// Read-only plan view: full preview + event log; delivery panel appears for
-// gym admins and nutritionists once the plan is GYM_APPROVED (plan §1 step 9).
+// Read-only plan view: full preview + event log; delivery panel appears once
+// the plan is approved by the nutritionist (NUTRITIONIST_APPROVED).
 
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
@@ -71,7 +71,7 @@ export default function PlanView() {
   if (!row || !client) return <Loading />
 
   const canDeliver = ['gym_admin', 'platform_admin', 'nutritionist'].includes(role) &&
-    ['GYM_APPROVED', 'SENT'].includes(row.status)
+    ['NUTRITIONIST_APPROVED', 'GYM_APPROVED', 'SENT'].includes(row.status)
   const editable = ['DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED'].includes(row.status) &&
     (role === 'nutritionist' || role === 'platform_admin')
 

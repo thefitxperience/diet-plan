@@ -55,7 +55,7 @@ export default function Dashboard() {
       <div className="grid stat-grid">
         {role === 'gym_admin' && (
           <>
-            <Stat num={pending.length} label={t('dashboard.pendingApprovals')} to="/approvals" />
+            <Stat num={pending.length} label={t('dashboard.readyToDeliver')} to="/plans" />
             <Stat num={data.nutritionistCount} label={t('dashboard.nutritionists')} to="/team" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
             <Stat num={data.plans.length} label={t('dashboard.plansTotal')} />
@@ -65,7 +65,7 @@ export default function Dashboard() {
           <>
             <Stat num={draftGen.length} label={t('dashboard.inProgress')} to="/plans" />
             <Stat num={returned.length} label={t('dashboard.returned')} to="/plans" />
-            <Stat num={pending.length} label={t('dashboard.waitingGym')} to="/plans" />
+            <Stat num={pending.length} label={t('dashboard.readyToDeliver')} to="/plans" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
             <Stat num={data.gymCount} label={t('dashboard.totalGyms')} to="/admin/gyms" />
             <Stat num={data.nutritionistCount} label={t('dashboard.totalNutritionists')} to="/admin/users" />
@@ -103,7 +103,7 @@ export default function Dashboard() {
 
       {role === 'gym_admin' && pending.length > 0 && (
         <>
-          <h2>{t('dashboard.pendingApprovals')}</h2>
+          <h2>{t('dashboard.readyToDeliver')}</h2>
           <table className="data" style={{ marginBottom: '1.75rem' }}>
             <tbody>
               {pending.map((p) => (
@@ -111,7 +111,7 @@ export default function Dashboard() {
                   <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
                   <td>v{p.version}</td>
                   <td>{fmtDateTime(p.updated_at, lang)}</td>
-                  <td><Link className="btn sm" to={`/approvals/${p.id}`}>{t('plans.open')}</Link></td>
+                  <td><Link className="btn sm" to={`/plans/${p.id}`}>{t('plans.open')}</Link></td>
                 </tr>
               ))}
             </tbody>

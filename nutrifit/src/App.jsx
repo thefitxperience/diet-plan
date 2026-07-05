@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react'
-import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from './auth/AuthProvider'
 import { Loading, Alert } from './components/ui'
 import Layout from './components/Layout'
@@ -14,14 +14,13 @@ import NewPlan from './pages/NewPlan'
 import Plans from './pages/Plans'
 import SubmitQueue from './pages/SubmitQueue'
 import PlanEditor from './pages/PlanEditor'
-import Approvals from './pages/Approvals'
-import ApprovalDetail from './pages/ApprovalDetail'
 import PlanView from './pages/PlanView'
 import Team from './pages/Team'
 import GymSettings from './pages/GymSettings'
 import AdminGyms from './pages/AdminGyms'
 import AdminUsers from './pages/AdminUsers'
 import ActivityLog from './pages/ActivityLog'
+import Intake from './pages/Intake'
 
 function RequireRole({ roles, children }) {
   const { role } = useAuth()
@@ -32,6 +31,10 @@ function RequireRole({ roles, children }) {
 export default function App() {
   const { session, profile, loading, profileError, needsOnboarding, status, signOut } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Public, no-login client intake link — rendered before any auth gate.
+  const isIntake = location.pathname.startsWith('/intake')
 
   // Always land on the dashboard on sign-in. Keyed on the user id going
   // falsy→truthy, which fires on login and on a refresh that restores the
@@ -40,9 +43,17 @@ export default function App() {
   const userId = session?.user?.id
   const prevUserId = useRef(userId)
   useEffect(() => {
-    if (!prevUserId.current && userId) navigate('/', { replace: true })
+    if (!isIntake && !prevUserId.current && userId) navigate('/', { replace: true })
     prevUserId.current = userId
-  }, [userId, navigate])
+  }, [userId, navigate, isIntake])
+
+  if (isIntake) {
+    return (
+      <Routes>
+        <Route path="/intake/:token" element={<Intake />} />
+      </Routes>
+    )
+  }
 
   if (loading) return <Loading />
   if (!session) return <Login />
@@ -74,8 +85,6 @@ export default function App() {
         <Route path="/to-submit" element={<RequireRole roles={NUTRI}><SubmitQueue /></RequireRole>} />
         <Route path="/plans/:id" element={<PlanView />} />
         <Route path="/plans/:id/edit" element={<RequireRole roles={NUTRI}><PlanEditor /></RequireRole>} />
-        <Route path="/approvals" element={<RequireRole roles={GYM}><Approvals /></RequireRole>} />
-        <Route path="/approvals/:id" element={<RequireRole roles={GYM}><ApprovalDetail /></RequireRole>} />
         <Route path="/team" element={<RequireRole roles={[...GYM, ...ADMIN]}><Team /></RequireRole>} />
         <Route path="/settings" element={<RequireRole roles={GYM}><GymSettings /></RequireRole>} />
         <Route path="/admin/gyms" element={<RequireRole roles={ADMIN}><AdminGyms /></RequireRole>} />

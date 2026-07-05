@@ -22,6 +22,11 @@ export default function GymSettings() {
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState(null)
   const [error, setError] = useState(null)
+  const [copied, setCopied] = useState(false)
+
+  const intakeUrl = gym?.intake_token
+    ? `${window.location.origin}${import.meta.env.BASE_URL}#/intake/${gym.intake_token}`
+    : null
 
   async function uploadLogo(file) {
     if (!file) return
@@ -96,6 +101,22 @@ export default function GymSettings() {
           {busy ? <Spinner /> : t('common.save')}
         </button>
       </div>
+
+      {intakeUrl && (
+        <div className="card" style={{ maxWidth: 480, marginTop: '1rem' }}>
+          <h2 style={{ marginTop: 0 }}>{t('settings.intakeTitle')}</h2>
+          <p className="muted small">{t('settings.intakeHint')}</p>
+          <div className="row" style={{ gap: 8 }}>
+            <input type="text" readOnly value={intakeUrl} onFocus={(e) => e.target.select()} style={{ flex: 1, direction: 'ltr' }} />
+            <button className="btn secondary sm" onClick={() => {
+              navigator.clipboard?.writeText(intakeUrl)
+              setCopied(true); setTimeout(() => setCopied(false), 2000)
+            }}>
+              {copied ? t('settings.copied') : t('settings.copyLink')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
