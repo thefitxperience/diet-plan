@@ -62,10 +62,10 @@ function fmtDate(iso) {
   return isNaN(d) ? iso : d.toLocaleDateString('en-GB')
 }
 
-function Header({ gym }) {
+function Header({ gym, t }) {
   return (
     <div className="deepfit-header">
-      <div className="deepfit-header-title">DIET PLAN</div>
+      <div className="deepfit-header-title">{t.ui('DIET PLAN')}</div>
       <img src={ASSET('Arrow.png')} className="deepfit-header-arrow" alt="" />
       <img src={ASSET('deep-fit-logo.png')} className="deepfit-header-logo" alt="DEEP FIT" />
       {gym?.logo_url && (
@@ -244,7 +244,7 @@ export function planPageList(plan) {
 }
 
 export default function DeepFitTemplate({
-  plan, lang = 'en', gym, selectable = false, selection, onSelect, warnings, pageRefs,
+  plan, lang = 'en', gym, selectable = false, selection, onSelect, warnings, pageRefs, only = null,
 }) {
   if (!plan?.meals) return null
   const t = makeT(lang)
@@ -276,12 +276,13 @@ export default function DeepFitTemplate({
       style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}
     >
       {pages.map((page, idx) => {
+        if (only != null && only !== idx) return null
         const ref = pageRefs ? (el) => pageRefs(idx, el) : undefined
         if (page.type === 'cover') {
           const meal = mealById[page.mealId]
           return (
             <div className="deepfit-page" key={idx} ref={ref} style={bgStyle}>
-              <Header gym={gym} />
+              <Header gym={gym} t={t} />
               <div className="deepfit-content">
                 {infoRow}
                 <div className="deepfit-diet-type">
@@ -302,7 +303,7 @@ export default function DeepFitTemplate({
           const meal = mealById[page.mealId]
           return (
             <div className="deepfit-page" key={idx} ref={ref} style={bgStyle}>
-              <Header gym={gym} />
+              <Header gym={gym} t={t} />
               <div className="deepfit-content deepfit-meal-page">
                 <MealTable meal={meal} title={pres[meal.id].title} icon={pres[meal.id].icon}
                   t={t} selectable={selectable} selection={selection} onSelect={onSelect} warnings={warnings} />
@@ -315,7 +316,7 @@ export default function DeepFitTemplate({
         const sections = page.type === 'guidelines1' ? GUIDELINES_PAGE_1 : GUIDELINES_PAGE_2
         return (
           <div className="deepfit-page" key={idx} ref={ref} style={bgStyle}>
-            <Header gym={gym} />
+            <Header gym={gym} t={t} />
             <div className="deepfit-content">
               <div className="deepfit-guidelines-title">{t.ui(GUIDELINES_TITLE)}</div>
               {page.type === 'guidelines1' && (

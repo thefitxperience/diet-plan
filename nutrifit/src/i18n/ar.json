@@ -235,6 +235,11 @@
   "editor.clickToEdit": "انقر أي خيار وجبة في الصفحة لتعديله",
   "editor.rejectionComment": "ملاحظة النادي",
 
+  "meal.breakfast": "الفطور",
+  "meal.lunch": "الغداء",
+  "meal.dinner": "العشاء",
+  "meal.snack": "وجبة خفيفة",
+
   "approvals.title": "الموافقات",
   "approvals.pending": "بانتظار الموافقة",
   "approvals.empty": "لا يوجد شيء بانتظار الموافقة",

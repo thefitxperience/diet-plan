@@ -238,7 +238,7 @@ export default function PlanEditor() {
           <div className="card">
             {plan.meals.map((meal) => (
               <div className="row between" key={meal.id} style={{ marginBottom: 6 }}>
-                <b style={{ textTransform: 'capitalize' }}>{meal.id}</b>
+                <b>{t(`meal.${meal.id}`)}</b>
                 <div className="row">
                   <input type="number" style={{ width: 90 }} value={meal.targetKcal ?? ''}
                     placeholder={t('editor.mealTargetKcal')}
@@ -280,17 +280,10 @@ export default function PlanEditor() {
   )
 }
 
-// Single-page render for thumbnails: reuses the template but slices to a page.
+// Single-page render for thumbnails: the template renders only the requested
+// page (pages can exceed 842px, so margin-based slicing was unreliable).
 function ThumbPage({ plan, pageIndex, lang, gym }) {
-  // Cheap approach: render the full template; CSS scaling keeps it light for ≤6 pages.
-  // Slice: hide all but the requested page via a wrapper.
-  return (
-    <div style={{ height: 842, overflow: 'hidden' }}>
-      <div style={{ marginTop: pageIndex * -(842 + 20) }}>
-        <DeepFitTemplate plan={plan} lang={lang} gym={gym} />
-      </div>
-    </div>
-  )
+  return <DeepFitTemplate plan={plan} lang={lang} gym={gym} only={pageIndex} />
 }
 
 function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate, selection, setSelection }) {
@@ -314,7 +307,7 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
   return (
     <div className="card">
       <div className="row between">
-        <h3 style={{ textTransform: 'capitalize' }}>{meal.id} · {t('editor.option')} {idx + 1}</h3>
+        <h3>{t(`meal.${meal.id}`)} · {t('editor.option')} {idx + 1}</h3>
         <div className="row">
           <button className="btn ghost sm" title={t('editor.moveUp')} onClick={() => move(-1)}>↑</button>
           <button className="btn ghost sm" title={t('editor.moveDown')} onClick={() => move(1)}>↓</button>
@@ -358,10 +351,6 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
               onChange={(e) => updateOption((o) => { o.macros[k] = e.target.value === '' ? null : parseFloat(e.target.value) })} />
           </Field>
         ))}
-        <Field label={t('editor.kcal')}>
-          <input type="number" value={option.kcal || ''}
-            onChange={(e) => updateOption((o) => { o.kcal = parseInt(e.target.value) || 0 })} />
-        </Field>
       </div>
 
       <div className="row end" style={{ marginTop: '1rem' }}>

@@ -549,13 +549,14 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .editor-toolbar {
   background: var(--bg);
   padding: 0 0 0.5rem;
+  margin-bottom: 0.75rem;
   flex-wrap: wrap;
   gap: 0.5rem;
 }
 
 .editor-shell {
   display: grid;
-  grid-template-columns: 130px 1fr 340px;
+  grid-template-columns: 117px 1fr 340px;
   gap: 1rem;
   align-items: start;
 }
@@ -614,6 +615,13 @@ html.intake-active, body.intake-active { background: #4A878C; }
   transform-origin: top left;
   width: 595px;
   pointer-events: none;
+  /* Anchor the scaled page to the top-left even when the site is RTL —
+     otherwise the 595px-wide page is placed from the right edge and the
+     visible portion is clipped away, leaving the thumbnail blank. */
+  position: absolute;
+  top: 0;
+  left: 0;
+  direction: ltr;
 }
 .editor-canvas {
   overflow: auto;
@@ -634,7 +642,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .ingredient-row.two { grid-template-columns: 1fr 64px 28px; }
 
 /* Macros: protein / carbs / fats / kcal all on one compact line */
-.macros-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.macros-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
 .macros-grid .field { margin-bottom: 0; }
 .macros-grid .field > span { font-size: 0.7rem; margin-bottom: 2px; }
 .macros-grid input { padding: 0.35rem 0.3rem; font-size: 0.85rem; text-align: center; }
