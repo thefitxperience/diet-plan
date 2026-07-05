@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, BackButton } from '../components/ui'
-import { extractFromPdf, extractFromImage, parseInBodyText, crossCheckClient } from '../lib/inbodyParser'
+import { extractFromPdf, extractFromImage, renderPdfFirstPage, parseInBodyText, crossCheckClient } from '../lib/inbodyParser'
 
 const FIELDS = [
   ['weight', 'inbody.field.weight'],
@@ -46,21 +46,24 @@ export default function InBodyUpload() {
     supabase.from('clients').select('*').eq('id', clientId).single().then(({ data }) => setClient(data))
   }, [clientId])
 
-  useEffect(() => () => { if (previewUrl) URL.revokeObjectURL(previewUrl) }, [previewUrl])
+  // Only object URLs (image uploads) need revoking; PDF previews are data URLs.
+  useEffect(() => () => { if (previewUrl?.startsWith('blob:')) URL.revokeObjectURL(previewUrl) }, [previewUrl])
 
   async function handleFile(f) {
     if (!f) return
     setFile(f)
     setError(null)
     setParsing(true)
-    setPreviewUrl(URL.createObjectURL(f))
     try {
       const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
       let text
       if (isPdf) {
         text = await extractFromPdf(f)
         setSourceType('pdf_text')
+        // Clean image preview of the first page — no PDF-viewer chrome.
+        setPreviewUrl(await renderPdfFirstPage(f))
       } else {
+        setPreviewUrl(URL.createObjectURL(f))
         text = await extractFromImage(f, setProgress)
         setSourceType('ocr')
       }
@@ -161,9 +164,7 @@ export default function InBodyUpload() {
         <div className="grid cols-2" style={{ gridTemplateColumns: previewUrl ? '1fr 1fr' : '1fr', alignItems: 'start' }}>
           {previewUrl && (
             <div className="card" style={{ position: 'sticky', top: '1rem' }}>
-              {file?.type === 'application/pdf'
-                ? <iframe src={previewUrl} title="InBody" style={{ width: '100%', height: '75vh', border: 'none' }} />
-                : <img src={previewUrl} alt="InBody" style={{ maxWidth: '100%' }} />}
+              <img src={previewUrl} alt="InBody" style={{ width: '100%', display: 'block' }} />
             </div>
           )}
           <div className="card">

@@ -120,7 +120,7 @@
   "intake.needInbody": "Please upload your InBody result to continue.",
   "intake.needDetails": "Please fill in your name, date of birth, gender, activity level, dietary type, and consent.",
   "intake.scanning": "Reading your InBody…",
-  "intake.scanFailed": "We couldn't read your InBody sheet clearly. Please upload a clearer photo or the PDF file.",
+  "intake.scanFailed": "We couldn't read your InBody sheet clearly. Please upload a clearer PDF file.",
   "intake.inbodyReceived": "InBody received",
   "intake.reupload": "Upload a different file",
   "clients.empty": "No clients yet. Create your first client to get started.",
@@ -130,7 +130,7 @@
   "clients.uploadInbody": "Upload InBody",
 
   "inbody.title": "InBody upload",
-  "inbody.dropHint": "Drop an InBody PDF or photo here, or click to browse",
+  "inbody.dropHint": "Drop an InBody PDF here, or click to browse",
   "inbody.parsing": "Extracting values…",
   "inbody.reviewTitle": "Review extracted values",
   "inbody.reviewHint": "Check every value against the document before confirming. Extraction is never trusted blindly.",

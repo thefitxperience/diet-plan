@@ -120,7 +120,7 @@
   "intake.needInbody": "يرجى رفع نتيجة تحليل الجسم للمتابعة.",
   "intake.needDetails": "يرجى إدخال الاسم وتاريخ الميلاد والجنس ومستوى النشاط والنمط الغذائي والموافقة.",
   "intake.scanning": "جارٍ قراءة تحليل الجسم…",
-  "intake.scanFailed": "تعذّرت قراءة نتيجة تحليل الجسم بوضوح. يرجى رفع صورة أوضح أو ملف PDF.",
+  "intake.scanFailed": "تعذّرت قراءة نتيجة تحليل الجسم بوضوح. يرجى رفع ملف PDF أوضح.",
   "intake.inbodyReceived": "تم استلام تحليل الجسم",
   "intake.reupload": "رفع ملف آخر",
   "clients.history": "السجل",
@@ -129,7 +129,7 @@
   "clients.uploadInbody": "رفع تقرير InBody",
 
   "inbody.title": "رفع تقرير InBody",
-  "inbody.dropHint": "أسقط ملف PDF أو صورة لتقرير InBody هنا، أو انقر للاختيار",
+  "inbody.dropHint": "أسقط ملف PDF لتقرير InBody هنا، أو انقر للاختيار",
   "inbody.parsing": "جارٍ استخراج القيم…",
   "inbody.reviewTitle": "مراجعة القيم المستخرجة",
   "inbody.reviewHint": "تحقق من كل قيمة مقابل المستند قبل التأكيد. لا يتم الوثوق بالاستخراج تلقائياً.",

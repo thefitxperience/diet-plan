@@ -29,6 +29,30 @@ export async function extractFromPdf(file) {
   return text
 }
 
+// Render a PDF's first page to a PNG data URL — a clean preview image with no
+// browser PDF-viewer chrome (toolbar/thumbnails/print). Returns null on failure
+// (the preview is optional; extraction is what matters).
+export async function renderPdfFirstPage(file, targetWidth = 1000) {
+  try {
+    const pdfjs = await import('pdfjs-dist')
+    const workerUrl = (await import('pdfjs-dist/build/pdf.worker.min.mjs?url')).default
+    pdfjs.GlobalWorkerOptions.workerSrc = workerUrl
+
+    const data = await file.arrayBuffer()
+    const doc = await pdfjs.getDocument({ data }).promise
+    const page = await doc.getPage(1)
+    const base = page.getViewport({ scale: 1 })
+    const viewport = page.getViewport({ scale: targetWidth / base.width })
+    const canvas = document.createElement('canvas')
+    canvas.width = viewport.width
+    canvas.height = viewport.height
+    await page.render({ canvasContext: canvas.getContext('2d'), viewport }).promise
+    return canvas.toDataURL('image/png')
+  } catch {
+    return null
+  }
+}
+
 export async function extractFromImage(file, onProgress) {
   const { default: Tesseract } = await import('tesseract.js')
   const result = await Tesseract.recognize(file, 'eng', {
