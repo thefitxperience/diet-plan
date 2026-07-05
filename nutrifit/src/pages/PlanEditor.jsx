@@ -9,7 +9,7 @@ import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge } from '../components/ui'
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
-  blankOption, duplicateOption, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  blankOption, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
 } from '../lib/planModel'
 import { generateSafePlan } from '../lib/planGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
@@ -373,14 +373,6 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
       </div>
 
       <div className="row end" style={{ marginTop: '1rem' }}>
-        <button className="btn secondary sm" onClick={() => mutate((p) => {
-          const m = p.meals.find((x) => x.id === meal.id)
-          if (m.options.length >= MAX_OPTIONS_PER_MEAL) return
-          const i = m.options.findIndex((o) => o.id === option.id)
-          m.options.splice(i + 1, 0, duplicateOption(m.options[i]))
-        })}>
-          {t('editor.duplicateOption')}
-        </button>
         <button className="btn danger sm" onClick={() => {
           mutate((p) => {
             const m = p.meals.find((x) => x.id === meal.id)
