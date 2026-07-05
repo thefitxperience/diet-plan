@@ -4,11 +4,13 @@ import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
+import { arDigits } from '../lib/digits'
 
 function Stat({ num, label, to }) {
+  const { lang } = useI18n()
   const inner = (
     <div className="card stat">
-      <div className="num">{num}</div>
+      <div className="num">{arDigits(num, lang)}</div>
       <div className="lbl">{label}</div>
     </div>
   )
@@ -109,7 +111,7 @@ export default function Dashboard() {
               {pending.map((p) => (
                 <tr key={p.id}>
                   <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
-                  <td>v{p.version}</td>
+                  <td>v{arDigits(p.version, lang)}</td>
                   <td>{fmtDateTime(p.updated_at, lang)}</td>
                   <td><Link className="btn sm" to={`/plans/${p.id}`}>{t('plans.open')}</Link></td>
                 </tr>

@@ -115,7 +115,7 @@
   "intake.selectGender": "Select gender",
   "intake.consent": "I consent to storing my health data for diet plan preparation",
   "intake.submitting": "Preparing your plan…",
-  "intake.doneTitle": "All done! 🎉",
+  "intake.doneTitle": "All done!",
   "intake.doneBody": "Your information has been received and your diet plan has been sent to a nutritionist for approval. You'll hear from your gym soon.",
   "intake.needInbody": "Please upload your InBody result to continue.",
   "intake.needDetails": "Please fill in your name, date of birth, gender, activity level, dietary type, and consent.",
