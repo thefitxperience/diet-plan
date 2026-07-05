@@ -1,9 +1,7 @@
--- Status transitions enforced server-side (plan §1 lifecycle, §7 security).
---
--- DRAFT → GENERATED → IN_REVIEW → NUTRITIONIST_APPROVED → GYM_APPROVED → SENT
---                         ↑                                    |
---                         └──────── CHANGES_REQUESTED ←────────┘
+-- Let nutritionists deliver plans too (after gym approval), not just gym admins.
+-- Backend counterpart to the PlanView delivery panel now showing for nutritionists.
 
+-- 1) Allow the 'sent' transition for nutritionists.
 create or replace function transition_plan(
   p_plan_id uuid,
   p_action  plan_action,
@@ -30,7 +28,6 @@ begin
     raise exception 'Plan belongs to another gym';
   end if;
 
-  -- action → (allowed role, allowed current statuses, next status)
   if p_action = 'generated' then
     if v_role not in ('nutritionist', 'platform_admin') then raise exception 'Only nutritionists generate plans'; end if;
     if v_plan.status not in ('DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED') then
@@ -89,46 +86,9 @@ begin
   return v_plan;
 end $$;
 
--- Log non-transition events (e.g. content edit saves) with gym scoping.
-create or replace function log_plan_event(
-  p_plan_id uuid,
-  p_action  plan_action,
-  p_comment text default ''
-) returns void
-language plpgsql security definer set search_path = public as $$
-declare
-  v_gym uuid;
-  v_plan_gym uuid;
-begin
-  select gym_id into v_gym from profiles where id = auth.uid();
-  select gym_id into v_plan_gym from plans where id = p_plan_id;
-  if v_plan_gym is null then raise exception 'Plan not found'; end if;
-  if v_gym is distinct from v_plan_gym
-     and (select role from profiles where id = auth.uid()) <> 'platform_admin' then
-    raise exception 'Plan belongs to another gym';
-  end if;
-  insert into plan_events (gym_id, plan_id, actor, action, comment)
-  values (v_plan_gym, p_plan_id, auth.uid(), p_action, coalesce(p_comment, ''));
-end $$;
-
--- First-login bootstrap: creates a profile for a fresh auth user.
--- The FIRST user of the system becomes platform_admin; everyone else must be
--- invited (profile row pre-created by an admin) — see seed notes in README.
-create or replace function ensure_profile(p_full_name text default '')
-returns profiles
-language plpgsql security definer set search_path = public as $$
-declare
-  v_profile profiles;
-begin
-  select * into v_profile from profiles where id = auth.uid();
-  if v_profile.id is not null then return v_profile; end if;
-
-  if not exists (select 1 from profiles) then
-    insert into profiles (id, role, full_name)
-    values (auth.uid(), 'platform_admin', coalesce(p_full_name, ''))
-    returning * into v_profile;
-  else
-    raise exception 'No profile provisioned for this account — ask your gym admin to invite you.';
-  end if;
-  return v_profile;
-end $$;
+-- 2) Allow nutritionists to insert delivery records for their gym.
+drop policy if exists deliveries_insert on deliveries;
+create policy deliveries_insert on deliveries for insert with check (
+  gym_id = auth_gym() and actor = auth.uid()
+  and auth_role() in ('gym_admin', 'platform_admin', 'nutritionist')
+);

@@ -42,7 +42,9 @@ export default function ApprovalDetail() {
         p_plan_id: id, p_action: action, p_comment: comment,
       })
       if (e) throw e
-      navigate('/approvals')
+      // On gym approval the plan becomes deliverable — take the approver
+      // straight to the plan's delivery panel instead of back to the list.
+      navigate(action === 'approved_gym' ? `/plans/${id}` : '/approvals')
     } catch (err) {
       setError(err.message)
     } finally {

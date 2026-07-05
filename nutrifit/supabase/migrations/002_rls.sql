@@ -114,7 +114,7 @@ create policy deliveries_select on deliveries for select using (
 );
 create policy deliveries_insert on deliveries for insert with check (
   gym_id = auth_gym() and actor = auth.uid()
-  and auth_role() in ('gym_admin', 'platform_admin')
+  and auth_role() in ('gym_admin', 'platform_admin', 'nutritionist')
 );
 
 -- ── storage policies ─────────────────────────────────────────────────
