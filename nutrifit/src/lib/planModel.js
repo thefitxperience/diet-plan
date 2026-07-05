@@ -114,6 +114,32 @@ export function scaleOptionToKcal(option, targetKcal) {
   }
 }
 
+// Realistic max food weight for a single meal (grams). Dishes whose scaled
+// portion exceeds this are demoted (see rankByPortion) — a low-calorie-density
+// dish stretched to a high calorie target becomes an unrealistic amount of food.
+export const MEAL_WEIGHT_CAP = 650
+
+// Total (already-scaled) food weight of an option.
+export function optionWeight(option) {
+  return (option.ingredients || []).reduce((s, i) => s + (i.grams || 0), 0)
+}
+
+// Order options so realistic portions surface first: dishes within the weight
+// cap keep their original (variety) order; oversized ones sink to the end,
+// least-oversized first. Options are expected to already be scaled to the meal
+// target, so optionWeight() is the real serving size.
+export function rankByPortion(options, cap = MEAL_WEIGHT_CAP) {
+  const over = (o) => optionWeight(o) > cap
+  return options
+    .map((o, i) => ({ o, i }))
+    .sort((a, b) => {
+      if (over(a.o) !== over(b.o)) return over(a.o) ? 1 : -1
+      if (over(a.o)) return optionWeight(a.o) - optionWeight(b.o)
+      return a.i - b.i
+    })
+    .map((x) => x.o)
+}
+
 // Build a fully-populated plan option from a mealCatalog.json entry.
 export function optionFromCatalog(entry) {
   return {

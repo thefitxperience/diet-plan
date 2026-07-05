@@ -13,7 +13,7 @@
 import { generatePlan } from './fitApi'
 import {
   buildPlanModel, autofillArabic, optionFromCatalog, scaleOptionToKcal,
-  mealTargetKcal, MAX_OPTIONS_PER_MEAL,
+  mealTargetKcal, rankByPortion, MAX_OPTIONS_PER_MEAL,
 } from './planModel'
 import { processOption, canonicalTokens, norm } from './dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
@@ -116,6 +116,7 @@ export async function generateSafePlan(payload, { allergyNames = [], conditionNa
   for (const meal of model.meals) {
     let opts = pool[meal.id]
     if (!opts.length) opts = fallback[meal.id] // extreme: nothing safe found, keep originals
+    opts = rankByPortion(opts) // realistic portions first, oversized dishes last
     opts = opts.slice(0, targets[meal.id] || MAX_OPTIONS_PER_MEAL)
     for (const o of opts) {
       if (o._swaps) {

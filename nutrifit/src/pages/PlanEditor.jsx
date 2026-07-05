@@ -10,7 +10,7 @@ import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../comp
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
-  kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
@@ -337,6 +337,14 @@ function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, con
     !used?.has((v.entry.name_en || '').trim().toLowerCase()) &&
     (!v.entry.categories?.length || v.entry.categories.includes(slot)) &&
     (!diet || !v.entry.diets?.length || v.entry.diets.includes(diet)))
+  // Realistic portions first: dishes whose scaled serving fits the weight cap
+  // keep alphabetical order; oversized ones (for this meal's calories) sink down.
+  available.sort((a, b) => {
+    const oa = optionWeight(a.opt) > MEAL_WEIGHT_CAP, ob = optionWeight(b.opt) > MEAL_WEIGHT_CAP
+    if (oa !== ob) return oa ? 1 : -1
+    if (oa) return optionWeight(a.opt) - optionWeight(b.opt)
+    return 0
+  })
   const results = query
     ? available.filter(({ entry }) =>
         entry.name_en.toLowerCase().includes(query) || (entry.name_ar || '').includes(q.trim()))
