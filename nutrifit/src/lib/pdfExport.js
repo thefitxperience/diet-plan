@@ -1,7 +1,11 @@
 // Client-side PDF export (plan §7): html2canvas captures each rendered
-// .deepfit-page, jsPDF assembles an A4 document. Ported from the demo's
-// downloadDietPlanPDF. Returns a Blob so delivery can also upload the
-// immutable snapshot to storage.
+// .deepfit-page, jsPDF assembles the document. Returns a Blob so delivery can
+// also upload the immutable snapshot to storage.
+//
+// The PDF is a 1:1 copy of the on-screen preview: each PDF page is sized to
+// match its captured .deepfit-page (not forced to A4), so a page never gets
+// scaled/shrunk to fit — a taller meal simply yields a taller page, exactly
+// like the preview.
 
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
@@ -10,33 +14,31 @@ export async function renderPlanPdf(containerEl, { scale = 3 } = {}) {
   const pages = containerEl.querySelectorAll('.deepfit-page')
   if (!pages.length) throw new Error('No pages found to export')
 
-  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true })
+  // let fonts / background images settle before capture
+  await new Promise((r) => setTimeout(r, 200))
 
-  const originalHeights = []
-  pages.forEach((page, idx) => {
-    originalHeights[idx] = page.style.height
-    page.style.height = '842px'
-  })
-  await new Promise((r) => setTimeout(r, 300))
+  let pdf = null
+  for (const page of pages) {
+    const canvas = await html2canvas(page, {
+      scale,
+      useCORS: true,
+      allowTaint: true,
+      logging: false,
+      backgroundColor: '#ffffff',
+      imageTimeout: 0,
+    })
 
-  try {
-    for (let i = 0; i < pages.length; i++) {
-      const canvas = await html2canvas(pages[i], {
-        scale,
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        imageTimeout: 0,
-      })
-      const imgData = canvas.toDataURL('image/jpeg', 0.95)
-      const imgWidth = 210
-      const imgHeight = Math.min((canvas.height * imgWidth) / canvas.width, 297)
-      if (i > 0) pdf.addPage('a4')
-      pdf.addImage(imgData, 'JPEG', 0, 0, imgWidth, imgHeight, undefined, 'FAST')
+    // Page size in CSS pixels (canvas is `scale`× that for crisp text).
+    const w = canvas.width / scale
+    const h = canvas.height / scale
+    const orientation = w > h ? 'landscape' : 'portrait'
+
+    if (!pdf) {
+      pdf = new jsPDF({ orientation, unit: 'px', format: [w, h], compress: true, hotfixes: ['px_scaling'] })
+    } else {
+      pdf.addPage([w, h], orientation)
     }
-  } finally {
-    pages.forEach((page, idx) => { page.style.height = originalHeights[idx] })
+    pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, w, h, undefined, 'FAST')
   }
 
   return pdf.output('blob')
