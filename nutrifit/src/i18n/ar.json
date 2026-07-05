@@ -239,6 +239,7 @@
   "delivery.history": "سجل التسليم",
   "delivery.generating": "جارٍ إنشاء PDF…",
   "delivery.message": "مرحباً {name}، خطتك الغذائية الشخصية من {gym} جاهزة! تجد ملف PDF مرفقاً.",
+  "delivery.emailSubject": "خطتك الغذائية الشخصية من {gym}",
 
   "dashboard.title": "لوحة التحكم",
   "dashboard.inProgress": "قيد الإنجاز",

@@ -51,6 +51,8 @@ jobs:
           VITE_EMAILJS_SERVICE_ID: ${{ vars.VITE_EMAILJS_SERVICE_ID }}
           VITE_EMAILJS_TEMPLATE_ID: ${{ vars.VITE_EMAILJS_TEMPLATE_ID }}
           VITE_EMAILJS_PUBLIC_KEY: ${{ vars.VITE_EMAILJS_PUBLIC_KEY }}
+          VITE_EMAIL_WORKER_URL: ${{ vars.VITE_EMAIL_WORKER_URL }}
+          VITE_EMAIL_RELAY_TOKEN: ${{ vars.VITE_EMAIL_RELAY_TOKEN }}
           VITE_BASE: /${{ github.event.repository.name }}/
       # SPA fallback so refreshes/deep links resolve to index.html
       - run: cp dist/index.html dist/404.html

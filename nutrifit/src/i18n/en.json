@@ -239,6 +239,7 @@
   "delivery.history": "Delivery history",
   "delivery.generating": "Rendering PDF…",
   "delivery.message": "Hi {name}, your personalized diet plan from {gym} is ready! Please find the PDF attached.",
+  "delivery.emailSubject": "Your personalized diet plan from {gym}",
 
   "dashboard.title": "Dashboard",
   "dashboard.inProgress": "In progress",

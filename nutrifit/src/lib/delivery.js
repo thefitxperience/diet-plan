@@ -10,18 +10,47 @@ const EMAILJS = {
   publicKey: import.meta.env.VITE_EMAILJS_PUBLIC_KEY,
 }
 
-export const emailConfigured = Boolean(EMAILJS.serviceId && EMAILJS.templateId && EMAILJS.publicKey)
+// Preferred: our own SMTP relay Worker (sends from your mailbox, attaches the
+// PDF). Falls back to EmailJS (link only) when the Worker URL isn't set.
+const EMAIL_WORKER_URL = import.meta.env.VITE_EMAIL_WORKER_URL
+const EMAIL_RELAY_TOKEN = import.meta.env.VITE_EMAIL_RELAY_TOKEN
+
+const emailjsConfigured = Boolean(EMAILJS.serviceId && EMAILJS.templateId && EMAILJS.publicKey)
+export const emailConfigured = Boolean(EMAIL_WORKER_URL) || emailjsConfigured
 
 export function waLink(phone, message) {
   const digits = (phone || '').replace(/[^\d]/g, '')
   return `https://wa.me/${digits}?text=${encodeURIComponent(message)}`
 }
 
-export async function sendEmail({ toEmail, toName, message, pdfUrl }) {
-  if (!emailConfigured) throw new Error('EmailJS is not configured')
+// Blob → bare base64 (no data: prefix) for the SMTP attachment.
+export function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(String(reader.result).split(',')[1] || '')
+    reader.onerror = reject
+    reader.readAsDataURL(blob)
+  })
+}
+
+export async function sendEmail({ toEmail, toName, subject, message, pdfBase64, filename, pdfUrl }) {
+  if (EMAIL_WORKER_URL) {
+    const res = await fetch(EMAIL_WORKER_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(EMAIL_RELAY_TOKEN ? { 'X-Relay-Token': EMAIL_RELAY_TOKEN } : {}),
+      },
+      body: JSON.stringify({ to: toEmail, toName, subject, message, pdfBase64, filename }),
+    })
+    if (!res.ok) throw new Error(`Email failed: ${res.status} — ${(await res.text()).slice(0, 200)}`)
+    return res.json()
+  }
+  if (!emailjsConfigured) throw new Error('Email is not configured')
   return emailjs.send(EMAILJS.serviceId, EMAILJS.templateId, {
     to_email: toEmail,
     to_name: toName,
+    subject: subject || '',
     message,
     pdf_url: pdfUrl || '',
   }, { publicKey: EMAILJS.publicKey })

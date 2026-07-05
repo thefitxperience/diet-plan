@@ -9,7 +9,7 @@ import { useI18n } from '../lib/i18n'
 import { Alert, Loading, Spinner, StatusBadge, fmtDateTime } from '../components/ui'
 import DeepFitTemplate from '../components/DeepFitTemplate'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
-import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl } from '../lib/delivery'
+import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl, blobToBase64 } from '../lib/delivery'
 
 export function EventLog({ planId, refresh }) {
   const { t, lang } = useI18n()
@@ -101,10 +101,14 @@ export default function PlanView() {
         recipient = client.email || ''
         if (!recipient) throw new Error('Client has no email address')
         const url = await signedPdfUrl(pdfPath)
+        const pdfBase64 = await blobToBase64(blob)
         await sendEmail({
           toEmail: recipient,
           toName: `${client.first_name} ${client.last_name}`,
+          subject: t('delivery.emailSubject', { gym: planGym?.name || 'FIT' }),
           message: t('delivery.message', { name: client.first_name, gym: planGym?.name || 'your gym' }),
+          pdfBase64,
+          filename: fileName,
           pdfUrl: url,
         })
       }

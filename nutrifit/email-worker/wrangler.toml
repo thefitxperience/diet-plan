@@ -1,0 +1,15 @@
+name = "fit-email"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+compatibility_flags = ["nodejs_compat"]
+
+# Non-secret config (override as needed). Secrets (SMTP_PASS, RELAY_TOKEN) are
+# set with `wrangler secret put` — never put them here.
+[vars]
+SMTP_HOST = "mail.infomaniak.com"
+SMTP_PORT = "587"
+SMTP_SECURE = "false"     # false = STARTTLS on 587; set "true" + SMTP_PORT=465 for implicit TLS
+SMTP_FROM_NAME = "NutriFIT"
+# SMTP_USER / SMTP_FROM can live here (not secret) or be set as secrets too:
+# SMTP_USER = "you@yourdomain.com"
+# SMTP_FROM = "you@yourdomain.com"
