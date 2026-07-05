@@ -11,13 +11,22 @@
 // The nutritionist just sees a normal, complete plan; the fixing is invisible.
 
 import { generatePlan } from './fitApi'
-import { buildPlanModel, autofillArabic, MAX_OPTIONS_PER_MEAL } from './planModel'
+import {
+  buildPlanModel, autofillArabic, optionFromCatalog, scaleOptionToKcal,
+  mealTargetKcal, MAX_OPTIONS_PER_MEAL,
+} from './planModel'
 import { processOption, canonicalTokens, norm } from './dietaryRules'
+import mealCatalog from '../data/mealCatalog.json'
 
 // Upper bound on API calls per generation. The first call plus a couple of
 // top-ups is normally enough to backfill every meal; the cap stops us looping
 // forever if a very restrictive profile leaves a meal permanently short.
 const MAX_ATTEMPTS = 5
+
+// Diets the API under-serves — supplement these from our catalog. Keto returns
+// only ~9 dishes total (too few to fill a plan), so it's boosted with the
+// curated keto meals in mealCatalog.json.
+const SUPPLEMENT_DIETS = new Set(['Keto'])
 
 /**
  * Generate a plan that is already safe for the client's restrictions.
@@ -29,9 +38,11 @@ const MAX_ATTEMPTS = 5
  */
 export async function generateSafePlan(payload, { allergyNames = [], conditionNames = [] } = {}, ctx = {}) {
   const tokens = canonicalTokens([...allergyNames, ...conditionNames])
+  // Plan style comes from the request, not from what the API happens to return.
+  const ctxM = { ...ctx, isIF: payload.secondaryTypeId === 'IntermittentFasting' }
 
   const firstResponse = await generatePlan(payload)
-  const model = autofillArabic(buildPlanModel(firstResponse, ctx))
+  const model = autofillArabic(buildPlanModel(firstResponse, ctxM))
 
   // Per-meal target = how many options the API naturally offers for that meal
   // (so a restricted plan looks identical in shape to an unrestricted one).
@@ -70,8 +81,34 @@ export async function generateSafePlan(payload, { allergyNames = [], conditionNa
   let attempts = 1
   while (tokens.size && short() && attempts < MAX_ATTEMPTS) {
     const resp = await generatePlan(payload)
-    ingest(autofillArabic(buildPlanModel(resp, ctx)))
+    ingest(autofillArabic(buildPlanModel(resp, ctxM)))
     attempts++
+  }
+
+  // Supplement diets the API serves too few dishes for (keto especially) with
+  // our curated catalog meals for that diet, scaled to each meal's calorie
+  // target. Keeps generated keto plans full instead of 1–2 options per meal.
+  const diet = payload.dietaryTypeId
+  if (SUPPLEMENT_DIETS.has(diet)) {
+    for (const meal of model.meals) {
+      const target = meal.targetKcal || mealTargetKcal(meal.id, ctx.dailyKcal)
+      const extras = mealCatalog.filter((e) =>
+        (e.diets || []).includes(diet) && (e.categories || []).includes(meal.id))
+      for (const e of extras) {
+        const key = norm(e.name_en)
+        if (!key || seen[meal.id].has(key)) continue
+        const opt = scaleOptionToKcal(optionFromCatalog(e), target)
+        if (tokens.size) {
+          const { swaps, conflicts } = processOption(opt, tokens)
+          if (conflicts.length) continue
+          opt._swaps = swaps
+        }
+        seen[meal.id].add(key)
+        pool[meal.id].push(opt)
+      }
+      // let the assembled plan include the supplemented options
+      targets[meal.id] = Math.min(pool[meal.id].length, MAX_OPTIONS_PER_MEAL)
+    }
   }
 
   // Assemble the final plan from the pooled safe options.

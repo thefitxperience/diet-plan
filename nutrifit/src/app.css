@@ -654,6 +654,30 @@ html.intake-active, body.intake-active { background: #4A878C; }
   .editor-inspector { position: static; max-height: none; }
 }
 
+/* Modal + meal picker */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(12, 43, 73, 0.45);
+  display: flex; align-items: center; justify-content: center;
+  padding: 1rem;
+}
+.modal-card {
+  background: var(--card, #fff);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+  width: 100%; max-width: 560px;
+  max-height: 85vh; display: flex; flex-direction: column;
+}
+.meal-picker-list { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
+.meal-picker-item {
+  text-align: start; width: 100%;
+  background: var(--bg, #f4f6f9);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 0.55rem 0.7rem; cursor: pointer;
+}
+.meal-picker-item:hover { border-color: var(--teal); background: #eef5f5; }
+
 @media (max-width: 800px) {
   .shell { flex-direction: column; }
   .sidebar { width: 100%; height: auto; position: static; flex-direction: row; align-items: center; flex-wrap: wrap; }

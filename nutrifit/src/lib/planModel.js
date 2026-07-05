@@ -83,6 +83,60 @@ export function duplicateOption(opt) {
   return JSON.parse(JSON.stringify({ ...opt, id: newId() }))
 }
 
+// Fraction of the daily calories each meal slot carries (matches how the FIT
+// API splits a plan: breakfast 25%, lunch 30%, dinner 25%, snack 10%/option).
+export const MEAL_KCAL_RATIO = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
+
+// Per-meal calorie target derived from the daily total (fallback when a meal
+// has no API-provided targetKcal, e.g. a manually-built plan).
+export function mealTargetKcal(slot, dailyKcal) {
+  const r = MEAL_KCAL_RATIO[slot]
+  return dailyKcal && r ? Math.round(dailyKcal * r) : 0
+}
+
+// Scale an option's ingredient quantities + macros so it hits targetKcal,
+// exactly like the API does (factor = targetKcal / baseKcal). Returns a copy;
+// leaves the option untouched if it can't be scaled (no base kcal / no target).
+export function scaleOptionToKcal(option, targetKcal) {
+  const base = option.kcal
+  if (!targetKcal || !base || base <= 0) return option
+  const f = targetKcal / base
+  const sc = (v) => (v == null ? null : Math.round(v * f))
+  return {
+    ...option,
+    ingredients: (option.ingredients || []).map((i) => ({ ...i, grams: Math.round((i.grams || 0) * f) })),
+    macros: {
+      protein: sc(option.macros?.protein),
+      carbs: sc(option.macros?.carbs),
+      fats: sc(option.macros?.fats),
+    },
+    kcal: Math.round(targetKcal),
+  }
+}
+
+// Build a fully-populated plan option from a mealCatalog.json entry.
+export function optionFromCatalog(entry) {
+  return {
+    id: newId(),
+    name_en: entry.name_en || '',
+    name_ar: entry.name_ar || '',
+    desc_en: entry.desc_en || '',
+    desc_ar: entry.desc_ar || '',
+    ingredients: (entry.ingredients || []).map((ing) => ({
+      name_en: ing.name_en || '',
+      name_ar: ing.name_ar || '',
+      grams: ing.grams ?? 0,
+      uom: ing.uom || 'g',
+    })),
+    macros: {
+      protein: entry.macros?.protein ?? null,
+      carbs: entry.macros?.carbs ?? null,
+      fats: entry.macros?.fats ?? null,
+    },
+    kcal: Math.round(entry.kcal || 0),
+  }
+}
+
 /**
  * Build the editable plan model from the raw /v3/generate response plus
  * questionnaire context.
@@ -90,7 +144,10 @@ export function duplicateOption(opt) {
 export function buildPlanModel(apiResponse, ctx = {}) {
   const foodData = apiResponse.foodDishByCategoryMap || {}
   const hasBreakfast = foodData.Breakfast && Object.keys(foodData.Breakfast).length > 0
-  const isIF = !hasBreakfast
+  // Plan style is known from the request (ctx.isIF); only fall back to inferring
+  // it from an empty breakfast when it wasn't provided — otherwise a keto plan
+  // that returns no breakfast dishes would be mistaken for intermittent fasting.
+  const isIF = ctx.isIF != null ? ctx.isIF : !hasBreakfast
 
   const meals = MEAL_DEFS
     .filter((m) => !(isIF && m.id === 'breakfast'))

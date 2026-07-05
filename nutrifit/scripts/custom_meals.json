@@ -1,0 +1,467 @@
+[
+  {
+    "id": "keto_salmon_asparagus",
+    "name_en": "Grilled Salmon with Asparagus",
+    "name_ar": "سلمون مشوي مع الهليون",
+    "desc_en": "Grilled salmon fillet served with buttered asparagus.",
+    "desc_ar": "شريحة سلمون مشوية مقدمة مع الهليون بالزبدة.",
+    "categories": [
+      "lunch",
+      "dinner"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Pescatarian"
+    ],
+    "kcal": 490,
+    "servingGrams": 325,
+    "ingredientCount": 4,
+    "macros": {
+      "protein": 40,
+      "carbs": 6,
+      "fats": 34
+    },
+    "ingredients": [
+      {
+        "name_en": "Salmon",
+        "name_ar": "سلمون",
+        "grams": 180,
+        "uom": "g"
+      },
+      {
+        "name_en": "Asparagus Greens, cooked",
+        "name_ar": "هليون مطبوخ",
+        "grams": 120,
+        "uom": "g"
+      },
+      {
+        "name_en": "Oil, olive",
+        "name_ar": "زيت الزيتون",
+        "grams": 15,
+        "uom": "g"
+      },
+      {
+        "name_en": "Butter",
+        "name_ar": "زبدة",
+        "grams": 10,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_chicken_thighs_broccoli",
+    "name_en": "Baked Chicken Thighs with Broccoli",
+    "name_ar": "أفخاذ دجاج بالفرن مع البروكلي",
+    "desc_en": "Roasted chicken thighs served with olive-oil broccoli.",
+    "desc_ar": "أفخاذ دجاج محمّرة مقدمة مع البروكلي بزيت الزيتون.",
+    "categories": [
+      "lunch",
+      "dinner"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal"
+    ],
+    "kcal": 450,
+    "servingGrams": 365,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 38,
+      "carbs": 8,
+      "fats": 30
+    },
+    "ingredients": [
+      {
+        "name_en": "Chicken thigh, without skin, cooked/grilled",
+        "name_ar": "فخذ الدجاج بدون جلد مطبوخ/مشوي",
+        "grams": 200,
+        "uom": "g"
+      },
+      {
+        "name_en": "Broccoli Cooked",
+        "name_ar": "بروكلي مطبوخ",
+        "grams": 150,
+        "uom": "g"
+      },
+      {
+        "name_en": "Oil, olive",
+        "name_ar": "زيت الزيتون",
+        "grams": 15,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_beef_steak_mushrooms",
+    "name_en": "Beef Steak with Sautéed Mushrooms",
+    "name_ar": "شريحة لحم مع الفطر المقلي",
+    "desc_en": "Pan-seared beef steak topped with butter-sautéed mushrooms.",
+    "desc_ar": "شريحة لحم مشوية بالمقلاة مع فطر مقلي بالزبدة.",
+    "categories": [
+      "lunch",
+      "dinner"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal"
+    ],
+    "kcal": 540,
+    "servingGrams": 315,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 46,
+      "carbs": 5,
+      "fats": 38
+    },
+    "ingredients": [
+      {
+        "name_en": "Beef strips",
+        "name_ar": "شرائح اللحم البقري",
+        "grams": 200,
+        "uom": "g"
+      },
+      {
+        "name_en": "Mushrooms Cooked",
+        "name_ar": "فطر مطبوخ",
+        "grams": 100,
+        "uom": "g"
+      },
+      {
+        "name_en": "Butter",
+        "name_ar": "زبدة",
+        "grams": 15,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_shrimp_avocado_salad",
+    "name_en": "Shrimp and Avocado Salad",
+    "name_ar": "سلطة الروبيان والأفوكادو",
+    "desc_en": "Grilled shrimp with avocado and greens in olive oil.",
+    "desc_ar": "روبيان مشوي مع الأفوكادو والخضار الورقية بزيت الزيتون.",
+    "categories": [
+      "lunch",
+      "dinner"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Pescatarian"
+    ],
+    "kcal": 440,
+    "servingGrams": 325,
+    "ingredientCount": 4,
+    "macros": {
+      "protein": 30,
+      "carbs": 9,
+      "fats": 32
+    },
+    "ingredients": [
+      {
+        "name_en": "Shellfish Shrimps, grilled",
+        "name_ar": "روبيان مشوي",
+        "grams": 150,
+        "uom": "g"
+      },
+      {
+        "name_en": "Avocado",
+        "name_ar": "أفوكادو",
+        "grams": 100,
+        "uom": "g"
+      },
+      {
+        "name_en": "Salad Greens and lettuce",
+        "name_ar": "خضار الخس والسلطة",
+        "grams": 60,
+        "uom": "g"
+      },
+      {
+        "name_en": "Oil, olive",
+        "name_ar": "زيت الزيتون",
+        "grams": 15,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_cauliflower_chicken_rice",
+    "name_en": "Chicken Cauliflower Fried Rice",
+    "name_ar": "أرز القرنبيط المقلي بالدجاج",
+    "desc_en": "Cauliflower rice stir-fried with chicken and egg in sesame oil.",
+    "desc_ar": "أرز القرنبيط مقلي مع الدجاج والبيض بزيت السمسم.",
+    "categories": [
+      "lunch",
+      "dinner"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal"
+    ],
+    "kcal": 380,
+    "servingGrams": 360,
+    "ingredientCount": 4,
+    "macros": {
+      "protein": 38,
+      "carbs": 10,
+      "fats": 20
+    },
+    "ingredients": [
+      {
+        "name_en": "Chicken Breast, without skin, cooked/grilled",
+        "name_ar": "صدر الدجاج بدون جلد مطبوخ/مشوي",
+        "grams": 150,
+        "uom": "g"
+      },
+      {
+        "name_en": "Cauliflower",
+        "name_ar": "قرنبيط",
+        "grams": 150,
+        "uom": "g"
+      },
+      {
+        "name_en": "Egg, whole, boiled",
+        "name_ar": "بيض مسلوق",
+        "grams": 50,
+        "uom": "g"
+      },
+      {
+        "name_en": "Sesame Oil",
+        "name_ar": "زيت السمسم",
+        "grams": 10,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_avocado_baked_eggs",
+    "name_en": "Avocado Baked Eggs",
+    "name_ar": "بيض مخبوز بالأفوكادو",
+    "desc_en": "Avocado halves baked with eggs and cheddar cheese.",
+    "desc_ar": "أنصاف أفوكادو مخبوزة مع البيض وجبنة الشيدر.",
+    "categories": [
+      "breakfast"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Vegetarian",
+      "Kosher"
+    ],
+    "kcal": 360,
+    "servingGrams": 240,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 16,
+      "carbs": 7,
+      "fats": 30
+    },
+    "ingredients": [
+      {
+        "name_en": "Avocado",
+        "name_ar": "أفوكادو",
+        "grams": 120,
+        "uom": "g"
+      },
+      {
+        "name_en": "Egg, whole, boiled",
+        "name_ar": "بيض مسلوق",
+        "grams": 100,
+        "uom": "g"
+      },
+      {
+        "name_en": "Cheddar",
+        "name_ar": "جبنة شيدر",
+        "grams": 20,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_cream_cheese_pancakes",
+    "name_en": "Keto Cream Cheese Pancakes",
+    "name_ar": "بان كيك كيتو بالجبنة الكريمية",
+    "desc_en": "Low-carb pancakes made with egg, cream cheese and almond flour.",
+    "desc_ar": "بان كيك قليل الكربوهيدرات من البيض والجبنة الكريمية ودقيق اللوز.",
+    "categories": [
+      "breakfast"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Vegetarian"
+    ],
+    "kcal": 360,
+    "servingGrams": 180,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 18,
+      "carbs": 6,
+      "fats": 28
+    },
+    "ingredients": [
+      {
+        "name_en": "Egg, whole, boiled",
+        "name_ar": "بيض مسلوق",
+        "grams": 100,
+        "uom": "g"
+      },
+      {
+        "name_en": "Cream Cheese (Light)",
+        "name_ar": "جبنة كريمية (لايت)",
+        "grams": 60,
+        "uom": "g"
+      },
+      {
+        "name_en": "Almond Flour",
+        "name_ar": "دقيق اللوز",
+        "grams": 20,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_cheese_olives_plate",
+    "name_en": "Cheese and Olives Plate",
+    "name_ar": "طبق الجبن والزيتون",
+    "desc_en": "Cheddar cheese with green olives and almonds.",
+    "desc_ar": "جبنة شيدر مع الزيتون الأخضر واللوز.",
+    "categories": [
+      "snack"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Vegetarian",
+      "Kosher"
+    ],
+    "kcal": 290,
+    "servingGrams": 85,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 12,
+      "carbs": 4,
+      "fats": 24
+    },
+    "ingredients": [
+      {
+        "name_en": "Cheddar",
+        "name_ar": "جبنة شيدر",
+        "grams": 40,
+        "uom": "g"
+      },
+      {
+        "name_en": "Olives, black or green",
+        "name_ar": "زيتون أسود أو أخضر",
+        "grams": 30,
+        "uom": "g"
+      },
+      {
+        "name_en": "Almonds",
+        "name_ar": "لوز",
+        "grams": 15,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_tuna_egg_salad",
+    "name_en": "Tuna Egg Salad",
+    "name_ar": "سلطة التونة والبيض",
+    "desc_en": "Tuna mixed with boiled egg and mayonnaise.",
+    "desc_ar": "تونة ممزوجة مع البيض المسلوق والمايونيز.",
+    "categories": [
+      "snack",
+      "lunch"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Pescatarian"
+    ],
+    "kcal": 300,
+    "servingGrams": 170,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 28,
+      "carbs": 2,
+      "fats": 20
+    },
+    "ingredients": [
+      {
+        "name_en": "Fish, Tuna, Canned in water, drained",
+        "name_ar": "تونة معلبة بالماء مصفاة",
+        "grams": 100,
+        "uom": "g"
+      },
+      {
+        "name_en": "Egg, whole, boiled",
+        "name_ar": "بيض مسلوق",
+        "grams": 50,
+        "uom": "g"
+      },
+      {
+        "name_en": "Mayonnaise, Reduced-fat",
+        "name_ar": "مايونيز منخفض الدهون",
+        "grams": 20,
+        "uom": "g"
+      }
+    ]
+  },
+  {
+    "id": "keto_almond_fat_bombs",
+    "name_en": "Almond Coconut Fat Bombs",
+    "name_ar": "كرات الدهون باللوز وجوز الهند",
+    "desc_en": "No-bake bites of almond butter, coconut oil and cocoa.",
+    "desc_ar": "لقيمات غير مخبوزة من زبدة اللوز وزيت جوز الهند والكاكاو.",
+    "categories": [
+      "snack"
+    ],
+    "diets": [
+      "Keto",
+      "Omnivore",
+      "Halal",
+      "Vegetarian",
+      "Vegan",
+      "Kosher"
+    ],
+    "kcal": 270,
+    "servingGrams": 40,
+    "ingredientCount": 3,
+    "macros": {
+      "protein": 5,
+      "carbs": 4,
+      "fats": 26
+    },
+    "ingredients": [
+      {
+        "name_en": "Almond butter",
+        "name_ar": "زبدة اللوز",
+        "grams": 20,
+        "uom": "g"
+      },
+      {
+        "name_en": "Coconut Oil",
+        "name_ar": "زيت جوز الهند",
+        "grams": 15,
+        "uom": "g"
+      },
+      {
+        "name_en": "Cocoa",
+        "name_ar": "كاكاو",
+        "grams": 5,
+        "uom": "g"
+      }
+    ]
+  }
+]

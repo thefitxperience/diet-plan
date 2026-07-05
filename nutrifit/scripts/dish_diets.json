@@ -1,0 +1,542 @@
+{
+"Egg and Spinach Plate": [
+"Halal",
+"Keto",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Banana Almond Smoothie": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Chia Pudding with Almond Milk": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Foul Medames with Pita": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Halloumi Wrap": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Fat-Free Greek Yogurt with Berries": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Cottage Cheese with Apple and Honey": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Vegetable and Lentil Soup": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Chicken Noodle Soup": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Vegetable Omelette": [
+"Halal",
+"Keto",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Falafel Sandwich": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Chicken Avocado Sandwich": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Lamb Mandi": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Lentil Patties with Vegetables": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Falafel Plate with Vegetables": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Grilled Steak with Sweet Potato": [
+"Halal",
+"Omnivore"
+],
+"Baked Eggplant with Tomato and Feta": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Boiled Eggs with Avocado and Vegetables": [
+"Halal",
+"Keto",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Shakshuka": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Caprese Sandwich": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Salmon with Quinoa and Vegetables": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Fresh Fruit Cup with Greek Yogurt and Almonds": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Yogurt Granola Cup": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Vegetarian"
+],
+"Dates with Almonds": [
+"Halal",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Greek Yogurt with Oats and Berries": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Greek Yogurt with Honey and Walnuts": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Turkey Avocado Toast": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Grilled Halloumi Plate": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Scrambled Eggs with Toast": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Low-Fat Berry Oatmeal": [
+"Halal",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Turkey Egg Plate": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Chicken and Quinoa Salad": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Lemon Herb Chicken with Rice & Vegetables": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Tofu Curry with Rice": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Quinoa Vegetable Bowl": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Lentil Soup": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Chicken Saleeg": [
+"Halal",
+"Omnivore"
+],
+"Chicken Kabsa": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Lebanese Tabbouleh": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Chicken Shawarma Bowl": [
+"Halal",
+"Omnivore"
+],
+"Chicken Pesto Pasta": [
+"Halal",
+"Omnivore"
+],
+"Protein Pancakes with Berries": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Protein Shake with Banana": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Hummus with Carrot Sticks": [
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Cottage Cheese with Strawberries": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Labneh with Olive Oil and Pita": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Tofu Vegetable Stir Fry": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Grilled Vegetable Wrap": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Lebanese Fattoush with Chickpeas": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Tuna Lettuce Wraps": [
+"Halal",
+"Keto",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Mediterranean Chicken Salad": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Chicken Burrito Bowl": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Steak and Arugula Salad": [
+"Halal",
+"Omnivore"
+],
+"Cabbage Stir Fry with Tofu": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Vegetable Curry with Rice": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Mixed Nuts Snack": [
+"Halal",
+"Keto",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Apple with Peanut Butter": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Cucumber Yogurt Dip": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Peanut Butter Banana Oatmeal": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Egg Salad Sandwich": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Egg-White Veggie Scramble": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"Chicken Caesar Wrap": [
+"Halal",
+"Omnivore"
+],
+"Grilled Chicken Lettuce Cups": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Lentil and Vegetable Stew": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Beef and Vegetable Stir Fry with Rice": [
+"Halal",
+"Omnivore"
+],
+"Beef Taco Bowl": [
+"Halal",
+"Omnivore"
+],
+"Vegetable Pasta with Tomato Sauce": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Tuna Pasta Salad": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Hummus with Whole Wheat Pita": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Avocado Toast with Tomato": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Baked Salmon with Potatoes": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Turkey Avocado Sandwich": [
+"Kosher",
+"Omnivore"
+],
+"Shrimp Tacos": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Grilled Chicken with Rice and Vegetables": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Rice Cakes with Peanut Butter": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Beef and Potato Bowl": [
+"Halal",
+"Kosher",
+"Omnivore"
+],
+"Chickpea and Vegetable Bowl": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Celery Sticks with Peanut Butter": [
+"Halal",
+"Keto",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"Jareesh with Chicken": [
+"Halal",
+"Omnivore"
+],
+"Chicken Teriyaki with Rice": [
+"Halal",
+"Omnivore"
+],
+"Tuna Avocado Wrap": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"Cottage Cheese with Nuts": [
+"Keto"
+],
+"Greek Yogurt Bowl": [
+"Keto"
+],
+"Chicken Zucchini Skillet": [
+"Keto"
+]
+}

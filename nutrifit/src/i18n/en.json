@@ -235,6 +235,12 @@
   "editor.arabic": "Arabic",
   "editor.clickToEdit": "Click any meal option on the page to edit it",
   "editor.rejectionComment": "Gym comment",
+  "editor.pickMealFor": "Add a meal to {meal}",
+  "editor.searchMeals": "Search meals…",
+  "editor.blankOption": "Blank option (enter manually)",
+  "editor.noMealsFound": "No meals match your search",
+  "editor.ingredientsCount": "{count} ingredients",
+  "editor.autoAdjusted": "adjusted for restrictions",
 
   "meal.breakfast": "Breakfast",
   "meal.lunch": "Lunch",

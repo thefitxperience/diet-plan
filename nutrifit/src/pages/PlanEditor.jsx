@@ -9,8 +9,12 @@ import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../components/ui'
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
-  blankOption, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
+  kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
 } from '../lib/planModel'
+import { canonicalTokens, processOption } from '../lib/dietaryRules'
+import mealCatalog from '../data/mealCatalog.json'
+import { arDigits } from '../lib/digits'
 import { generateSafePlan } from '../lib/planGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 
@@ -25,6 +29,7 @@ export default function PlanEditor() {
   const [plan, setPlan] = useState(null)
   const [dirty, setDirty] = useState(false)
   const [selection, setSelection] = useState(null) // { mealId, optionId }
+  const [picker, setPicker] = useState(null) // mealId currently choosing a meal for
   const [previewLang, setPreviewLang] = useState('en')
   const [busy, setBusy] = useState(null) // 'save' | 'submit' | 'regen' | 'pdf'
   const [notice, setNotice] = useState(null)
@@ -92,6 +97,17 @@ export default function PlanEditor() {
       const opt = meal?.options.find((o) => o.id === selection.optionId)
       if (opt) fn(opt, meal)
     })
+  }
+
+  // Add an option to a meal — a fully-built option (safe-swapped catalog dish),
+  // or a blank one for manual entry.
+  function addOption(mealId, option) {
+    mutate((p) => {
+      const m = p.meals.find((x) => x.id === mealId)
+      if (!m || m.options.length >= MAX_OPTIONS_PER_MEAL) return
+      m.options.push(option || blankOption())
+    })
+    setPicker(null)
   }
 
   async function saveDraft() {
@@ -249,11 +265,7 @@ export default function PlanEditor() {
                     })} />
                   <button className="btn ghost sm"
                     disabled={meal.options.length >= MAX_OPTIONS_PER_MEAL}
-                    onClick={() => mutate((p) => {
-                      const m = p.meals.find((x) => x.id === meal.id)
-                      const opt = blankOption()
-                      m.options.push(opt)
-                    })}>
+                    onClick={() => setPicker(meal.id)}>
                     + {t('editor.addOption')}
                   </button>
                 </div>
@@ -276,6 +288,96 @@ export default function PlanEditor() {
               setSelection={setSelection}
             />
           )}
+        </div>
+      </div>
+
+      {picker && (
+        <MealPicker
+          mealLabel={t(`meal.${picker}`)}
+          slot={picker}
+          diet={row.questionnaire?.dietaryTypeId || ''}
+          targetKcal={plan.meals.find((m) => m.id === picker)?.targetKcal || mealTargetKcal(picker, plan.header?.dailyKcal)}
+          used={new Set(plan.meals.flatMap((m) => m.options.map((o) => (o.name_en || '').trim().toLowerCase())))}
+          allergyNames={row.questionnaire?.allergyNames || []}
+          conditionNames={row.questionnaire?.conditionNames || []}
+          onPick={(opt) => addOption(picker, opt)}
+          onBlank={() => addOption(picker, null)}
+          onClose={() => setPicker(null)}
+        />
+      )}
+    </div>
+  )
+}
+
+// Searchable catalog of the gym's real meals (src/data/mealCatalog.json).
+// Picking one inserts a fully-populated option; "blank" starts a manual one.
+function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, onPick, onBlank, onClose }) {
+  const { t, lang } = useI18n() // follow the site language, not the plan-preview toggle
+  const [q, setQ] = useState('')
+  const query = q.trim().toLowerCase()
+
+  // Vet every catalog meal against the client's conditions/allergies: build the
+  // option, scale its quantities/macros to this meal's calorie target (like the
+  // API does), apply safe ingredient swaps, and drop any dish that still has an
+  // unsuitable ingredient with no safe alternative. `opt` is the final result.
+  const vetted = useMemo(() => {
+    const tokens = canonicalTokens([...(allergyNames || []), ...(conditionNames || [])])
+    return mealCatalog.map((entry) => {
+      const opt = scaleOptionToKcal(optionFromCatalog(entry), targetKcal)
+      const { swaps, conflicts } = tokens.size ? processOption(opt, tokens) : { swaps: [], conflicts: [] }
+      return { entry, opt, swaps, safe: conflicts.length === 0 }
+    })
+  }, [allergyNames, conditionNames, targetKcal])
+
+  // Show only meals valid for this slot AND the client's dietary type (empty
+  // categories/diets = allowed anywhere, until harvested); hide unfixable meals
+  // and ones already in the plan.
+  const available = vetted.filter((v) =>
+    v.safe &&
+    !used?.has((v.entry.name_en || '').trim().toLowerCase()) &&
+    (!v.entry.categories?.length || v.entry.categories.includes(slot)) &&
+    (!diet || !v.entry.diets?.length || v.entry.diets.includes(diet)))
+  const results = query
+    ? available.filter(({ entry }) =>
+        entry.name_en.toLowerCase().includes(query) || (entry.name_ar || '').includes(q.trim()))
+    : available
+  const g = (v) => `${arDigits(v, lang)}${lang === 'ar' ? ' غرام' : 'g'}`
+  const macroLine = (mac) => [
+    mac.protein != null && `${t('editor.protein')} ${g(mac.protein)}`,
+    mac.carbs != null && `${t('editor.carbs')} ${g(mac.carbs)}`,
+    mac.fats != null && `${t('editor.fats')} ${g(mac.fats)}`,
+  ].filter(Boolean).join(' · ')
+
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card meal-picker" onClick={(e) => e.stopPropagation()}>
+        <div className="row between" style={{ marginBottom: '0.75rem' }}>
+          <h2 style={{ margin: 0 }}>{t('editor.pickMealFor', { meal: mealLabel })}</h2>
+          <button className="btn ghost sm" onClick={onClose}>✕</button>
+        </div>
+        <input type="text" autoFocus placeholder={t('editor.searchMeals')}
+          value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: '0.75rem' }} />
+        <button className="btn secondary sm" onClick={onBlank} style={{ marginBottom: '0.75rem' }}>
+          + {t('editor.blankOption')}
+        </button>
+        <div className="meal-picker-list">
+          {results.length === 0 && <div className="muted small">{t('editor.noMealsFound')}</div>}
+          {results.map(({ entry: m, opt, swaps }) => {
+            const name = lang === 'ar' && m.name_ar ? m.name_ar : m.name_en
+            return (
+              <button key={m.id} className="meal-picker-item" onClick={() => onPick(opt)}>
+                <div className="row between">
+                  <b>{name}</b>
+                  <span className="muted small">{arDigits(opt.kcal, lang)} {lang === 'ar' ? 'كيلو سعرة' : 'kcal'}</span>
+                </div>
+                <div className="muted small">
+                  {t('editor.ingredientsCount', { count: arDigits(m.ingredientCount, lang) })}
+                  {macroLine(opt.macros) ? ` · ${macroLine(opt.macros)}` : ''}
+                  {swaps.length > 0 && <span> · {t('editor.autoAdjusted')}</span>}
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

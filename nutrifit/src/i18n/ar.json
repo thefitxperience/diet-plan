@@ -234,6 +234,12 @@
   "editor.arabic": "العربية",
   "editor.clickToEdit": "انقر أي خيار وجبة في الصفحة لتعديله",
   "editor.rejectionComment": "ملاحظة النادي",
+  "editor.pickMealFor": "أضف وجبة إلى {meal}",
+  "editor.searchMeals": "ابحث عن وجبة…",
+  "editor.blankOption": "خيار فارغ (إدخال يدوي)",
+  "editor.noMealsFound": "لا توجد وجبات تطابق بحثك",
+  "editor.ingredientsCount": "{count} مكوّنات",
+  "editor.autoAdjusted": "مُعدّلة حسب القيود الغذائية",
 
   "meal.breakfast": "الفطور",
   "meal.lunch": "الغداء",
