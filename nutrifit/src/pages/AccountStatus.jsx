@@ -9,6 +9,7 @@ export default function AccountStatus({ status }) {
 
   return (
     <div className="login-wrap">
+      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/background.png)` }} />
       <div className="login-card" style={{ textAlign: 'center' }}>
         <h1>{t('app.name')}</h1>
         <div style={{ fontSize: '2.5rem', margin: '0.5rem 0' }}>{rejected ? '⛔' : '⏳'}</div>

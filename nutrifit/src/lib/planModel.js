@@ -52,7 +52,10 @@ function normalizeOption(item) {
   }
 }
 
-// Flatten the nested group/classification map into ≤7 options (demo behavior).
+// Flatten the nested group/classification map into a flat option list.
+// We keep ALL options the API returned (not just the first 7) so the dietary
+// rules can drop unsuitable dishes and backfill from the remaining safe ones;
+// the final ≤7 cap is applied after that selection (see dietaryRules.js).
 function flattenMeal(mealData) {
   const options = []
   if (!mealData) return options
@@ -60,10 +63,7 @@ function flattenMeal(mealData) {
     for (const classification of Object.keys(mealData[groupId] || {})) {
       const items = mealData[groupId][classification]
       if (!Array.isArray(items)) continue
-      for (const item of items) {
-        if (options.length >= MAX_OPTIONS_PER_MEAL) return options
-        options.push(normalizeOption(item))
-      }
+      for (const item of items) options.push(normalizeOption(item))
     }
   }
   return options

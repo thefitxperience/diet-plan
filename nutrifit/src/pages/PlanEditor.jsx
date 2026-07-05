@@ -9,11 +9,9 @@ import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge } from '../components/ui'
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
-  blankOption, duplicateOption, kcalWarning, allergenWarnings,
-  autofillArabic, MAX_OPTIONS_PER_MEAL,
+  blankOption, duplicateOption, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
 } from '../lib/planModel'
-import { generatePlan } from '../lib/fitApi'
-import { buildPlanModel } from '../lib/planModel'
+import { generateSafePlan } from '../lib/planGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 
 const EDITABLE = ['DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED']
@@ -139,14 +137,22 @@ export default function PlanEditor() {
     try {
       // strip UI-only fields stored alongside the API payload
       const { goal, planStyle, allergyNames, conditionNames, ...q } = row.questionnaire
-      const apiResponse = await generatePlan(q)
-      const model = autofillArabic(buildPlanModel(apiResponse, {
+      // Never send restrictions to the API — its filter corrupts the plan
+      // (0 g quantities, dropped ingredients). generateSafePlan applies them
+      // itself and backfills replaced dishes from extra API calls.
+      q.conditionIdSet = []
+      q.allergyIdSet = []
+      const { plan: model, apiResponse, substitutions } = await generateSafePlan(q, {
+        allergyNames: row.questionnaire?.allergyNames || [],
+        conditionNames: row.questionnaire?.conditionNames || [],
+      }, {
         fullName: plan.header.fullName,
         dob: plan.header.dob,
         dailyKcal: q.kilocalorieNeeded,
         goalText: plan.header.dietType,
-      }))
+      })
       model.header.nextCheckup = plan.header.nextCheckup
+      model.dietary = { substitutions } // silent audit trail
       const { error: e } = await supabase.from('plans')
         .update({ plan_data: model, api_response: apiResponse }).eq('id', id)
       if (e) throw e
@@ -205,6 +211,7 @@ export default function PlanEditor() {
           {t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy })}
         </Alert>
       ))}
+
 
       <div className="editor-shell">
         {/* thumbnails */}

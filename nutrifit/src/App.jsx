@@ -1,4 +1,5 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import { useAuth } from './auth/AuthProvider'
 import { Loading, Alert } from './components/ui'
 import Layout from './components/Layout'
@@ -30,6 +31,18 @@ function RequireRole({ roles, children }) {
 
 export default function App() {
   const { session, profile, loading, profileError, needsOnboarding, status, signOut } = useAuth()
+  const navigate = useNavigate()
+
+  // Always land on the dashboard on sign-in. Keyed on the user id going
+  // falsy→truthy, which fires on login and on a refresh that restores the
+  // session, but NOT on tab-refocus (AuthProvider preserves the session ref
+  // there, so the id is unchanged and in-progress screens survive a refocus).
+  const userId = session?.user?.id
+  const prevUserId = useRef(userId)
+  useEffect(() => {
+    if (!prevUserId.current && userId) navigate('/', { replace: true })
+    prevUserId.current = userId
+  }, [userId, navigate])
 
   if (loading) return <Loading />
   if (!session) return <Login />

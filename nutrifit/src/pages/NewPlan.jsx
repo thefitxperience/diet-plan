@@ -9,11 +9,11 @@ import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner } from '../components/ui'
 import {
-  fetchLookups, generatePlan, activityDisplayName, sortActivities, activityMultiplier,
+  fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
-import { buildPlanModel, autofillArabic } from '../lib/planModel'
+import { generateSafePlan } from '../lib/planGenerator'
 
 export default function NewPlan() {
   const { id: clientId } = useParams()
@@ -122,22 +122,31 @@ export default function NewPlan() {
         bmr: String(form.bmr || '0'),
         lbm: String(form.lbm || '0'),
         kilocalorieNeeded: parseFloat(form.calories) || 0,
-        conditionIdSet: form.noConditions ? [] : form.conditionIds,
+        // Restrictions are intentionally NOT sent to the API. Its own filtering
+        // corrupts the plan — it deletes offending ingredients (leaving
+        // incoherent dishes), zeroes serving sizes to 0 g, and reshuffles whole
+        // meals. We generate an unrestricted, coherent plan and apply targeted
+        // 1:1 substitutions ourselves below (see lib/dietaryRules.js), which
+        // preserves dishes and quantities.
+        conditionIdSet: [],
         conditionNote: '',
-        allergyIdSet: form.noAllergies ? [] : form.allergyIds,
+        allergyIdSet: [],
       }
 
-      const apiResponse = await generatePlan(payload)
+      const selectedConditionIds = form.noConditions ? [] : form.conditionIds
+      const selectedAllergyIds = form.noAllergies ? [] : form.allergyIds
+      const allergyNames = allergies.filter((a) => selectedAllergyIds.includes(a.allergyId)).map((a) => a.allergyName)
+      const conditionNames = conditions.filter((c) => selectedConditionIds.includes(c.conditionId)).map((c) => c.conditionName)
 
-      const allergyNames = allergies.filter((a) => payload.allergyIdSet.includes(a.allergyId)).map((a) => a.allergyName)
-      const conditionNames = conditions.filter((c) => payload.conditionIdSet.includes(c.conditionId)).map((c) => c.conditionName)
-
-      const planModel = autofillArabic(buildPlanModel(apiResponse, {
-        fullName: `${client.first_name} ${client.last_name}`,
-        dob: client.dob,
-        dailyKcal: payload.kilocalorieNeeded,
-        goalText: GOAL_LABELS[form.goal],
-      }))
+      // Generate a plan that is already safe for the client's restrictions:
+      // unsuitable ingredients are swapped, and un-fixable dishes are replaced
+      // with suitable ones pulled from extra API calls — all invisibly.
+      const { plan: planModel, apiResponse, substitutions } = await generateSafePlan(
+        payload,
+        { allergyNames, conditionNames },
+        { fullName: `${client.first_name} ${client.last_name}`, dob: client.dob, dailyKcal: payload.kilocalorieNeeded, goalText: GOAL_LABELS[form.goal] },
+      )
+      planModel.dietary = { substitutions } // silent audit trail
 
       const { data: plan, error: insErr } = await supabase.from('plans').insert({
         gym_id: profile.gym_id,

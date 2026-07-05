@@ -58,6 +58,7 @@ export default function Onboarding() {
 
   return (
     <div className="login-wrap">
+      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/background.png)` }} />
       <div className="login-card" style={{ maxWidth: 460 }}>
         <h1>{t('onboarding.title')}</h1>
         <p className="muted small" style={{ marginTop: '-0.5rem' }}>{t('onboarding.subtitle')}</p>
