@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
-import { Field, Alert, Loading, Spinner, StatusBadge } from '../components/ui'
+import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../components/ui'
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
   blankOption, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
@@ -29,7 +29,6 @@ export default function PlanEditor() {
   const [busy, setBusy] = useState(null) // 'save' | 'submit' | 'regen' | 'pdf'
   const [notice, setNotice] = useState(null)
   const [error, setError] = useState(null)
-  const [rejection, setRejection] = useState(null)
   const canvasRef = useRef()
   const pageEls = useRef({})
 
@@ -43,12 +42,6 @@ export default function PlanEditor() {
       setPlan(JSON.parse(JSON.stringify(p.plan_data)))
       const { data: g } = await supabase.from('gyms').select('*').eq('id', p.gym_id).maybeSingle()
       setGym(g)
-      if (p.status === 'CHANGES_REQUESTED') {
-        const { data: ev } = await supabase.from('plan_events')
-          .select('comment, created_at').eq('plan_id', id).eq('action', 'rejected')
-          .order('created_at', { ascending: false }).limit(1)
-        if (ev?.length) setRejection(ev[0])
-      }
     })()
   }, [id])
 
@@ -71,6 +64,7 @@ export default function PlanEditor() {
   if (!EDITABLE.includes(row.status)) {
     return (
       <div>
+        <BackButton />
         <Alert kind="info">
           This plan is <StatusBadge status={row.status} /> and locked for editing.{' '}
           <Link to={`/plans/${id}`}>Open the read-only view</Link>.
@@ -178,6 +172,7 @@ export default function PlanEditor() {
     <div className="editor-page">
       <div className="editor-toolbar row between">
         <div className="row">
+          <BackButton />
           <h1 style={{ margin: 0 }}>{t('editor.title')}</h1>
           <StatusBadge status={row.status} />
           {dirty && <span className="muted small">●</span>}
@@ -203,9 +198,6 @@ export default function PlanEditor() {
 
       <Alert kind="error">{error}</Alert>
       <Alert kind="ok">{notice}</Alert>
-      {rejection && (
-        <Alert kind="warn"><b>{t('editor.rejectionComment')}:</b> {rejection.comment}</Alert>
-      )}
       {warnings.allergen.map((w, i) => (
         <Alert kind="warn" key={`a${i}`}>
           {t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy })}

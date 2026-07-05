@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
-import { Field, Alert, Loading, Spinner } from '../components/ui'
+import { Field, Alert, Loading, Spinner, BackButton } from '../components/ui'
 import { extractFromPdf, extractFromImage, parseInBodyText, crossCheckClient } from '../lib/inbodyParser'
 
 const FIELDS = [
@@ -123,7 +123,10 @@ export default function InBodyUpload() {
 
   return (
     <div>
-      <h1>{t('inbody.title')} — {client.first_name} {client.last_name}</h1>
+      <div className="row" style={{ marginBottom: '1rem' }}>
+        <BackButton />
+        <h1 style={{ margin: 0 }}>{t('inbody.title')} — {client.first_name} {client.last_name}</h1>
+      </div>
       <Alert kind="error">{error}</Alert>
 
       {!values && !parsing && (

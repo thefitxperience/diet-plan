@@ -19,7 +19,7 @@ function Stat({ num, label, to }) {
 
 export default function Dashboard() {
   const { t, lang } = useI18n()
-  const { role } = useAuth()
+  const { role, profile } = useAuth()
 
   const { data } = useQuery('dashboard', async () => {
     const [plans, clients, nutritionists, gyms, events] = await Promise.all([
@@ -46,7 +46,7 @@ export default function Dashboard() {
   const inProgress = byStatus(['DRAFT', 'GENERATED', 'IN_REVIEW'])
   const draftGen = byStatus(['DRAFT', 'GENERATED'])
   const inReview = byStatus(['IN_REVIEW'])
-  const returned = byStatus(['CHANGES_REQUESTED'])
+  const awaiting = byStatus(['GENERATED', 'IN_REVIEW'])
   const pending = byStatus(['NUTRITIONIST_APPROVED'])
   const sent = byStatus(['SENT'])
 
@@ -54,10 +54,10 @@ export default function Dashboard() {
     <div>
       <h1>{t('dashboard.title')}</h1>
 
-      <div className="grid stat-grid">
+      <div className={`grid stat-grid ${role === 'nutritionist' ? 'stat-grid-3' : ''}`}>
         {role === 'gym_admin' && (
           <>
-            <Stat num={pending.length} label={t('dashboard.readyToDeliver')} to="/plans" />
+            <Stat num={awaiting.length} label={t('dashboard.awaitingApproval')} to="/plans" />
             <Stat num={data.nutritionistCount} label={t('dashboard.nutritionists')} to="/team" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
             <Stat num={data.plans.length} label={t('dashboard.plansTotal')} />
@@ -66,7 +66,6 @@ export default function Dashboard() {
         {role === 'platform_admin' && (
           <>
             <Stat num={draftGen.length} label={t('dashboard.inProgress')} to="/plans" />
-            <Stat num={returned.length} label={t('dashboard.returned')} to="/plans" />
             <Stat num={pending.length} label={t('dashboard.readyToDeliver')} to="/plans" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
             <Stat num={data.gymCount} label={t('dashboard.totalGyms')} to="/admin/gyms" />
@@ -78,30 +77,11 @@ export default function Dashboard() {
         {role === 'nutritionist' && (
           <>
             <Stat num={inProgress.length} label={t('dashboard.inProgress')} to="/plans" />
-            <Stat num={returned.length} label={t('dashboard.returned')} to="/plans" />
             <Stat num={sent.length} label={t('dashboard.recentlySent')} to="/plans" />
             <Stat num={data.clientCount} label={t('dashboard.clients')} to="/clients" />
           </>
         )}
       </div>
-
-      {returned.length > 0 && role !== 'gym_admin' && (
-        <>
-          <h2>{t('approvals.toFix')}</h2>
-          <table className="data" style={{ marginBottom: '1.75rem' }}>
-            <tbody>
-              {returned.map((p) => (
-                <tr key={p.id}>
-                  <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
-                  <td><StatusBadge status={p.status} /></td>
-                  <td>{fmtDateTime(p.updated_at, lang)}</td>
-                  <td><Link className="btn sm" to={`/plans/${p.id}/edit`}>{t('common.edit')}</Link></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </>
-      )}
 
       {role === 'gym_admin' && pending.length > 0 && (
         <>
@@ -129,10 +109,19 @@ export default function Dashboard() {
           {data.events.map((ev) => {
             const c = ev.plans?.clients
             const clientName = c ? `${c.first_name} ${c.last_name}` : null
+            // Self-service intake events have no actor — phrase them around the client.
+            const isIntake = !ev.actor && ev.action === 'generated'
             return (
               <li key={ev.id}>
-                <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
-                {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                {isIntake ? (
+                  <><b>{clientName || t('event.newClient')}</b> {t('event.intake')}</>
+                ) : (
+                  <>
+                    <b>{ev.actor === profile?.id ? t('event.you') : (ev.profiles?.full_name || '—')}</b>{' '}
+                    {t(`${ev.actor === profile?.id ? 'eventYou' : 'event'}.${ev.action}`)}
+                    {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                  </>
+                )}
                 {role === 'platform_admin' && ev.gyms?.name ? <span className="muted"> ({ev.gyms.name})</span> : ''}
                 {ev.comment && ev.action === 'rejected' && <span className="small"> — “{ev.comment}”</span>}
                 <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>

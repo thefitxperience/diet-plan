@@ -1,25 +1,34 @@
 import { useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
-import { Loading, fmtDate, fmtDateTime } from '../components/ui'
+import { Loading, StatusBadge, BackButton, fmtDate, fmtDateTime } from '../components/ui'
+import { arDigits } from '../lib/digits'
 import { ClientForm } from './Clients'
+
+const INBODY_METRICS = [
+  ['weight', 'inbody.field.weight'], ['height', 'inbody.field.height'], ['bmr', 'inbody.field.bmr'],
+  ['smm', 'inbody.field.smm'], ['fatMass', 'inbody.field.fatMass'], ['lbm', 'inbody.field.lbm'],
+]
 
 export default function ClientProfile() {
   const { id } = useParams()
+  const navigate = useNavigate()
   const { t, lang } = useI18n()
-  const { role } = useAuth()
+  const { role, profile } = useAuth()
   const [client, setClient] = useState(null)
   const [inbody, setInbody] = useState([])
+  const [plans, setPlans] = useState([])
   const [events, setEvents] = useState([])
   const [editing, setEditing] = useState(false)
   const canEdit = role === 'nutritionist' || role === 'platform_admin'
 
   async function load() {
-    const [{ data: c }, { data: ib }, { data: ev }] = await Promise.all([
+    const [{ data: c }, { data: ib }, { data: pl }, { data: ev }] = await Promise.all([
       supabase.from('clients').select('*').eq('id', id).single(),
       supabase.from('inbody_results').select('*').eq('client_id', id).order('created_at', { ascending: false }),
+      supabase.from('plans').select('id, status, version, updated_at').eq('client_id', id).order('created_at', { ascending: false }),
       supabase.from('plan_events')
         .select('*, profiles:actor(full_name), plans!inner(client_id, version)')
         .eq('plans.client_id', id)
@@ -27,6 +36,7 @@ export default function ClientProfile() {
     ])
     setClient(c)
     setInbody(ib || [])
+    setPlans(pl || [])
     setEvents(ev || [])
   }
   useEffect(() => { load() }, [id])
@@ -42,7 +52,10 @@ export default function ClientProfile() {
   return (
     <div>
       <div className="row between" style={{ marginBottom: '1.25rem' }}>
-        <h1 style={{ margin: 0 }}>{client.first_name} {client.last_name}</h1>
+        <div className="row">
+          <BackButton />
+          <h1 style={{ margin: 0 }}>{client.first_name} {client.last_name}</h1>
+        </div>
         {canEdit && (
           <div className="row">
             <Link className="btn secondary" to={`/clients/${id}/inbody`}>{t('clients.uploadInbody')}</Link>
@@ -70,7 +83,56 @@ export default function ClientProfile() {
         </div>
       )}
 
-      <h2>{t('clients.history')}</h2>
+      {inbody.length > 0 && (
+        <>
+          <h2>{t('clients.inbodyResults')}</h2>
+          {inbody.map((r) => {
+            const v = r.confirmed || {}
+            return (
+              <div className="card" key={r.id}>
+                <div className="row between" style={{ alignItems: 'center' }}>
+                  <b>{fmtDate(r.test_date, lang) || fmtDate(r.created_at, lang)}</b>
+                  <span className="muted small">{r.model}</span>
+                </div>
+                <div className="grid cols-4" style={{ marginTop: 8 }}>
+                  {INBODY_METRICS.map(([k, lk]) => (
+                    <div key={k}>
+                      <div className="muted small">{t(lk)}</div>
+                      <b>{v[k] != null && v[k] !== '' ? arDigits(v[k], lang) : '—'}</b>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </>
+      )}
+
+      {plans.length > 0 && (
+        <>
+          <h2>{t('nav.plans')}</h2>
+          <table className="data">
+            <thead>
+              <tr>
+                <th>{t('plans.version')}</th>
+                <th>{t('common.status')}</th>
+                <th>{t('plans.updated')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {plans.map((p) => (
+                <tr key={p.id} className="clickable" onClick={() => navigate(`/plans/${p.id}`)}>
+                  <td>v{arDigits(p.version, lang)}</td>
+                  <td><StatusBadge status={p.status} /></td>
+                  <td>{fmtDateTime(p.updated_at, lang)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </>
+      )}
+
+      <h2 style={{ marginTop: '1rem' }}>{t('clients.history')}</h2>
       {timeline.length === 0 && <div className="card muted">{t('common.none')}</div>}
       <ul className="timeline">
         {timeline.map((item, i) => (
@@ -82,14 +144,20 @@ export default function ClientProfile() {
               </div>
             ) : (
               <div>
-                <b>{item.row.profiles?.full_name || '—'}</b>{' '}
-                {t(`event.${item.row.action}`)}
-                {item.row.action === 'sent' ? ` ${t('event.toClient')}` : ''}
-                {item.row.comment && (
-                  <div className="small" style={{ fontStyle: 'italic' }}>“{item.row.comment}”</div>
+                {(!item.row.actor && item.row.action === 'generated') ? (
+                  <><b>{client.first_name} {client.last_name}</b> {t('event.intake')}</>
+                ) : (
+                  <>
+                    <b>{item.row.actor === profile?.id ? t('event.you') : (item.row.profiles?.full_name || '—')}</b>{' '}
+                    {t(`${item.row.actor === profile?.id ? 'eventYou' : 'event'}.${item.row.action}`)}
+                    {item.row.action === 'sent' ? ` ${t('event.toClient')}` : ''}
+                    {item.row.comment && (
+                      <div className="small" style={{ fontStyle: 'italic' }}>“{item.row.comment}”</div>
+                    )}
+                  </>
                 )}
                 <div className="muted small">
-                  <Link to={`/plans/${item.row.plan_id}`}>{t('plans.title')} v{item.row.plans?.version}</Link>
+                  <Link to={`/plans/${item.row.plan_id}`}>{t('plans.title')} v{arDigits(item.row.plans?.version, lang)}</Link>
                   {' · '}{fmtDateTime(item.at, lang)}
                 </div>
               </div>

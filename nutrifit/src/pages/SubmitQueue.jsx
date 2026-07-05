@@ -1,6 +1,5 @@
-// Nutritionist "Approvals" tab: plans that still need to be submitted for the
-// gym's approval — anything not yet submitted/sent (returned-with-comments
-// shown first since those need action).
+// Nutritionist "Approvals" tab: plans awaiting the nutritionist's approval —
+// anything generated/in-review/draft that hasn't been approved or sent yet.
 
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
@@ -8,7 +7,7 @@ import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
-const TO_SUBMIT = ['CHANGES_REQUESTED', 'IN_REVIEW', 'GENERATED', 'DRAFT']
+const TO_SUBMIT = ['IN_REVIEW', 'GENERATED', 'DRAFT']
 
 export default function SubmitQueue() {
   const { t, lang } = useI18n()
@@ -24,15 +23,10 @@ export default function SubmitQueue() {
 
   if (!plans) return <Loading />
 
-  // returned-with-comments first — those explicitly need the nutritionist to act
-  const ordered = [...plans].sort(
-    (a, b) => (a.status === 'CHANGES_REQUESTED' ? -1 : 0) - (b.status === 'CHANGES_REQUESTED' ? -1 : 0)
-  )
-
   return (
     <div>
       <h1 style={{ marginBottom: '1rem' }}>{t('nav.approvals')}</h1>
-      {ordered.length === 0 ? (
+      {plans.length === 0 ? (
         <div className="card muted">{t('submit.empty')}</div>
       ) : (
         <table className="data">
@@ -45,7 +39,7 @@ export default function SubmitQueue() {
             </tr>
           </thead>
           <tbody>
-            {ordered.map((p) => (
+            {plans.map((p) => (
               <tr key={p.id} className="clickable" onClick={() => navigate(`/plans/${p.id}/edit`)}>
                 <td><b>{p.clients?.first_name} {p.clients?.last_name}</b></td>
                 <td><StatusBadge status={p.status} /></td>

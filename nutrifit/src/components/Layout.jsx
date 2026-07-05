@@ -1,6 +1,12 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
+import { arDigits } from '../lib/digits'
+
+// Plans awaiting the nutritionist's review/approval (matches the Approvals queue).
+const APPROVAL_STATES = ['IN_REVIEW', 'GENERATED', 'DRAFT']
 
 // Role-aware sidebar (plan §3)
 const NAV = {
@@ -30,7 +36,19 @@ const NAV = {
 export default function Layout() {
   const { profile, gym, role, signOut } = useAuth()
   const { t, lang, setLang } = useI18n()
+  const location = useLocation()
   const links = NAV[role] || []
+
+  // Count of plans awaiting approval → red badge on the nutritionist's Approvals tab.
+  const [approvalCount, setApprovalCount] = useState(0)
+  useEffect(() => {
+    if (role !== 'nutritionist') return
+    let cancelled = false
+    supabase.from('plans').select('id', { count: 'exact', head: true })
+      .in('status', APPROVAL_STATES)
+      .then(({ count }) => { if (!cancelled) setApprovalCount(count || 0) })
+    return () => { cancelled = true }
+  }, [role, location.pathname])
 
   return (
     <div className="shell">
@@ -50,6 +68,9 @@ export default function Layout() {
           {links.map(([to, key]) => (
             <NavLink key={to} to={to} end={to === '/'}>
               {t(key)}
+              {to === '/to-submit' && approvalCount > 0 && (
+                <span className="nav-badge">{arDigits(approvalCount, lang)}</span>
+              )}
             </NavLink>
           ))}
         </nav>

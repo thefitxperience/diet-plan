@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
 import GymFilter from '../components/GymFilter'
@@ -7,6 +8,7 @@ import { Loading, fmtDateTime } from '../components/ui'
 
 export default function ActivityLog() {
   const { t, lang } = useI18n()
+  const { profile } = useAuth()
   const [gymFilter, setGymFilter] = useState('')
 
   const { data: events } = useQuery(`activity:${gymFilter || 'all'}`, async () => {
@@ -27,15 +29,28 @@ export default function ActivityLog() {
         <GymFilter value={gymFilter} onChange={setGymFilter} />
       </div>
       <ul className="timeline">
-        {events.map((ev) => (
-          <li key={ev.id}>
-            <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
-            {ev.plans?.clients ? ` ${t('event.for', { name: `${ev.plans.clients.first_name} ${ev.plans.clients.last_name}` })}` : ''}
-            {!gymFilter && ev.gyms?.name ? <span className="muted"> ({ev.gyms.name})</span> : ''}
-            {ev.comment && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
-            <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
-          </li>
-        ))}
+        {events.map((ev) => {
+          const c = ev.plans?.clients
+          const clientName = c ? `${c.first_name} ${c.last_name}` : null
+          const isIntake = !ev.actor && ev.action === 'generated'
+          const you = ev.actor === profile?.id
+          return (
+            <li key={ev.id}>
+              {isIntake ? (
+                <><b>{clientName || t('event.newClient')}</b> {t('event.intake')}</>
+              ) : (
+                <>
+                  <b>{you ? t('event.you') : (ev.profiles?.full_name || '—')}</b>{' '}
+                  {t(`${you ? 'eventYou' : 'event'}.${ev.action}`)}
+                  {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                </>
+              )}
+              {!gymFilter && ev.gyms?.name ? <span className="muted"> ({ev.gyms.name})</span> : ''}
+              {ev.comment && !isIntake && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
+              <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )

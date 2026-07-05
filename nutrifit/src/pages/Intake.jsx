@@ -19,6 +19,7 @@ import {
 import { generateSafePlan } from '../lib/planGenerator'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
+import PhoneField from '../components/PhoneField'
 
 // Mifflin–St Jeor fallback when the InBody sheet has no BMR.
 function estimateBmr({ weight, height, age, gender }) {
@@ -122,7 +123,7 @@ export default function Intake() {
   }
 
   const step2Valid = form.firstName && form.lastName && form.dob && form.gender &&
-    form.phone && form.activityId && form.dietaryTypeId && form.consent
+    (form.phone || '').replace(/\D/g, '').length >= 8 && form.activityId && form.dietaryTypeId && form.consent
 
   async function submit() {
     setSubmitting(true); setError(null)
@@ -286,7 +287,7 @@ export default function Intake() {
                     </select>
                   </Field>
                   <Field label={t('clients.phone')} required>
-                    <input type="tel" value={form.phone} onChange={set('phone')} style={{ direction: 'ltr' }} />
+                    <PhoneField value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
                   </Field>
                   <Field label={t('clients.email')}>
                     <input type="email" value={form.email} onChange={set('email')} />

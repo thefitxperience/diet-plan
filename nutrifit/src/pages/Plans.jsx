@@ -7,7 +7,7 @@ import { useQuery } from '../lib/useQuery'
 import GymFilter from '../components/GymFilter'
 import { Loading, StatusBadge, fmtDateTime } from '../components/ui'
 
-const STATUSES = ['', 'DRAFT', 'GENERATED', 'IN_REVIEW', 'NUTRITIONIST_APPROVED', 'CHANGES_REQUESTED', 'SENT']
+const STATUSES = ['', 'DRAFT', 'GENERATED', 'IN_REVIEW', 'NUTRITIONIST_APPROVED', 'SENT']
 
 export default function Plans() {
   const { t, lang } = useI18n()

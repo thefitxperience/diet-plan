@@ -5,6 +5,7 @@ import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
 import GymFilter from '../components/GymFilter'
+import PhoneField from '../components/PhoneField'
 import { Field, Alert, Loading, fmtDate } from '../components/ui'
 
 export function ClientForm({ initial, onSaved, onCancel }) {
@@ -21,11 +22,6 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   const set = (k) => (e) => {
     setForm({ ...form, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value })
     setErrors((x) => ({ ...x, [k]: false }))
-  }
-  // Phone: keep digits and phone punctuation only — block letters entirely.
-  const setPhone = (e) => {
-    setForm({ ...form, phone: e.target.value.replace(/[^\d+\-\s()]/g, '') })
-    setErrors((x) => ({ ...x, phone: false }))
   }
 
   const today = new Date().toISOString().slice(0, 10)
@@ -90,8 +86,8 @@ export function ClientForm({ initial, onSaved, onCancel }) {
           </select>
         </Field>
         <Field label={t('clients.phone')} required error={errors.phone} hint={errors.phone}>
-          <input type="tel" inputMode="tel" className={errors.phone ? 'invalid' : ''}
-            value={form.phone || ''} onChange={setPhone} />
+          <PhoneField value={form.phone || ''} invalid={!!errors.phone}
+            onChange={(v) => { setForm({ ...form, phone: v }); setErrors((x) => ({ ...x, phone: false })) }} />
         </Field>
         <Field label={`${t('clients.email')} (${t('common.optional')})`} error={errors.email} hint={errors.email}>
           <input type="email" className={errors.email ? 'invalid' : ''} value={form.email || ''} onChange={set('email')} />
@@ -113,7 +109,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
 }
 
 export default function Clients() {
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { role } = useAuth()
   const navigate = useNavigate()
   const [query, setQuery] = useState('')
@@ -176,7 +172,7 @@ export default function Clients() {
               <tr key={c.id} className="clickable" onClick={() => navigate(`/clients/${c.id}`)}>
                 {showGym && <td>{c.gyms?.name || '—'}</td>}
                 <td><b>{c.first_name} {c.last_name}</b></td>
-                <td>{fmtDate(c.dob)}</td>
+                <td>{fmtDate(c.dob, lang)}</td>
                 <td><bdi dir="ltr">{c.phone}</bdi></td>
                 <td>{c.email}</td>
               </tr>

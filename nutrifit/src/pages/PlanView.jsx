@@ -6,13 +6,14 @@ import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
-import { Alert, Loading, Spinner, StatusBadge, fmtDateTime } from '../components/ui'
+import { Alert, Loading, Spinner, StatusBadge, BackButton, fmtDateTime } from '../components/ui'
 import DeepFitTemplate from '../components/DeepFitTemplate'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl, blobToBase64 } from '../lib/delivery'
 
 export function EventLog({ planId, refresh }) {
   const { t, lang } = useI18n()
+  const { profile } = useAuth()
   const [events, setEvents] = useState([])
   useEffect(() => {
     supabase.from('plan_events')
@@ -25,13 +26,18 @@ export function EventLog({ planId, refresh }) {
     <div className="card">
       <h2>{t('dashboard.recentActivity')}</h2>
       <ul className="timeline">
-        {events.map((ev) => (
-          <li key={ev.id}>
-            <b>{ev.profiles?.full_name || '—'}</b> {t(`event.${ev.action}`)}
-            {ev.comment && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
-            <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
-          </li>
-        ))}
+        {events.map((ev) => {
+          const isIntake = !ev.actor && ev.action === 'generated'
+          return (
+            <li key={ev.id}>
+              {isIntake
+                ? <b>{t('event.intakeShort')}</b>
+                : <><b>{ev.actor === profile?.id ? t('event.you') : (ev.profiles?.full_name || '—')}</b> {t(`${ev.actor === profile?.id ? 'eventYou' : 'event'}.${ev.action}`)}</>}
+              {ev.comment && !isIntake && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
+              <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
+            </li>
+          )
+        })}
       </ul>
     </div>
   )
@@ -137,6 +143,7 @@ export default function PlanView() {
     <div>
       <div className="row between" style={{ marginBottom: '1rem' }}>
         <div className="row">
+          <BackButton />
           <h1 style={{ margin: 0 }}>
             {row.plan_data?.header?.fullName} — v{row.version}
           </h1>
