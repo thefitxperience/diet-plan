@@ -14,11 +14,13 @@ import {
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateSafePlan } from '../lib/planGenerator'
+import { restrictionLabel } from '../lib/restrictionNames'
+import { arDigits } from '../lib/digits'
 
 export default function NewPlan() {
   const { id: clientId } = useParams()
   const navigate = useNavigate()
-  const { t } = useI18n()
+  const { t, lang } = useI18n()
   const { profile } = useAuth()
 
   const [client, setClient] = useState(null)
@@ -182,7 +184,7 @@ export default function NewPlan() {
         <div className="step-progress-line" style={{ width: `${((step - 1) / 2) * 100}%` }} />
         {[1, 2, 3].map((n) => (
           <div key={n} className={`step-item ${step === n ? 'active' : ''} ${step > n ? 'completed' : ''}`}>
-            <div className="step-circle">{n}</div>
+            <div className="step-circle">{arDigits(n, lang)}</div>
             <div className="step-label">{t(`wizard.step${n}`)}</div>
           </div>
         ))}
@@ -196,7 +198,7 @@ export default function NewPlan() {
               <select value={form.activityId} onChange={set('activityId')}>
                 <option value="">{t('wizard.selectActivity')}</option>
                 {activities.map((a) => (
-                  <option key={a.enumId} value={a.enumId}>{activityDisplayName(a.description)}</option>
+                  <option key={a.enumId} value={a.enumId}>{activityDisplayName(a.description, lang)}</option>
                 ))}
               </select>
             </Field>
@@ -204,7 +206,7 @@ export default function NewPlan() {
               <select value={form.dietaryTypeId} onChange={set('dietaryTypeId')}>
                 <option value="">{t('wizard.selectDietary')}</option>
                 {(lookups?.dietaryTypes || []).map((d) => (
-                  <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName)}</option>
+                  <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName, lang)}</option>
                 ))}
               </select>
             </Field>
@@ -288,7 +290,7 @@ export default function NewPlan() {
                   <label key={c.conditionId}>
                     <input type="checkbox" checked={form.conditionIds.includes(c.conditionId)}
                       onChange={() => toggleList('conditionIds', c.conditionId, 'noConditions')} />
-                    {c.conditionName}
+                    {restrictionLabel(c.conditionName, lang)}
                   </label>
                 ))}
               </div>
@@ -304,7 +306,7 @@ export default function NewPlan() {
                   <label key={a.allergyId}>
                     <input type="checkbox" checked={form.allergyIds.includes(a.allergyId)}
                       onChange={() => toggleList('allergyIds', a.allergyId, 'noAllergies')} />
-                    {a.allergyName}
+                    {restrictionLabel(a.allergyName, lang)}
                   </label>
                 ))}
               </div>

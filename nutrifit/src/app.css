@@ -166,6 +166,8 @@ label.field .hint { font-weight: 400; color: var(--muted); font-size: 0.78rem; m
 input[type='text'], input[type='number'], input[type='date'], input[type='email'],
 input[type='password'], input[type='tel'], select, textarea {
   width: 100%;
+  min-width: 0;               /* let it shrink inside grid/flex tracks (iOS date fix) */
+  min-height: 2.4rem;         /* uniform height incl. an empty date input */
   padding: 0.55rem 0.7rem;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -179,6 +181,14 @@ input:focus, select:focus, textarea:focus {
   border-color: var(--teal);
 }
 input.invalid { border-color: var(--danger); }
+
+/* iOS renders date inputs with a wide native control that ignores width once a
+   value is set — reset its appearance so it respects the field width. */
+input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
+}
+input[type='date']::-webkit-date-and-time-value { text-align: start; }
 
 /* 3-step progress indicator (ported from fit-demo) */
 .step-progress {
@@ -398,6 +408,44 @@ table.data tr.clickable:hover { background: #f8fafc; }
   z-index: 1;
 }
 .login-card h1 { text-align: center; color: var(--navy); }
+
+/* ── client intake (public mobile page) ── */
+/* The gradient lives on the body itself (fixed), so it bleeds edge-to-edge —
+   iOS Safari then tints the status bar from the top of the gradient (teal) and
+   the toolbar from the bottom (navy), so the bars merge into the background
+   instead of showing as separate white/flat bands. Vertical so top/bottom edges
+   are a clean single colour. */
+/* Solid background (a slightly darker teal than the brand --teal). A single
+   flat colour means the status bar and toolbar match exactly — no seams. */
+html.intake-active, body.intake-active { background: #4A878C; }
+
+.intake-page {
+  position: relative;
+  min-height: 100vh;
+  min-height: 100dvh;               /* full mobile viewport, no cut-off */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;          /* centers the card when it fits */
+  /* extra teal room at the bottom (+ iOS safe area) so the Safari toolbar sits
+     on the background colour, not on the white card, on the taller step 2. */
+  padding: 1.5rem 1rem calc(3.5rem + env(safe-area-inset-bottom, 0px));
+}
+.intake-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 620px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  padding: 1.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+/* 16px inputs stop iOS from auto-zooming when a field is focused */
+.intake-page input, .intake-page select, .intake-page textarea { font-size: 16px; }
+.intake-head { align-items: center; }
+.intake-body { margin-top: 1.4rem; } /* space under the gym name + language button */
+.intake-card h1 { color: var(--navy); margin: 0; text-align: center; }
 
 .input-with-icon { position: relative; }
 .input-with-icon input { padding-inline-end: 2.6rem; }

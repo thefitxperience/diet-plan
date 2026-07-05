@@ -73,9 +73,25 @@ const ACTIVITY_DISPLAY = [
 
 const ACTIVITY_ORDER = ['sedentary', 'light', 'lightly active', 'moderate', 'moderately active', 'very active', 'highly active', 'extra active']
 
-export function activityDisplayName(description) {
+// Arabic for each distinct activity display label.
+const ACTIVITY_AR = {
+  'Peak Performance (Hard exercise, sports, or physically demanding activity 6–7 days per week)':
+    'الأداء الأقصى (تمارين شاقة أو رياضة أو نشاط بدني مكثّف ٦–٧ أيام في الأسبوع)',
+  'Committed Intense (Exercise 5–6 days per week)':
+    'التزام مكثّف (تمارين ٥–٦ أيام في الأسبوع)',
+  'Consistent Moderate (Exercise 3–4 days per week)':
+    'نشاط معتدل منتظم (تمارين ٣–٤ أيام في الأسبوع)',
+  'Building Momentum (Light exercise or physical activity 1–2 days per week)':
+    'بناء الزخم (تمارين خفيفة أو نشاط بدني ١–٢ يوم في الأسبوع)',
+  'Getting Started (Very little or no exercise)':
+    'بداية الطريق (تمارين قليلة جداً أو بدون)',
+}
+
+export function activityDisplayName(description, lang) {
   const desc = (description || '').toLowerCase()
-  for (const [key, label] of ACTIVITY_DISPLAY) if (desc.includes(key)) return label
+  for (const [key, label] of ACTIVITY_DISPLAY) {
+    if (desc.includes(key)) return lang === 'ar' ? (ACTIVITY_AR[label] || label) : label
+  }
   return description
 }
 
@@ -105,10 +121,20 @@ const DIETARY_DISPLAY = {
   vegetarian: 'Plant-based with dairy & eggs',
 }
 
-export function dietaryDisplayName(name) {
+const DIETARY_AR = {
+  'Halal-friendly': 'حلال',
+  'Low-carb high-fat': 'قليل الكربوهيدرات عالي الدهون (كيتو)',
+  'Kosher-friendly': 'كوشير',
+  'Balanced diet': 'نظام متوازن',
+  'Fish-based vegetarian': 'نباتي مع الأسماك',
+  'Strict plant-based': 'نباتي صِرف',
+  'Plant-based with dairy & eggs': 'نباتي مع الألبان والبيض',
+}
+
+export function dietaryDisplayName(name, lang) {
   const lower = (name || '').toLowerCase()
   for (const [key, label] of Object.entries(DIETARY_DISPLAY)) {
-    if (lower.includes(key)) return label
+    if (lower.includes(key)) return lang === 'ar' ? (DIETARY_AR[label] || label) : label
   }
   return name
 }
