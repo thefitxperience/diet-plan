@@ -120,7 +120,9 @@ export default function PlanEditor() {
       if (e) throw e
       const { error: e2 } = await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'submitted' })
       if (e2) throw e2
-      navigate(`/plans/${id}`)
+      // Replace the (now locked) editor entry so "back" from the plan/delivery
+      // page returns to the approvals list, not the locked-editor screen.
+      navigate(`/plans/${id}`, { replace: true })
     } catch (e) { setError(e.message) } finally { setBusy(null) }
   }
 

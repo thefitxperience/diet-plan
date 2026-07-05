@@ -185,7 +185,12 @@ export default function PlanView() {
               <ul className="small">
                 {deliveries.map((d) => (
                   <li key={d.id}>
-                    {t(`delivery.channel.${d.channel}`)} · {t(`delivery.lang.${d.language}`)} · {d.recipient || '—'} · {fmtDateTime(d.created_at, lang)}
+                    {[
+                      t(`delivery.channel.${d.channel}`),
+                      t(`delivery.lang.${d.language}`),
+                      d.recipient,
+                      fmtDateTime(d.created_at, lang),
+                    ].filter(Boolean).join(' · ')}
                   </li>
                 ))}
               </ul>
