@@ -137,10 +137,10 @@ export default function PlanShare() {
       {fallback ? (
         <iframe className="plan-share-frame" src={row.pdf_url} title={t('share.title')} />
       ) : (
-        <div className="plan-share-stage">
+        <>
           <div className="plan-share-viewer" ref={viewerRef} />
           {rendering && <div className="plan-share-loading"><Spinner /></div>}
-        </div>
+        </>
       )}
     </div>
   )

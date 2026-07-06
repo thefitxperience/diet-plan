@@ -489,8 +489,12 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .input-with-icon input { padding-inline-end: 2.6rem; }
 
 /* Public plan viewer (/#/plan/<id>) — header bar + full-height PDF frame */
+/* Page-level scroll (not an inner box) so iOS Safari collapses its toolbar and
+   the plan flows under the URL bar — same trick as the intake page. */
 .plan-share { justify-content: flex-start; padding: 0; }
 .plan-share-bar {
+  position: sticky; top: 0; z-index: 5;
+  background: #4A878C;
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   flex-wrap: wrap;
   padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 1rem 0.9rem;
@@ -505,16 +509,11 @@ html.intake-active, body.intake-active { background: #4A878C; }
   border-top-left-radius: 12px; border-top-right-radius: 12px;
   min-height: 60vh;
 }
-.plan-share-stage {
-  position: relative; flex: 1; width: 100%; min-height: 60vh;
-  border-top-left-radius: 12px; border-top-right-radius: 12px; overflow: hidden;
-}
 .plan-share-viewer {
-  position: absolute; inset: 0;
-  overflow-y: auto; -webkit-overflow-scrolling: touch;
+  flex: 1; width: 100%;
   background: #4A878C;
   display: flex; flex-direction: column; align-items: center;
-  gap: 12px; padding: 14px 0 calc(28px + env(safe-area-inset-bottom, 0px));
+  gap: 12px; padding: 14px 0 calc(48px + env(safe-area-inset-bottom, 0px));
 }
 .plan-share-page {
   display: block; width: 94%; max-width: 900px; height: auto;
@@ -522,7 +521,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
 }
 .plan-share-loading {
-  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
   pointer-events: none;
 }
 .input-icon-btn {
