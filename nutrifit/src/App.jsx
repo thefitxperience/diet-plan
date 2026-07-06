@@ -21,6 +21,7 @@ import AdminGyms from './pages/AdminGyms'
 import AdminUsers from './pages/AdminUsers'
 import ActivityLog from './pages/ActivityLog'
 import Intake from './pages/Intake'
+import PlanShare from './pages/PlanShare'
 
 function RequireRole({ roles, children }) {
   const { role } = useAuth()
@@ -33,8 +34,10 @@ export default function App() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  // Public, no-login client intake link — rendered before any auth gate.
+  // Public, no-login links — rendered before any auth gate. Note the trailing
+  // slash on '/plan/' so it doesn't match the authenticated '/plans' list.
   const isIntake = location.pathname.startsWith('/intake')
+  const isPublic = isIntake || location.pathname.startsWith('/plan/')
 
   // Always land on the dashboard on sign-in. Keyed on the user id going
   // falsy→truthy, which fires on login and on a refresh that restores the
@@ -43,14 +46,15 @@ export default function App() {
   const userId = session?.user?.id
   const prevUserId = useRef(userId)
   useEffect(() => {
-    if (!isIntake && !prevUserId.current && userId) navigate('/', { replace: true })
+    if (!isPublic && !prevUserId.current && userId) navigate('/', { replace: true })
     prevUserId.current = userId
-  }, [userId, navigate, isIntake])
+  }, [userId, navigate, isPublic])
 
-  if (isIntake) {
+  if (isPublic) {
     return (
       <Routes>
         <Route path="/intake/:token" element={<Intake />} />
+        <Route path="/plan/:token" element={<PlanShare />} />
       </Routes>
     )
   }

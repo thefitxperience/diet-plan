@@ -487,6 +487,24 @@ html.intake-active, body.intake-active { background: #4A878C; }
 
 .input-with-icon { position: relative; }
 .input-with-icon input { padding-inline-end: 2.6rem; }
+
+/* Public plan viewer (/#/plan/<id>) — header bar + full-height PDF frame */
+.plan-share { justify-content: flex-start; padding: 0; }
+.plan-share-bar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  flex-wrap: wrap;
+  padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 1rem 0.9rem;
+  color: #fff;
+}
+.plan-share-logo { max-height: 34px; max-width: 140px; margin-bottom: 4px; display: block; }
+.plan-share-title { font-weight: 700; font-size: 1.15rem; }
+.plan-share-sub { opacity: 0.85; font-size: 0.85rem; }
+.plan-share-actions { display: flex; gap: 0.5rem; }
+.plan-share-frame {
+  flex: 1; width: 100%; border: none; background: #fff;
+  border-top-left-radius: 12px; border-top-right-radius: 12px;
+  min-height: 60vh;
+}
 .input-icon-btn {
   position: absolute;
   inset-inline-end: 0.5rem;

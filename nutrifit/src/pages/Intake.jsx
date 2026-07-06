@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Spinner } from '../components/ui'
-import { extractFromPdf, extractFromImage, parseInBodyText } from '../lib/inbodyParser'
+import { extractInBody, parseInBodyText } from '../lib/inbodyParser'
 import {
   fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
@@ -89,11 +89,9 @@ export default function Intake() {
     if (!f) return
     setError(null); setParsing(true)
     try {
-      const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
-      let text
-      if (isPdf) { text = await extractFromPdf(f); setSourceType('pdf_text') }
-      else { text = await extractFromImage(f, setProgress); setSourceType('ocr') }
-      const result = parseInBodyText(text)
+      const { text, ocr } = await extractInBody(f, setProgress)
+      setSourceType(ocr ? 'ocr' : 'pdf_text')
+      const result = parseInBodyText(text, { ocr })
       const fields = result.fields || {}
       // The scan must give us at least weight + height. We don't make the client
       // verify numbers — if the read is too poor, ask for a clearer file instead.
@@ -238,7 +236,7 @@ export default function Intake() {
             {step === 1 && (
               <div>
                 <p className="muted small">{t('intake.inbodyIntro')}</p>
-                <input ref={inputRef} type="file" accept="application/pdf,.pdf" hidden onChange={(e) => handleFile(e.target.files[0])} />
+                <input ref={inputRef} type="file" accept="application/pdf,.pdf,image/*" hidden onChange={(e) => handleFile(e.target.files[0])} />
                 {parsing ? (
                   <div className="card center" style={{ minHeight: 160 }}>
                     <Spinner />

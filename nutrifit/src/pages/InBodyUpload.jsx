@@ -8,7 +8,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, BackButton } from '../components/ui'
-import { extractFromPdf, extractFromImage, renderPdfFirstPage, parseInBodyText, crossCheckClient } from '../lib/inbodyParser'
+import { extractInBody, renderPdfFirstPage, parseInBodyText, crossCheckClient } from '../lib/inbodyParser'
 
 const FIELDS = [
   ['weight', 'inbody.field.weight'],
@@ -56,18 +56,10 @@ export default function InBodyUpload() {
     setParsing(true)
     try {
       const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
-      let text
-      if (isPdf) {
-        text = await extractFromPdf(f)
-        setSourceType('pdf_text')
-        // Clean image preview of the first page — no PDF-viewer chrome.
-        setPreviewUrl(await renderPdfFirstPage(f))
-      } else {
-        setPreviewUrl(URL.createObjectURL(f))
-        text = await extractFromImage(f, setProgress)
-        setSourceType('ocr')
-      }
-      const result = parseInBodyText(text)
+      setPreviewUrl(isPdf ? await renderPdfFirstPage(f) : URL.createObjectURL(f))
+      const { text, ocr } = await extractInBody(f, setProgress)
+      setSourceType(ocr ? 'ocr' : 'pdf_text')
+      const result = parseInBodyText(text, { ocr })
       setModel(result.model)
       setExtracted({ ...result.fields, _text_sample: text.slice(0, 2000) })
       setValues({ ...result.fields })

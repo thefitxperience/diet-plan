@@ -64,16 +64,25 @@ export async function uploadPdfSnapshot(gymId, planId, blob, language) {
   return path
 }
 
-export async function signedPdfUrl(path, expiresIn = 60 * 60 * 24 * 7) {
+// Long-lived by default — the link is shared with the client (WhatsApp/email)
+// and they should be able to open the plan for a long time.
+export async function signedPdfUrl(path, expiresIn = 60 * 60 * 24 * 365) {
   const { data, error } = await supabase.storage.from('plan-pdfs').createSignedUrl(path, expiresIn)
   if (error) throw error
   return data.signedUrl
 }
 
-export async function recordDelivery({ gymId, planId, actorId, channel, recipient, language, pdfPath }) {
-  const { error } = await supabase.from('deliveries').insert({
+export async function recordDelivery({ gymId, planId, actorId, channel, recipient, language, pdfPath, pdfUrl }) {
+  const { data, error } = await supabase.from('deliveries').insert({
     gym_id: gymId, plan_id: planId, actor: actorId,
-    channel, recipient: recipient || '', language, pdf_path: pdfPath,
-  })
+    channel, recipient: recipient || '', language, pdf_path: pdfPath, pdf_url: pdfUrl || null,
+  }).select('id').single()
   if (error) throw error
+  return data.id
+}
+
+// Short, shareable link to the public plan viewer page (/#/plan/<delivery_id>),
+// e.g. https://…/diet-plan/#/plan/<id> — resolves the PDF via get_shared_plan.
+export function planShareUrl(deliveryId) {
+  return `${window.location.origin}${import.meta.env.BASE_URL}#/plan/${deliveryId}`
 }

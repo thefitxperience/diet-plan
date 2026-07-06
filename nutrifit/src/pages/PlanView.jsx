@@ -9,7 +9,7 @@ import { useI18n } from '../lib/i18n'
 import { Alert, Loading, Spinner, StatusBadge, BackButton, fmtDateTime } from '../components/ui'
 import DeepFitTemplate from '../components/DeepFitTemplate'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
-import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl, blobToBase64 } from '../lib/delivery'
+import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl, blobToBase64, planShareUrl } from '../lib/delivery'
 
 export function EventLog({ planId, refresh }) {
   const { t, lang } = useI18n()
@@ -94,19 +94,29 @@ export default function PlanView() {
       const blob = await makePdf()
       const pdfPath = await uploadPdfSnapshot(row.gym_id, row.id, blob, lang2)
       const fileName = `${row.plan_data.header.fullName || 'Client'} - Diet Plan.pdf`
-      let recipient = ''
+      const recipient = channel === 'whatsapp_link' ? (client.phone || '')
+        : channel === 'email' ? (client.email || '') : ''
+      if (channel === 'email' && !recipient) throw new Error('Client has no email address')
+
+      // Shared channels get a long-lived signed URL, stored on the delivery so the
+      // public /plan/<id> viewer page can serve it via the short link.
+      const pdfUrl = (channel === 'whatsapp_link' || channel === 'email') ? await signedPdfUrl(pdfPath) : null
+
+      // Record first — we need the delivery id to build the share link.
+      const deliveryId = await recordDelivery({
+        gymId: row.gym_id, planId: row.id, actorId: profile.id,
+        channel, recipient, language: lang2, pdfPath, pdfUrl,
+      })
 
       if (channel === 'download') {
         downloadBlob(blob, fileName)
       } else if (channel === 'whatsapp_link') {
-        downloadBlob(blob, fileName) // gym attaches it manually in WhatsApp
-        recipient = client.phone || ''
-        const msg = t('delivery.message', { name: client.first_name, gym: planGym?.name || 'your gym' })
+        // Short link to the viewer page (opens the PDF with download/share) —
+        // no giant signed URL in the message, no manual attach.
+        const shareUrl = planShareUrl(deliveryId)
+        const msg = `${t('delivery.messageLink', { name: client.first_name, gym: planGym?.name || 'your gym' })}\n${shareUrl}`
         window.open(waLink(client.phone, msg), '_blank')
       } else if (channel === 'email') {
-        recipient = client.email || ''
-        if (!recipient) throw new Error('Client has no email address')
-        const url = await signedPdfUrl(pdfPath)
         const pdfBase64 = await blobToBase64(blob)
         await sendEmail({
           toEmail: recipient,
@@ -115,14 +125,10 @@ export default function PlanView() {
           message: t('delivery.message', { name: client.first_name, gym: planGym?.name || 'your gym' }),
           pdfBase64,
           filename: fileName,
-          pdfUrl: url,
+          pdfUrl,
         })
       }
 
-      await recordDelivery({
-        gymId: row.gym_id, planId: row.id, actorId: profile.id,
-        channel, recipient, language: lang2, pdfPath,
-      })
       if (row.status !== 'SENT') {
         const { error: trErr } = await supabase.rpc('transition_plan', { p_plan_id: row.id, p_action: 'sent' })
         if (trErr) throw trErr
