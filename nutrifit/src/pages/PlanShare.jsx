@@ -54,13 +54,17 @@ export default function PlanShare() {
       if (cancelled) return
       const container = viewerRef.current
       container.innerHTML = ''
-      const dpr = Math.min(window.devicePixelRatio || 1, 2)
+      // Render at a high fixed resolution rather than scaling to the (often
+      // narrow) container, so pages stay crisp on hi-DPI phones and when the
+      // user pinch-zooms. Capped so we don't exceed iOS's canvas memory limit.
+      const dpr = window.devicePixelRatio || 1
       const cssWidth = Math.min(container.clientWidth || 800, 900)
+      const targetWidth = Math.min(Math.max(cssWidth * dpr, 1600), 2200)
       for (let i = 1; i <= doc.numPages; i++) {
         const page = await doc.getPage(i)
         if (cancelled) return
         const base = page.getViewport({ scale: 1 })
-        const vp = page.getViewport({ scale: (cssWidth / base.width) * dpr })
+        const vp = page.getViewport({ scale: targetWidth / base.width })
         const canvas = document.createElement('canvas')
         canvas.className = 'plan-share-page'
         canvas.width = vp.width
