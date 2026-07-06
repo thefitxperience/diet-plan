@@ -227,6 +227,12 @@ function finalize(text, out) {
   if (out.weight != null && out.lbm != null) {
     out.fatMass = Math.round((out.weight - out.lbm) * 10) / 10
   }
+  // Reverse of the above: some sheets (e.g. InBody380) print Body Fat Mass in a
+  // clean cell but the Fat Free Mass value is buried in a column table OCR can't
+  // anchor — recover LBM = Weight − Body Fat Mass.
+  if (out.lbm == null && out.weight != null && out.fatMass != null) {
+    out.lbm = Math.round((out.weight - out.fatMass) * 10) / 10
+  }
   if (out.pbf == null && out.fatMass != null && out.weight) {
     out.pbf = Math.round((out.fatMass / out.weight) * 1000) / 10
   }
@@ -235,6 +241,15 @@ function finalize(text, out) {
   if (out.bmi == null && out.weight && out.height) {
     const h = out.height / 100
     out.bmi = Math.round((out.weight / (h * h)) * 10) / 10
+  }
+  // BMR: the InBody380 sheet doesn't print Basal Metabolic Rate, but it's needed
+  // for the daily-calorie target. Estimate it from lean mass via Katch–McArdle
+  // (BMR = 370 + 21.6 × Fat-Free Mass kg) whenever the sheet didn't provide one.
+  // Sheets that print BMR (e.g. InBody270) keep their own value. On those,
+  // Katch–McArdle lands within ~1 kcal of the printed figure, so it's a safe
+  // fallback for any BMR-missing sheet too.
+  if (out.bmr == null && out.lbm != null) {
+    out.bmr = Math.round(370 + 21.6 * out.lbm)
   }
 
   // InBody Score fallback: first standalone 2–3 digit line (label fill handles
@@ -270,12 +285,21 @@ function labelAnchoredFill(text, out) {
   // Weight/fat rows are "…VALUE ( lo~hi )". Lazy gap tolerates OCR unit junk
   // (e.g. "(kg)" read as "*9)"); the trailing "(" anchors to the composition row.
   set('weight', grab(new RegExp('\\bWeight\\b[^\\n]{0,10}?' + DEC + '\\s*[.\\-—]*\\s*\\(', 'i'), 30, 300))
+  // InBody380 layout: the composition-table Weight value has no trailing
+  // "(range)". The Muscle-Fat "Weight (kg)" bar value instead sits right before
+  // the fixed "Weight Control" section label; its bar scale tops out at "205 %".
+  set('weight', grab(new RegExp(DEC + '\\s*Weight\\s*Control', 'i'), 30, 300))
+  set('weight', grab(new RegExp('205\\s*%[^0-9]{0,15}' + DEC, 'i'), 30, 300))
   // LBM (Fat Free Mass) — label may OCR as "Fat Free Bass"; anchor on the "kg".
   set('lbm', grab(new RegExp('Fat\\s*Free\\s*\\w+[^\\n]{0,8}?' + DEC + '\\s*kg', 'i'), 20, 120))
   set('lbm', grab(new RegExp('Fat\\s*Free\\s*Mass[^0-9]{0,14}' + DEC, 'i'), 20, 120))
   // fatMass is normally DERIVED (weight − lbm); this is only a fallback when one
   // of those is missing. Tight upper bound so a dropped decimal (141→14.1) repairs.
   set('fatMass', grab(new RegExp('Body\\s*Fat\\s*Mass[^\\n]{0,10}?' + DEC + '\\s*[.\\-—]*\\s*\\(', 'i'), 2, 90))
+  // InBody380: "Body Fat Mass (kg) 30.8" printed with no trailing range (label
+  // often OCRs as "BodyFathass (a)"). The lookahead rejects the Muscle-Fat
+  // bar-scale row "Body Fat Mass (kg) 40 60 80…" (value followed by more numbers).
+  set('fatMass', grab(new RegExp('Body\\s*Fat\\s*\\w+\\s*\\(\\s*[a-z]+\\s*\\)\\s*' + DEC + '(?!\\s*[\\d.])', 'i'), 2, 90))
   // BMR: the only "NNNN kcal ( lo~hi )" — robust to the label mis-OCR'ing
   // (e.g. "Basal MetebolicRete"). Recommended-intake kcal has no range, so it's ignored.
   set('bmr', grab(/(\d{3,4})\s*kcal\s*[^0-9]{0,4}\d{3,4}\s*[~\-]/i, 700, 5000))
@@ -300,12 +324,19 @@ function labelAnchoredFill(text, out) {
   set('score', grab(/(\d{2,3})\s*\/\s*1\s*0\s*0/, 1, 100))
   set('age', grab(/[co]m\s+(\d{1,3})\s+(?:Male|Female)/i, 10, 100))
   if (!out.testDate) {
-    const d = text.match(/(\d{2})\.(\d{2})\.(\d{4})/)
+    const d = text.match(/(\d{2})\.(\d{2})\.(\d{4})/) // DD.MM.YYYY (InBody270)
     if (d) out.testDate = `${d[3]}-${d[2]}-${d[1]}`
+  }
+  if (!out.testDate) {
+    const d = text.match(/(\d{4})\.(\d{2})\.(\d{2})/) // YYYY.MM.DD (InBody380)
+    if (d) out.testDate = `${d[1]}-${d[2]}-${d[3]}`
   }
 }
 
-const STRATEGIES = { InBody270: parseInBody270 }
+// InBody380 is image-only (empty text layer) so it always takes the OCR path,
+// where parseInBody270 skips its strict PDF anchors and runs the shared
+// label-anchored/derived finalize — which now handles the 380 layout too.
+const STRATEGIES = { InBody270: parseInBody270, InBody380: parseInBody270 }
 
 /**
  * Parse extracted text → { model, fields, unsupportedModel }.
