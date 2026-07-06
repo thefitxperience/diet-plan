@@ -284,8 +284,13 @@ function labelAnchoredFill(text, out) {
   // can't grab bar-chart scale numbers.
   set('pbf', grab(/(?:Percent\s*Body\s*Fat|\bPBF\b)[^0-9]{0,24}(\d{1,2}\.\d)/i, 3, 70))
   // SMM is the trickiest (it lives next to bar-chart scale numbers). Try the
-  // most specific forms first: the Research-Parameters "…Muscle Mass NN.N kg"
-  // value, then the value printed on the line right after the "SMM … %" scale row.
+  // most specific forms first: the Body-Composition-History row "SMM (kg) | NNN"
+  // — a SINGLE value at end of line (a dropped decimal 355→35.5 is repaired by
+  // grab). The end-of-line anchor rejects the bar-chart scale row "SMM (kg) 70
+  // 80 90…", whose first number is followed by more numbers, not a line break.
+  // Then the Research-Parameters "…Muscle Mass NN.N kg" value, then the value
+  // printed on the line right after the "SMM … %" scale row.
+  set('smm', grab(new RegExp('\\bSMM\\s*\\(kg\\)[^0-9\\n]{0,5}' + DEC + '\\s*(?:\\n|$)', 'im'), 10, 100))
   set('smm', grab(new RegExp('Skeletal\\s*Muscle\\s*Mass\\s*' + DEC + '\\s*kg', 'i'), 10, 100))
   set('smm', grab(/\bSMM\b[^\n]*%[^\n]*\n[^\d\n]*(\d{2,3}\.\d)/i, 10, 100))
   set('bmi', grab(/\bBMI\b[^0-9]{0,4}(\d{1,2}\.\d)/i, 10, 60))
