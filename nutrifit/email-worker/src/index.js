@@ -1,12 +1,11 @@
-// NutriFIT email relay — sends plan emails through an SMTP mailbox
-// (e.g. Infomaniak) with the PDF attached. Runs on Cloudflare Workers via
-// worker-mailer (Cloudflare TCP Sockets; needs nodejs_compat).
-//
+// NutriFIT email relay
+// Runs on Cloudflare Workers
+
 // Frontend POSTs JSON:
 //   { to, toName, subject, message, pdfBase64, filename }
 // SMTP credentials come from Worker vars/secrets (never from the client):
 //   SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_USER, SMTP_PASS,
-//   SMTP_FROM (defaults to SMTP_USER), SMTP_FROM_NAME, RELAY_TOKEN (optional)
+//   SMTP_FROM (defaults to SMTP_USER), SMTP_FROM_NAME, RELAY_TOKEN
 
 import { WorkerMailer } from 'worker-mailer'
 

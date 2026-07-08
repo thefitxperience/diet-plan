@@ -1,24 +1,12 @@
 name: Deploy to GitHub Pages
 
-# The app lives in the nutrifit/ subfolder; this workflow MUST sit at the repo
-# root (.github/workflows/) or GitHub will not register it.
-#
-# We publish the built site to a `gh-pages` branch and let Pages serve from that
-# branch ("Deploy from a branch"). This deliberately avoids the
-# actions/deploy-pages "environment" API, which was persistently returning
-# "Deployment failed, try again later" even though the build always succeeded.
-# Branch-based publishing is a separate, much more stable Pages pipeline.
-#
-# One-time setup: repo Settings → Pages → Build and deployment →
-#   Source: "Deploy from a branch",  Branch: "gh-pages"  /  "(root)".
-
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
 permissions:
-  contents: write        # needed to push the gh-pages branch
+  contents: write      
 
 concurrency:
   group: pages-deploy
@@ -52,8 +40,7 @@ jobs:
           VITE_EMAIL_WORKER_URL: ${{ vars.VITE_EMAIL_WORKER_URL }}
           VITE_EMAIL_RELAY_TOKEN: ${{ vars.VITE_EMAIL_RELAY_TOKEN }}
           VITE_BASE: /${{ github.event.repository.name }}/
-      # SPA fallback so refreshes/deep links resolve to index.html; .nojekyll
-      # stops GitHub's Jekyll build from touching the Vite output.
+
       - run: cp dist/index.html dist/404.html && touch dist/.nojekyll
       - name: Publish to gh-pages branch
         run: |

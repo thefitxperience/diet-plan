@@ -301,7 +301,6 @@ export default function PlanEditor() {
           allergyNames={row.questionnaire?.allergyNames || []}
           conditionNames={row.questionnaire?.conditionNames || []}
           onPick={(opt) => addOption(picker, opt)}
-          onBlank={() => addOption(picker, null)}
           onClose={() => setPicker(null)}
         />
       )}
@@ -311,7 +310,7 @@ export default function PlanEditor() {
 
 // Searchable catalog of the gym's real meals (src/data/mealCatalog.json).
 // Picking one inserts a fully-populated option; "blank" starts a manual one.
-function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, onPick, onBlank, onClose }) {
+function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, onPick, onClose }) {
   const { t, lang } = useI18n() // follow the site language, not the plan-preview toggle
   const [q, setQ] = useState('')
   const query = q.trim().toLowerCase()
@@ -365,9 +364,6 @@ function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, con
         </div>
         <input type="text" autoFocus placeholder={t('editor.searchMeals')}
           value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: '0.75rem' }} />
-        <button className="btn secondary sm" onClick={onBlank} style={{ marginBottom: '0.75rem' }}>
-          + {t('editor.blankOption')}
-        </button>
         <div className="meal-picker-list">
           {results.length === 0 && <div className="muted small">{t('editor.noMealsFound')}</div>}
           {results.map(({ entry: m, opt, swaps }) => {
@@ -416,6 +412,18 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
     ;[m.options[i], m.options[j]] = [m.options[j], m.options[i]]
   })
 
+  const num = (n) => arDigits(Math.round(n ?? 0), lang)
+  // Re-portion the whole option: scale grams + macros + kcal by one factor so
+  // they stay consistent (macros are stored per dish, not per ingredient, so a
+  // single scale is the only accurate way to change the serving size).
+  const rescale = (mult) => updateOption((o) => {
+    const target = Math.max(50, Math.round((o.kcal || 0) * mult))
+    const s = scaleOptionToKcal(o, target)
+    o.ingredients = s.ingredients
+    o.macros = s.macros
+    o.kcal = s.kcal
+  })
+
   return (
     <div className="card">
       <div className="row between">
@@ -430,38 +438,42 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
         <Alert kind="warn">{t('editor.kcalWarning', { est: kcalWarn.estimated, stated: kcalWarn.stated })}</Alert>
       )}
 
+      {/* Name and description are read-only too — they come from the meal
+          database; the nutritionist picks and portions, they don't rewrite. */}
       <Field label={t('editor.optionName')}>
-        <input type="text" dir={dir} value={option[nameKey]}
-          onChange={(e) => updateOption((o) => { o[nameKey] = e.target.value })} />
+        <p className="readonly-text" dir={dir}>{option[nameKey] || option.name_en || '—'}</p>
       </Field>
-      <Field label={t('editor.optionDesc')}>
-        <textarea rows={2} dir={dir} value={option[descKey]}
-          onChange={(e) => updateOption((o) => { o[descKey] = e.target.value })} />
-      </Field>
+      {(option[descKey] || option.desc_en) && (
+        <Field label={t('editor.optionDesc')}>
+          <p className="readonly-text muted" dir={dir}>{option[descKey] || option.desc_en}</p>
+        </Field>
+      )}
 
-      <h3>{t('editor.ingredients')}</h3>
-      {option.ingredients.map((ing, i) => (
-        <div className="ingredient-row two" key={i}>
-          <input type="text" dir={dir} value={ing[ingKey]}
-            onChange={(e) => updateOption((o) => { o.ingredients[i][ingKey] = e.target.value })} />
-          <input type="number" placeholder={t('editor.grams')} value={ing.grams}
-            onChange={(e) => updateOption((o) => { o.ingredients[i].grams = parseFloat(e.target.value) || 0 })} />
-          <button title={t('common.delete')} onClick={() => updateOption((o) => { o.ingredients.splice(i, 1) })}>✕</button>
-        </div>
-      ))}
-      <button className="btn ghost sm" onClick={() => updateOption((o) => {
-        o.ingredients.push({ name_en: '', name_ar: '', grams: 0, uom: 'g' })
-      })}>
-        + {t('editor.addIngredient')}
-      </button>
+      {/* Portion: scale the whole option (grams + macros + kcal move together by
+          a single factor — the only accurate way to re-portion, since macros are
+          stored per dish, not per ingredient). */}
+      <h3 style={{ marginTop: '0.9rem' }}>{t('editor.portion')}</h3>
+      <div className="portion-control">
+        <button className="btn ghost sm" title={t('editor.smaller')}
+          disabled={!option.kcal} onClick={() => rescale(0.9)}>−</button>
+        <span className="portion-kcal">{num(option.kcal)} {t('editor.kcal')}</span>
+        <button className="btn ghost sm" title={t('editor.larger')}
+          disabled={!option.kcal} onClick={() => rescale(1.1)}>＋</button>
+      </div>
+
+      {/* Ingredients and macros are read-only — they come from the meal database
+          and are kept consistent by the portion scaler above. */}
+      <h3 style={{ marginTop: '0.9rem' }}>{t('editor.ingredients')}</h3>
+      <ul className="readonly-list" dir={dir}>
+        {option.ingredients.map((ing, i) => (
+          <li key={i}><span>{ing[ingKey] || ing.name_en}</span><span className="muted">{num(ing.grams)} {t('editor.grams')}</span></li>
+        ))}
+      </ul>
 
       <h3 style={{ marginTop: '0.9rem' }}>{t('editor.macros')}</h3>
-      <div className="macros-grid">
+      <div className="readonly-macros">
         {[['protein', 'editor.protein'], ['carbs', 'editor.carbs'], ['fats', 'editor.fats']].map(([k, lk]) => (
-          <Field key={k} label={t(lk)}>
-            <input type="number" step="0.1" value={option.macros[k] ?? ''}
-              onChange={(e) => updateOption((o) => { o.macros[k] = e.target.value === '' ? null : parseFloat(e.target.value) })} />
-          </Field>
+          <div key={k}><span className="muted small">{t(lk)}</span><b>{option.macros[k] != null ? `${num(option.macros[k])} ${t('editor.grams')}` : '—'}</b></div>
         ))}
       </div>
 

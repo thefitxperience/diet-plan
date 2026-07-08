@@ -15,7 +15,7 @@ Implements `../diet-plan-system-plan.md` (v2).
 |---|---|
 | Frontend | React + Vite SPA, HashRouter (GitHub Pages-safe deep links) |
 | DB / Auth / Files | Supabase free tier — **RLS is the security model** (no backend) |
-| Generation API | `POST /v3/generate` via Cloudflare Worker `fit-proxy.andyayas27.workers.dev` |
+| Generation API | `POST /v3/generate` via Cloudflare Worker |
 | InBody parsing | pdf.js text layer (validated on the real InBody270 sample) + Tesseract.js OCR fallback |
 | PDF output | html2canvas + jsPDF, client-side; snapshot uploaded to storage on delivery |
 | Delivery (interim) | Download + wa.me deep link · EmailJS (optional) · recorded in `deliveries` |
@@ -36,7 +36,7 @@ Implements `../diet-plan-system-plan.md` (v2).
 ### 2. Local env
 
 ```bash
-cp .env.example .env.local   # fill VITE_SUPABASE_URL + VITE_SUPABASE_ANON_KEY
+cp .env.example .env.local 
 npm install
 npm run dev
 ```
@@ -112,13 +112,18 @@ to `plan_events` (who, when, comment).
   the Cloudflare Worker and strip `VITE_FIT_API_*`.
 - html2canvas PDFs are rasterized → server-side Puppeteer in Phase 2.
 - EmailJS public key is client-side with monthly caps → transactional provider later.
-- Only **InBody270** parsing is validated (all 11 fields pass against the real
-  sample). Other models: the parser dispatches on the `[InBodyXXX]` marker —
-  add a strategy per model in `src/lib/inbodyParser.js` when samples arrive.
+- **InBody270** and **InBody380** parsing are validated against real samples,
+  from both PDFs and phone photos (JPEG/PNG). Extraction tries the pdf.js text
+  layer first, then falls back to Tesseract.js OCR (image files, and newer
+  image-label PDF exports whose text layer is empty). The 380 sheet has no
+  printed BMR, so it's estimated via Katch–McArdle (370 + 21.6 × fat-free mass).
+  Other models: the parser dispatches on the `[InBodyXXX]` marker — add a
+  strategy in `src/lib/inbodyParser.js` when samples arrive.
 - WhatsApp Business API (verified platform number) is Phase 2 — start Meta
   verification early.
-- Plan-content AR dictionary lives in `src/i18n/plan-ar.json` (from the demo
-  repo); maintain it with `fill_translations.py`.
+- Plan-content AR dictionary lives in `src/i18n/plan-ar.json` (English→Arabic
+  for meal names, descriptions, and ingredients); maintain it by hand-editing
+  the JSON as new catalog meals are added.
 
 ## Project layout
 
