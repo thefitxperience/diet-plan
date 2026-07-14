@@ -130,3 +130,7 @@ export async function generateSafePlan(payload, { allergyNames = [], conditionNa
 
   return { plan: model, apiResponse: firstResponse, substitutions, attempts }
 }
+
+// Catalog-based generation now lives in ./catalogGenerator (Worker-safe, no FIT
+// API dependency). Re-exported here so existing imports keep working.
+export { generateCatalogPlan } from './catalogGenerator'

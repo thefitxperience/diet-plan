@@ -13,7 +13,8 @@ import {
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
-import { generateSafePlan } from '../lib/planGenerator'
+import { generateCatalogPlan } from '../lib/planGenerator'
+import { goalAdjustedKcal } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 
@@ -140,13 +141,14 @@ export default function NewPlan() {
       const allergyNames = allergies.filter((a) => selectedAllergyIds.includes(a.allergyId)).map((a) => a.allergyName)
       const conditionNames = conditions.filter((c) => selectedConditionIds.includes(c.conditionId)).map((c) => c.conditionName)
 
-      // Generate a plan that is already safe for the client's restrictions:
-      // unsuitable ingredients are swapped, and un-fixable dishes are replaced
-      // with suitable ones pulled from extra API calls — all invisibly.
-      const { plan: planModel, apiResponse, substitutions } = await generateSafePlan(
+      // Generate the plan from our curated meal catalog + rule-based scaling
+      // (no FIT API): restriction-aware (unsuitable ingredients swapped, unfixable
+      // dishes dropped) and every meal realistic at the client's calorie level.
+      const { plan: planModel, apiResponse, substitutions } = await generateCatalogPlan(
         payload,
         { allergyNames, conditionNames },
-        { fullName: `${client.first_name} ${client.last_name}`, dob: client.dob, dailyKcal: payload.kilocalorieNeeded, goalText: GOAL_LABELS[form.goal] },
+        // dailyKcal = the goal-adjusted intake the client actually eats.
+        { fullName: `${client.first_name} ${client.last_name}`, dob: client.dob, dailyKcal: goalAdjustedKcal(payload.kilocalorieNeeded, form.goal), goalText: GOAL_LABELS[form.goal] },
       )
       planModel.dietary = { substitutions } // silent audit trail
 

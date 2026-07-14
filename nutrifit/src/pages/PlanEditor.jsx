@@ -10,7 +10,7 @@ import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../comp
 import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
-  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL, formatAmount,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
@@ -466,7 +466,7 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
       <h3 style={{ marginTop: '0.9rem' }}>{t('editor.ingredients')}</h3>
       <ul className="readonly-list" dir={dir}>
         {option.ingredients.map((ing, i) => (
-          <li key={i}><span>{ing[ingKey] || ing.name_en}</span><span className="muted">{num(ing.grams)} {t('editor.grams')}</span></li>
+          <li key={i}><span>{ing[ingKey] || ing.name_en}</span><span className="muted">{formatAmount(ing, lang)}</span></li>
         ))}
       </ul>
 

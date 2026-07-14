@@ -17,6 +17,7 @@ import {
   DIET_INTRO, GUIDELINES_TITLE, GUIDELINES_INTRO,
   GUIDELINES_PAGE_1, GUIDELINES_PAGE_2,
 } from './deepfitGuidelines'
+import { formatAmount } from '../lib/planModel'
 import './deepfit.css'
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/deep-fit/${name}`
@@ -157,8 +158,8 @@ function MealTable({ meal, title, icon, t, selectable, selection, onSelect, warn
                     {opt.ingredients.length === 0 && <li>{t.isAr ? `• ${t.ui('No ingredients')}` : t.ui('No ingredients')}</li>}
                     {opt.ingredients.map((ing, i) => {
                       const ingName = t.isAr && ing.name_ar ? ing.name_ar : ing.name_en
-                      const line = `${ingName}: ${ing.grams} ${ing.uom}`
-                      return <li key={i}>{t.isAr ? `• ${arNums(line)}` : line}</li>
+                      const line = `${ingName}: ${formatAmount(ing, t.isAr ? 'ar' : 'en')}`
+                      return <li key={i}>{t.isAr ? `• ${line}` : line}</li>
                     })}
                   </ul>
                 </td>

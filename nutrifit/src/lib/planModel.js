@@ -2,6 +2,8 @@
 // into this shape; edits mutate it; the template re-renders from it.
 
 import planAr from '../i18n/plan-ar.json'
+import ingredientMeta from '../data/ingredientMeta.json'
+import { arDigits } from './digits'
 
 export const MEAL_DEFS = [
   { id: 'breakfast', apiKey: 'Breakfast' },
@@ -87,6 +89,16 @@ export function duplicateOption(opt) {
 // API splits a plan: breakfast 25%, lunch 30%, dinner 25%, snack 10%/option).
 export const MEAL_KCAL_RATIO = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
 
+// The FIT API shifts a plan's calories by its goal: −500 kcal for weight loss,
+// +500 for weight gain, unchanged for maintenance. We SEND the user's TDEE (the
+// API applies the shift); this returns the intake the client actually eats — the
+// number to show on the plan and to base our own per-meal scaling fallbacks on,
+// so catalog/keto-supplement meals line up with the API's goal-adjusted dishes.
+export const GOAL_KCAL_SHIFT = { lose: -500, gain: 500, maintain: 0 }
+export function goalAdjustedKcal(kcal, goal) {
+  return Math.max(0, (parseFloat(kcal) || 0) + (GOAL_KCAL_SHIFT[goal] || 0))
+}
+
 // Per-meal calorie target derived from the daily total (fallback when a meal
 // has no API-provided targetKcal, e.g. a manually-built plan).
 export function mealTargetKcal(slot, dailyKcal) {
@@ -94,10 +106,31 @@ export function mealTargetKcal(slot, dailyKcal) {
   return dailyKcal && r ? Math.round(dailyKcal * r) : 0
 }
 
-// Scale an option's ingredient quantities + macros so it hits targetKcal,
-// exactly like the API does (factor = targetKcal / baseKcal). Returns a copy;
-// leaves the option untouched if it can't be scaled (no base kcal / no target).
-export function scaleOptionToKcal(option, targetKcal) {
+// ── Rule-based calorie scaling ("meal generation engine") ────────────────────
+// Linear proportional scaling makes unrealistic plates at high/low calories
+// (8 eggs, 400 g spinach). Instead we redistribute the calorie change by role:
+// carbohydrates absorb most of it, healthy fats are secondary, protein rises
+// slowly, vegetables barely move, condiments are fixed — every ingredient
+// clamped to a realistic serving range. Per-ingredient nutrition + serving
+// bounds live in ingredientMeta.json (keyed by EN name).
+const ING_META = {}
+for (const [k, v] of Object.entries(ingredientMeta)) ING_META[k.trim().toLowerCase()] = v
+
+// How eagerly each category absorbs a calorie change (relative "pull").
+const SCALE_WEIGHT = {
+  carb: 6, fat: 3, dairy: 1.6, protein: 1.3, fruit: 1, vegetable: 0.35, condiment: 0, other: 1,
+}
+
+export function ingredientMetaFor(name) {
+  return ING_META[(name || '').trim().toLowerCase()] || null
+}
+
+// Tidy servings: nearest 5 g for real portions, nearest 1 g for tiny amounts.
+const roundGrams = (g) => (g >= 40 ? Math.round(g / 5) * 5 : Math.max(0, Math.round(g)))
+
+// Old proportional scaling — kept as the fallback for dishes we don't have
+// enough ingredient nutrition for, so behaviour is never worse than before.
+function linearScale(option, targetKcal) {
   const base = option.kcal
   if (!targetKcal || !base || base <= 0) return option
   const f = targetKcal / base
@@ -105,13 +138,136 @@ export function scaleOptionToKcal(option, targetKcal) {
   return {
     ...option,
     ingredients: (option.ingredients || []).map((i) => ({ ...i, grams: Math.round((i.grams || 0) * f) })),
-    macros: {
-      protein: sc(option.macros?.protein),
-      carbs: sc(option.macros?.carbs),
-      fats: sc(option.macros?.fats),
-    },
+    macros: { protein: sc(option.macros?.protein), carbs: sc(option.macros?.carbs), fats: sc(option.macros?.fats) },
     kcal: Math.round(targetKcal),
   }
+}
+
+// Redistribute `remaining` kcal (+ add / − remove) across ingredients by role
+// weight, clamping each to its [min,max] serving. Mutates `grams`; returns the
+// kcal it couldn't place (the meal hit its realistic serving limits).
+function redistribute(parts, grams, remaining) {
+  const dir = Math.sign(remaining)
+  if (dir === 0) return 0
+  // Ingredients without metadata (e.g. an allergy/condition swap substitute that
+  // isn't in the catalog table) are held fixed — weight 0, never moved.
+  const weightOf = (p) => (p.meta ? (SCALE_WEIGHT[p.meta.category] ?? SCALE_WEIGHT.other) : 0)
+  const canMove = (i) => {
+    if (!parts[i].meta || !parts[i].kcalPerG || weightOf(parts[i]) <= 0) return false
+    return dir > 0 ? grams[i] < parts[i].meta.max : grams[i] > parts[i].meta.min
+  }
+  const active = new Set(parts.map((_, i) => i).filter(canMove))
+  for (let iter = 0; iter < 24 && active.size && Math.abs(remaining) > 1; iter++) {
+    let totalW = 0
+    for (const i of active) totalW += weightOf(parts[i])
+    if (totalW <= 0) break
+    let moved = false
+    for (const i of [...active]) {
+      const shareKcal = remaining * (weightOf(parts[i]) / totalW)
+      let newG = grams[i] + shareKcal / parts[i].kcalPerG
+      const { min, max } = parts[i].meta
+      if (newG >= max) { newG = max; active.delete(i) }
+      else if (newG <= min) { newG = min; active.delete(i) }
+      const applied = (newG - grams[i]) * parts[i].kcalPerG
+      if (Math.abs(newG - grams[i]) > 1e-6) moved = true
+      grams[i] = newG
+      remaining -= applied
+    }
+    if (!moved) break
+  }
+  return remaining
+}
+
+// Scale / re-portion an option to targetKcal with role-based redistribution.
+// Works to scale a catalog base up/down AND to re-portion an already-scaled
+// dish into realistic servings (pass its own kcal as the target — the clamp
+// step alone pulls "8 eggs" back to a realistic max and frees those calories
+// for carbs/fats). Falls back to linear scaling when nutrition is missing for
+// most of the dish, so uncovered dishes behave exactly as before.
+export function scaleOptionToKcal(option, targetKcal) {
+  const ings = option.ingredients || []
+  if (!targetKcal || targetKcal <= 0 || !ings.length) return option
+
+  const parts = ings.map((ing) => {
+    // Fall back to the pre-swap ingredient's nutrition for allergy/condition
+    // substitutes (e.g. gluten-free bread ← whole wheat bread) — they're
+    // designed to be like-for-like, so this keeps calories/macros accurate.
+    const meta = ingredientMetaFor(ing.name_en) || ingredientMetaFor(ing.original_en)
+    return { ing, meta, kcalPerG: meta ? meta.per100g.kcal / 100 : null }
+  })
+  if (parts.filter((p) => p.meta).length < Math.ceil(ings.length * 0.6)) {
+    return linearScale(option, targetKcal)
+  }
+
+  // Phase 1 — clamp every ingredient into its realistic serving range. This is
+  // what fixes oversized plates even when total calories are already on target.
+  const grams = parts.map((p) => (p.meta ? Math.min(Math.max(p.ing.grams, p.meta.min), p.meta.max) : p.ing.grams))
+  const clampedTotal = parts.reduce((s, p, i) => s + (p.kcalPerG ? grams[i] * p.kcalPerG : 0), 0)
+  if (clampedTotal <= 0) return linearScale(option, targetKcal)
+
+  // Phase 2 — move the remaining calorie gap into the right roles.
+  redistribute(parts, grams, targetKcal - clampedTotal)
+
+  // Recompute kcal + macros from the final grams so they are always consistent.
+  const macros = { protein: 0, carbs: 0, fats: 0 }
+  let kcal = 0
+  const outIngs = parts.map((p, i) => {
+    const g = roundGrams(grams[i])
+    if (p.meta) {
+      const per = p.meta.per100g
+      kcal += (g / 100) * per.kcal
+      macros.protein += (g / 100) * (per.protein || 0)
+      macros.carbs += (g / 100) * (per.carbs || 0)
+      macros.fats += (g / 100) * (per.fats || 0)
+    }
+    return { ...p.ing, grams: g }
+  })
+  return {
+    ...option,
+    ingredients: outIngs,
+    macros: { protein: Math.round(macros.protein), carbs: Math.round(macros.carbs), fats: Math.round(macros.fats) },
+    kcal: Math.round(kcal),
+  }
+}
+
+// Countable foods: show "2 eggs" / "3 slices" instead of grams. Ordered — the
+// first matching pattern wins (egg-white before egg; pita before bread). `g` is
+// grams per unit, `step` is the rounding increment (0.5 allows "½ avocado").
+const UNIT_FOODS = [
+  { re: /egg[,\s]+white/i, g: 33, step: 1, en: ['egg white', 'egg whites'], ar: ['بياض بيضة', 'بياض بيض'] },
+  { re: /\begg/i, g: 50, step: 1, en: ['egg', 'eggs'], ar: ['بيضة', 'بيضات'] },
+  // Pita stays in grams — its weight varies too much (40–90 g) to count. Must come
+  // BEFORE the bread rule, since "Pita … Bread" would otherwise match as "slices".
+  { re: /pita/i, noUnit: true },
+  { re: /tortilla/i, g: 30, step: 1, en: ['tortilla', 'tortillas'], ar: ['تورتيلا', 'تورتيلا'] },
+  { re: /rice\s*cake/i, g: 9, step: 1, en: ['rice cake', 'rice cakes'], ar: ['كعكة أرز', 'كعكات أرز'] },
+  { re: /bread|toast/i, g: 30, step: 1, en: ['slice', 'slices'], ar: ['شريحة', 'شرائح'] },
+  { re: /avocado/i, g: 150, step: 0.5, en: ['avocado', 'avocados'], ar: ['حبة أفوكادو', 'حبات أفوكادو'] },
+  { re: /banana/i, g: 118, step: 0.5, en: ['banana', 'bananas'], ar: ['موزة', 'موز'] },
+  { re: /\bapple/i, g: 120, step: 0.5, en: ['apple', 'apples'], ar: ['تفاحة', 'تفاحات'] },
+  { re: /\bdate/i, g: 8, step: 1, en: ['date', 'dates'], ar: ['تمرة', 'تمرات'] },
+]
+
+function fmtCount(n) {
+  const whole = Math.trunc(n)
+  const hasHalf = Math.abs(n - whole) >= 0.5
+  if (hasHalf) return whole > 0 ? `${whole}½` : '½'
+  return String(whole)
+}
+
+// Human-friendly serving for an ingredient: "2 eggs" / "3 slices" for countable
+// foods, otherwise "45 g". Fully localized (Arabic digits + noun).
+export function formatAmount(ing, lang = 'en') {
+  const grams = ing?.grams || 0
+  const u = UNIT_FOODS.find((x) => x.re.test(ing?.name_en || ''))
+  if (u && !u.noUnit && grams > 0) {
+    const count = Math.round(grams / u.g / u.step) * u.step
+    if (count >= u.step) {
+      const noun = (lang === 'ar' ? u.ar : u.en)[count <= 1 ? 0 : 1]
+      return `${arDigits(fmtCount(count), lang)} ${noun}`
+    }
+  }
+  return `${arDigits(String(grams), lang)} ${lang === 'ar' ? 'غ' : 'g'}`
 }
 
 // Realistic max food weight for a single meal (grams). Dishes whose scaled
@@ -178,7 +334,10 @@ export function buildPlanModel(apiResponse, ctx = {}) {
   const meals = MEAL_DEFS
     .filter((m) => !(isIF && m.id === 'breakfast'))
     .map((m) => {
-      const options = flattenMeal(foodData[m.apiKey])
+      // Re-portion each API dish into realistic servings at its own calorie
+      // level (linear-scaled API dishes otherwise show 8 eggs / 400 g spinach).
+      // Dishes we lack ingredient nutrition for fall back unchanged.
+      const options = flattenMeal(foodData[m.apiKey]).map((o) => scaleOptionToKcal(o, o.kcal))
       return {
         id: m.id,
         targetKcal: options.length ? options[0].kcal : null,

@@ -245,13 +245,13 @@
 "Vegan",
 "Vegetarian"
 ],
-"kcal": 388,
+"kcal": 463,
 "servingGrams": 350,
-"ingredientCount": 4,
+"ingredientCount": 5,
 "macros": {
-"protein": 7,
-"carbs": 27,
-"fats": 28
+"protein": 9,
+"carbs": 48,
+"fats": 27
 },
 "ingredients": [
 {
@@ -281,6 +281,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 80,
+"uom": "g"
 }
 ]
 },
@@ -357,13 +363,13 @@
 "Vegan",
 "Vegetarian"
 ],
-"kcal": 288,
+"kcal": 366,
 "servingGrams": 300,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 6,
-"carbs": 39,
-"fats": 12
+"protein": 11,
+"carbs": 56,
+"fats": 14
 },
 "ingredients": [
 {
@@ -386,6 +392,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rolled oats",
+"name_ar": "شوفان مطحون",
+"grams": 25,
+"uom": "g"
 }
 ]
 },
@@ -682,13 +694,13 @@
 "Vegan",
 "Vegetarian"
 ],
-"kcal": 260,
+"kcal": 436,
 "servingGrams": 330,
-"ingredientCount": 5,
+"ingredientCount": 6,
 "macros": {
-"protein": 13,
-"carbs": 16,
-"fats": 16
+"protein": 23,
+"carbs": 42,
+"fats": 21
 },
 "ingredients": [
 {
@@ -725,6 +737,12 @@
 "grams": 10,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 90,
+"uom": "g"
 }
 ]
 },
@@ -889,13 +907,13 @@
 "Vegan",
 "Vegetarian"
 ],
-"kcal": 238,
+"kcal": 328,
 "servingGrams": 250,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 8,
-"carbs": 20,
-"fats": 14
+"protein": 12,
+"carbs": 37,
+"fats": 16
 },
 "ingredients": [
 {
@@ -918,6 +936,12 @@
 "grams": 30,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rolled oats",
+"name_ar": "شوفان مطحون",
+"grams": 25,
+"uom": "g"
 }
 ]
 },
@@ -1672,13 +1696,13 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 297,
+"kcal": 429,
 "servingGrams": 280,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 22,
-"carbs": 32,
-"fats": 9
+"protein": 25,
+"carbs": 51,
+"fats": 15
 },
 "ingredients": [
 {
@@ -1701,6 +1725,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Granola",
+"name_ar": "غرانولا",
+"grams": 30,
+"uom": "g"
 }
 ]
 },
@@ -1875,12 +1905,7 @@
 "lunch"
 ],
 "diets": [
-"Halal",
-"Keto",
-"Kosher",
-"Omnivore",
-"Pescatarian",
-"Vegetarian"
+"Keto"
 ],
 "kcal": 219,
 "servingGrams": 280,
@@ -2177,13 +2202,13 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 144,
+"kcal": 276,
 "servingGrams": 235,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 17,
-"carbs": 19,
-"fats": 0
+"protein": 20,
+"carbs": 34,
+"fats": 7
 },
 "ingredients": [
 {
@@ -2206,6 +2231,12 @@
 "grams": 5,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Granola",
+"name_ar": "غرانولا",
+"grams": 30,
+"uom": "g"
 }
 ]
 },
@@ -2470,13 +2501,13 @@
 "Kosher",
 "Omnivore"
 ],
-"kcal": 331,
+"kcal": 454,
 "servingGrams": 300,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 63,
-"carbs": 4,
-"fats": 7
+"protein": 65,
+"carbs": 27,
+"fats": 8
 },
 "ingredients": [
 {
@@ -2499,6 +2530,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 80,
+"uom": "g"
 }
 ]
 },
@@ -2580,13 +2617,13 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 361,
+"kcal": 461,
 "servingGrams": 300,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 24,
-"carbs": 10,
-"fats": 25
+"protein": 28,
+"carbs": 32,
+"fats": 26
 },
 "ingredients": [
 {
@@ -2609,6 +2646,12 @@
 "grams": 80,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
 }
 ]
 },
@@ -2982,10 +3025,7 @@
 "breakfast"
 ],
 "diets": [
-"Keto",
-"Omnivore",
-"Halal",
-"Vegetarian"
+"Keto"
 ],
 "kcal": 360,
 "servingGrams": 180,
@@ -3569,13 +3609,13 @@
 "Kosher",
 "Omnivore"
 ],
-"kcal": 410,
+"kcal": 504,
 "servingGrams": 350,
-"ingredientCount": 6,
+"ingredientCount": 7,
 "macros": {
-"protein": 56,
-"carbs": 6,
-"fats": 18
+"protein": 60,
+"carbs": 28,
+"fats": 17
 },
 "ingredients": [
 {
@@ -3619,6 +3659,12 @@
 "grams": 10,
 "uom": "g",
 "alt_en": "Cheese Feta, Lactose-Free"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
 }
 ]
 },
@@ -3808,13 +3854,13 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 308,
+"kcal": 421,
 "servingGrams": 300,
-"ingredientCount": 3,
+"ingredientCount": 4,
 "macros": {
-"protein": 31,
-"carbs": 28,
-"fats": 8
+"protein": 36,
+"carbs": 48,
+"fats": 11
 },
 "ingredients": [
 {
@@ -3837,6 +3883,12 @@
 "grams": 30,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Rolled oats",
+"name_ar": "شوفان مطحون",
+"grams": 30,
+"uom": "g"
 }
 ]
 },
@@ -4075,13 +4127,13 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 416,
+"kcal": 514,
 "servingGrams": 420,
-"ingredientCount": 6,
+"ingredientCount": 7,
 "macros": {
-"protein": 23,
-"carbs": 18,
-"fats": 28
+"protein": 28,
+"carbs": 45,
+"fats": 26
 },
 "ingredients": [
 {
@@ -4125,6 +4177,12 @@
 "grams": 10,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 50,
+"uom": "g"
 }
 ]
 },
@@ -4139,10 +4197,7 @@
 "dinner"
 ],
 "diets": [
-"Keto",
-"Omnivore",
-"Halal",
-"Pescatarian"
+"Keto"
 ],
 "kcal": 440,
 "servingGrams": 325,
@@ -4255,13 +4310,13 @@
 "Halal",
 "Omnivore"
 ],
-"kcal": 577,
+"kcal": 745,
 "servingGrams": 340,
-"ingredientCount": 4,
+"ingredientCount": 5,
 "macros": {
-"protein": 56,
-"carbs": 5,
-"fats": 37
+"protein": 58,
+"carbs": 25,
+"fats": 47
 },
 "ingredients": [
 {
@@ -4291,6 +4346,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Potatoes baked or boiled",
+"name_ar": "بطاطس مشوية أو مسلوقة",
+"grams": 100,
+"uom": "g"
 }
 ]
 },
@@ -4531,11 +4592,7 @@
 "lunch"
 ],
 "diets": [
-"Halal",
-"Keto",
-"Kosher",
-"Omnivore",
-"Pescatarian"
+"Keto"
 ],
 "kcal": 292,
 "servingGrams": 250,
@@ -4758,13 +4815,13 @@
 "Kosher",
 "Omnivore"
 ],
-"kcal": 311,
+"kcal": 410,
 "servingGrams": 320,
-"ingredientCount": 5,
+"ingredientCount": 6,
 "macros": {
-"protein": 38,
-"carbs": 6,
-"fats": 15
+"protein": 43,
+"carbs": 24,
+"fats": 16
 },
 "ingredients": [
 {
@@ -4801,6 +4858,12 @@
 "grams": 20,
 "uom": "g",
 "alt_en": ""
+},
+{
+"name_en": "Whole wheat bread",
+"name_ar": "خبز القمح الكامل",
+"grams": 40,
+"uom": "g"
 }
 ]
 },
@@ -5079,5 +5142,314 @@
 "alt_en": ""
 }
 ]
+},
+{
+"id": "eggs_spinach_toast",
+"name_en": "Eggs, Spinach & Toast",
+"name_ar": "بيض وسبانخ مع توست",
+"desc_en": "Scrambled eggs and egg whites with sautéed spinach and whole wheat toast.",
+"desc_ar": "بيض مخفوق وبياض بيض مع سبانخ وتوست القمح الكامل.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 320,
+"servingGrams": 320,
+"ingredientCount": 4,
+"macros": {
+"protein": 30,
+"carbs": 23,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Spinach, cooked",
+"name_ar": "سبانخ مطبوخة",
+"grams": 100,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Egg, whole, Scrambled (no fat added)",
+"name_ar": "بيض مخفوق بدون دهن",
+"grams": 100,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Egg, white, scrambled (no fat added)",
+"name_ar": "بياض بيض مخفوق (بدون دهون)",
+"grams": 80,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Whole wheat bread",
+"name_ar": "خبز القمح الكامل",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "shrimp_avocado_rice_bowl",
+"name_en": "Shrimp Avocado Rice Bowl",
+"name_ar": "وعاء الأرز بالروبيان والأفوكادو",
+"desc_en": "Grilled shrimp, avocado and greens over rice.",
+"desc_ar": "روبيان مشوي وأفوكادو وخضار ورقية فوق الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore",
+"Pescatarian"
+],
+"kcal": 555,
+"servingGrams": 405,
+"ingredientCount": 5,
+"macros": {
+"protein": 41,
+"carbs": 34,
+"fats": 31
+},
+"ingredients": [
+{
+"name_en": "Shellfish Shrimps, grilled",
+"name_ar": "روبيان مشوي",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Avocado",
+"name_ar": "أفوكادو",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Salad Greens and lettuce",
+"name_ar": "خضار الخس والسلطة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 80,
+"uom": "g"
+}
+]
+},
+{
+"id": "tuna_salad_wrap",
+"name_en": "Tuna Salad Wrap",
+"name_ar": "لفافة سلطة التونة",
+"desc_en": "Tuna with lettuce and olive oil wrapped in a tortilla.",
+"desc_ar": "تونة مع خس وزيت زيتون ملفوفة في تورتيلا.",
+"categories": [
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"kcal": 404,
+"servingGrams": 295,
+"ingredientCount": 4,
+"macros": {
+"protein": 50,
+"carbs": 22,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Fish, Tuna, Canned in water, drained",
+"name_ar": "تونة معلبة بالماء مصفاة",
+"grams": 180,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Lettuce",
+"name_ar": "خس",
+"grams": 60,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 10,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Corn Tortilla",
+"name_ar": "تورتيا الذرة",
+"grams": 45,
+"uom": "g"
+}
+]
+},
+{
+"id": "keto_steak_and_eggs",
+"name_en": "Keto Steak and Eggs",
+"name_ar": "ستيك وبيض كيتو",
+"desc_en": "Grilled steak with boiled eggs, avocado and butter.",
+"desc_ar": "ستيك مشوي مع البيض المسلوق والأفوكادو والزبدة.",
+"categories": [
+"breakfast",
+"lunch",
+"dinner"
+],
+"diets": [
+"Keto"
+],
+"ingredients": [
+{
+"name_en": "Grilled steak",
+"name_ar": "ستيك مشوي",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Egg, whole, boiled",
+"name_ar": "بيض مسلوق",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Avocado",
+"name_ar": "أفوكادو",
+"grams": 70,
+"uom": "g"
+},
+{
+"name_en": "Butter",
+"name_ar": "زبدة",
+"grams": 10,
+"uom": "g"
+}
+],
+"kcal": 776,
+"macros": {
+"protein": 58,
+"carbs": 8,
+"fats": 59
+},
+"ingredientCount": 4,
+"servingGrams": 350
+},
+{
+"id": "keto_salmon_avocado_plate",
+"name_en": "Keto Salmon Avocado Plate",
+"name_ar": "طبق السلمون والأفوكادو كيتو",
+"desc_en": "Grilled salmon with avocado, broccoli and olive oil.",
+"desc_ar": "سلمون مشوي مع الأفوكادو والبروكلي وزيت الزيتون.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Keto"
+],
+"ingredients": [
+{
+"name_en": "Salmon",
+"name_ar": "سلمون",
+"grams": 170,
+"uom": "g"
+},
+{
+"name_en": "Avocado",
+"name_ar": "أفوكادو",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Broccoli Cooked",
+"name_ar": "بروكلي مطبوخ",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 10,
+"uom": "g"
+}
+],
+"kcal": 612,
+"macros": {
+"protein": 38,
+"carbs": 16,
+"fats": 45
+},
+"ingredientCount": 4,
+"servingGrams": 380
+},
+{
+"id": "keto_cheese_omelette",
+"name_en": "Keto Cheese Omelette",
+"name_ar": "أومليت الجبن كيتو",
+"desc_en": "Fluffy omelette with cheddar, butter and spinach.",
+"desc_ar": "أومليت هش مع الشيدر والزبدة والسبانخ.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Keto"
+],
+"ingredients": [
+{
+"name_en": "Whole eggs",
+"name_ar": "بيض كامل",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Cheddar",
+"name_ar": "جبنة شيدر",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Spinach, cooked",
+"name_ar": "سبانخ مطبوخة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Butter",
+"name_ar": "زبدة",
+"grams": 10,
+"uom": "g"
+}
+],
+"kcal": 461,
+"macros": {
+"protein": 31,
+"carbs": 4,
+"fats": 36
+},
+"ingredientCount": 4,
+"servingGrams": 260
 }
 ]

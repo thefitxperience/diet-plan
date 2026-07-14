@@ -1,0 +1,6 @@
+name = "fit-generator"
+main = "src/index.js"
+compatibility_date = "2024-09-23"
+
+# The generator has no secrets and no bindings — it's pure computation over the
+# bundled meal catalog. Deploy with:  npx wrangler deploy
