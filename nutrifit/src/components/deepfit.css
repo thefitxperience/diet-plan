@@ -180,10 +180,11 @@
 
 .deepfit-guidelines-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #000; }
 .deepfit-guidelines-section { margin-bottom: 10px; }
-.deepfit-guidelines-section h3 { font-size: 12px; font-weight: 700; margin-bottom: 3px; color: #000; }
+.deepfit-guidelines-section h3 { font-size: 12px; font-weight: 700; margin-top: 0; margin-bottom: 3px; color: #000; }
 .deepfit-guidelines-section p {
   font-size: 12px;
   line-height: 1.2;
+  margin-top: 0;
   margin-bottom: 4px;
   color: #333;
   text-align: justify;
@@ -192,7 +193,7 @@
 .deepfit-guidelines-section ol { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.2; }
 .deepfit-two-column { display: flex; gap: 30px; margin-top: 5px; }
 .deepfit-column { flex: 1; }
-.deepfit-column h4 { font-size: 12px; font-weight: 700; margin-bottom: 3px; }
+.deepfit-column h4 { font-size: 12px; font-weight: 700; margin-top: 0; margin-bottom: 3px; }
 .deepfit-column ul { margin: 0; padding-left: 0; list-style: none; font-size: 12px; line-height: 1.2; }
 
 /* ── Arabic / RTL overrides (ported; html2canvas-safe: bullets and ordinals

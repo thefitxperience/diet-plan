@@ -236,16 +236,14 @@ export function scaleOptionToKcal(option, targetKcal) {
 const UNIT_FOODS = [
   { re: /egg[,\s]+white/i, g: 33, step: 1, en: ['egg white', 'egg whites'], ar: ['بياض بيضة', 'بياض بيض'] },
   { re: /\begg/i, g: 50, step: 1, en: ['egg', 'eggs'], ar: ['بيضة', 'بيضات'] },
-  // Pita stays in grams — its weight varies too much (40–90 g) to count. Must come
-  // BEFORE the bread rule, since "Pita … Bread" would otherwise match as "slices".
-  { re: /pita/i, noUnit: true },
-  { re: /tortilla/i, g: 30, step: 1, en: ['tortilla', 'tortillas'], ar: ['تورتيلا', 'تورتيلا'] },
+  // All bread/pita/toast/tortilla stays in grams — loaf/slice/wrap sizes vary too
+  // much to count reliably, so grams are the honest portion.
+  { re: /pita|bread|toast|tortilla/i, noUnit: true },
   { re: /rice\s*cake/i, g: 9, step: 1, en: ['rice cake', 'rice cakes'], ar: ['كعكة أرز', 'كعكات أرز'] },
-  { re: /bread|toast/i, g: 30, step: 1, en: ['slice', 'slices'], ar: ['شريحة', 'شرائح'] },
-  { re: /avocado/i, g: 150, step: 0.5, en: ['avocado', 'avocados'], ar: ['حبة أفوكادو', 'حبات أفوكادو'] },
   { re: /banana/i, g: 118, step: 0.5, en: ['banana', 'bananas'], ar: ['موزة', 'موز'] },
   { re: /\bapple/i, g: 120, step: 0.5, en: ['apple', 'apples'], ar: ['تفاحة', 'تفاحات'] },
   { re: /\bdate/i, g: 8, step: 1, en: ['date', 'dates'], ar: ['تمرة', 'تمرات'] },
+  // avocado intentionally left in grams (size varies a lot).
 ]
 
 function fmtCount(n) {

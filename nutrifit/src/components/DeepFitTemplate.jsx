@@ -15,7 +15,7 @@
 import planAr from '../i18n/plan-ar.json'
 import {
   DIET_INTRO, GUIDELINES_TITLE, GUIDELINES_INTRO,
-  GUIDELINES_PAGE_1, GUIDELINES_PAGE_2,
+  GUIDELINES_PAGE_1, GUIDELINES_PAGE_2, ABOUT_TITLE, ABOUT_SECTIONS,
 } from './deepfitGuidelines'
 import { formatAmount } from '../lib/planModel'
 import './deepfit.css'
@@ -183,7 +183,7 @@ function MealTable({ meal, title, icon, t, selectable, selection, onSelect, warn
 function GuidelinesSection({ section, t }) {
   return (
     <div className="deepfit-guidelines-section">
-      <h3>{t.ui(section.heading)}</h3>
+      {section.heading && <h3>{t.ui(section.heading)}</h3>}
       {(section.paragraphs || []).map((p, i) => (
         <p key={i} style={i === 0 && section.orderedList ? { marginBottom: 5 } : undefined}>
           {t.isAr ? arNums(t.para(p)) : p}
@@ -208,6 +208,9 @@ function GuidelinesSection({ section, t }) {
           {section.columns.map((col, i) => (
             <div className="deepfit-column" key={i}>
               <h4>{t.ui(col.heading)}</h4>
+              {(col.paragraphs || []).map((p, k) => (
+                <p key={k}>{t.isAr ? arNums(t.para(p)) : p}</p>
+              ))}
               <ul>
                 {col.items.map((li, j) => <li key={j}>{t.item(li)}</li>)}
               </ul>
@@ -319,6 +322,12 @@ export default function DeepFitTemplate({
           <div className="deepfit-page" key={idx} ref={ref} style={bgStyle}>
             <Header gym={gym} t={t} />
             <div className="deepfit-content">
+              {page.type === 'guidelines1' && (
+                <>
+                  <div className="deepfit-guidelines-title">{t.ui(ABOUT_TITLE)}</div>
+                  {ABOUT_SECTIONS.map((s, i) => <GuidelinesSection section={s} t={t} key={`about${i}`} />)}
+                </>
+              )}
               <div className="deepfit-guidelines-title">{t.ui(GUIDELINES_TITLE)}</div>
               {page.type === 'guidelines1' && (
                 <p className="deepfit-diet-intro" style={{ fontSize: 12 }}>
