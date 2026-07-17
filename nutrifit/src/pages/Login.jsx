@@ -10,6 +10,8 @@ const DEMO_ACCOUNTS = [
   { key: 'fit_admin', label: 'FIT Admin', email: 'fitadmin@demo.thefitxperience.com' },
 ]
 const DEMO_PASSWORD = 'FITdemo2026!'
+// Temporarily hidden — flip to true to bring the demo-login buttons back.
+const SHOW_DEMO_ACCOUNTS = false
 
 export default function Login() {
   const { signIn, signUp } = useAuth()
@@ -112,17 +114,19 @@ export default function Login() {
           </button>
         </div>
 
-        <div className="demo-accounts">
-          <div className="demo-divider"><span>{t('auth.demoAccounts')}</span></div>
-          <div className="row" style={{ flexWrap: 'nowrap' }}>
-            {DEMO_ACCOUNTS.map((d) => (
-              <button key={d.key} type="button" className="btn secondary sm" style={{ flex: 1, justifyContent: 'center' }}
-                disabled={busy || !supabaseConfigured} onClick={() => demoLogin(d)}>
-                {d.label || t(`role.${d.key}`)}
-              </button>
-            ))}
+        {SHOW_DEMO_ACCOUNTS && (
+          <div className="demo-accounts">
+            <div className="demo-divider"><span>{t('auth.demoAccounts')}</span></div>
+            <div className="row" style={{ flexWrap: 'nowrap' }}>
+              {DEMO_ACCOUNTS.map((d) => (
+                <button key={d.key} type="button" className="btn secondary sm" style={{ flex: 1, justifyContent: 'center' }}
+                  disabled={busy || !supabaseConfigured} onClick={() => demoLogin(d)}>
+                  {d.label || t(`role.${d.key}`)}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   )
