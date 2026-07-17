@@ -29,8 +29,20 @@ function estimateBmr({ weight, height, age, gender }) {
   return Math.round(gender === 'F' ? base - 161 : base + 5)
 }
 
-export default function Intake() {
-  const { token } = useParams()
+// Temporary vanity slugs for the soft launch: map a friendly slug to a gym's
+// real intake token, so a client can open /#/intake/bodycoach instead of a UUID.
+// The pretty slug stays in the URL; the real token is used behind the scenes.
+// Add gyms here as needed (slug must be lowercase).
+const INTAKE_SLUGS = {
+  bodycoach: '78054fa5-5885-46cd-b7a0-dced92581b6b',
+}
+
+export default function Intake({ slug }) {
+  const params = useParams()
+  // `slug` comes from the clean /diet/<slug> path; otherwise the /#/intake/<token>
+  // route param. Resolve a vanity slug to the real token (falls back as-is).
+  const rawToken = slug || params.token
+  const token = INTAKE_SLUGS[(rawToken || '').toLowerCase()] || rawToken
   const { t, lang, setLang } = useI18n()
 
   const [gym, setGym] = useState(null)

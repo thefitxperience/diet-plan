@@ -323,6 +323,7 @@
   "settings.intakeHint": "Share this link with clients. They upload their InBody and fill a short questionnaire — a plan is created and sent to a nutritionist for approval. No login needed.",
   "settings.copyLink": "Copy link",
   "settings.copied": "Copied!",
+  "settings.qrCode": "QR code",
 
   "admin.gyms": "Gyms",
   "admin.newGym": "New gym",

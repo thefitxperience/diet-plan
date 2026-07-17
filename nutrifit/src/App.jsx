@@ -36,8 +36,11 @@ export default function App() {
 
   // Public, no-login links — rendered before any auth gate. Note the trailing
   // slash on '/plan/' so it doesn't match the authenticated '/plans' list.
+  // Clean, hash-free intake link (soft launch): /diet/<slug> is served to
+  // index.html by an Apache rewrite, so we read the real path here.
+  const cleanIntake = window.location.pathname.match(/^\/diet\/([^/]+)\/?$/i)
   const isIntake = location.pathname.startsWith('/intake')
-  const isPublic = isIntake || location.pathname.startsWith('/plan/')
+  const isPublic = isIntake || location.pathname.startsWith('/plan/') || !!cleanIntake
 
   // Always land on the dashboard on sign-in. Keyed on the user id going
   // falsy→truthy, which fires on login and on a refresh that restores the
@@ -50,6 +53,9 @@ export default function App() {
     prevUserId.current = userId
   }, [userId, navigate, isPublic])
 
+  if (cleanIntake) {
+    return <Intake slug={decodeURIComponent(cleanIntake[1])} />
+  }
   if (isPublic) {
     return (
       <Routes>
