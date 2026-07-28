@@ -17,6 +17,7 @@ import {
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateSafePlan } from '../lib/planGenerator'
+import { goalAdjustedKcal } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 import PhoneField from '../components/PhoneField'
@@ -170,7 +171,10 @@ export default function Intake({ slug }) {
       const { plan, apiResponse, substitutions } = await generateSafePlan(
         payload,
         { allergyNames, conditionNames },
-        { fullName: `${form.firstName} ${form.lastName}`, dob: form.dob, dailyKcal: calories, goalText: GOAL_LABELS[form.goal] },
+        // Header shows the goal-adjusted intake the client actually eats (the API
+        // shifts meals by ±500 for the goal); raw `calories` here would mismatch
+        // the meal totals for lose/gain plans.
+        { fullName: `${form.firstName} ${form.lastName}`, dob: form.dob, dailyKcal: goalAdjustedKcal(calories, form.goal), goalText: GOAL_LABELS[form.goal] },
       )
       plan.dietary = { substitutions }
 

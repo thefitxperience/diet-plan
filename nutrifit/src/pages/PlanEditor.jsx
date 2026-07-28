@@ -11,6 +11,7 @@ import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
 import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
   optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL, formatAmount,
+  goalAdjustedKcal,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
@@ -160,7 +161,8 @@ export default function PlanEditor() {
       }, {
         fullName: plan.header.fullName,
         dob: plan.header.dob,
-        dailyKcal: q.kilocalorieNeeded,
+        // Goal-adjusted so the header matches the API's ±500-shifted meal totals.
+        dailyKcal: goalAdjustedKcal(q.kilocalorieNeeded, goal),
         goalText: plan.header.dietType,
       })
       model.header.nextCheckup = plan.header.nextCheckup
