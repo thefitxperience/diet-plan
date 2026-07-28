@@ -64,12 +64,18 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // meals that can't reach a high target — e.g. intermittent-fasting — don't
     // lead the list). Ties keep catalog order, preserving variety.
     const oversized = (o) => optionWeight(o) > MEAL_WEIGHT_CAP
-    const ranked = options
-      .sort((a, b) => {
-        if (oversized(a) !== oversized(b)) return oversized(a) ? 1 : -1
-        return Math.abs(a.kcal - target) - Math.abs(b.kcal - target)
-      })
-      .slice(0, MAX_OPTIONS_PER_MEAL)
+    const sorted = options.sort((a, b) => {
+      if (oversized(a) !== oversized(b)) return oversized(a) ? 1 : -1
+      return Math.abs(a.kcal - target) - Math.abs(b.kcal - target)
+    })
+    // Keep only options that land within a tolerance band of the meal target, so
+    // every "Choose One" option is interchangeable — picking any keeps the client
+    // on the daily total. If too few reach the target (a very high per-meal target
+    // on a restrictive/IF plan), fall back to the closest ones so the meal is
+    // never thin.
+    const tol = Math.max(60, target * 0.12)
+    const inBand = sorted.filter((o) => !oversized(o) && Math.abs(o.kcal - target) <= tol)
+    const ranked = (inBand.length >= 3 ? inBand : sorted).slice(0, MAX_OPTIONS_PER_MEAL)
     for (const o of ranked) {
       if (o._swaps) {
         for (const s of o._swaps) substitutions.push({ mealId: m.id, optionId: o.id, ...s })
