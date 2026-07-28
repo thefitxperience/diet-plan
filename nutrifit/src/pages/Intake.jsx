@@ -16,7 +16,7 @@ import {
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
-import { generateSafePlan } from '../lib/planGenerator'
+import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
@@ -168,12 +168,12 @@ export default function Intake({ slug }) {
       const allergyNames = allergies.filter((a) => selectedAllergyIds.includes(a.allergyId)).map((a) => a.allergyName)
       const conditionNames = conditions.filter((c) => selectedConditionIds.includes(c.conditionId)).map((c) => c.conditionName)
 
-      const { plan, apiResponse, substitutions } = await generateSafePlan(
+      // Catalog generator (same as the nutritionist NewPlan flow): every meal
+      // option is scaled to its per-meal target, so the meals sum exactly to the
+      // goal-adjusted daily total shown in the header.
+      const { plan, apiResponse, substitutions } = await generateCatalogPlan(
         payload,
         { allergyNames, conditionNames },
-        // Header shows the goal-adjusted intake the client actually eats (the API
-        // shifts meals by ±500 for the goal); raw `calories` here would mismatch
-        // the meal totals for lose/gain plans.
         { fullName: `${form.firstName} ${form.lastName}`, dob: form.dob, dailyKcal: goalAdjustedKcal(calories, form.goal), goalText: GOAL_LABELS[form.goal] },
       )
       plan.dietary = { substitutions }

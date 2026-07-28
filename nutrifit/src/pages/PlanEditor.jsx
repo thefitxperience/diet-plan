@@ -16,7 +16,7 @@ import {
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
 import { arDigits } from '../lib/digits'
-import { generateSafePlan } from '../lib/planGenerator'
+import { generateCatalogPlan } from '../lib/planGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 
 const EDITABLE = ['DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED']
@@ -148,20 +148,19 @@ export default function PlanEditor() {
     setBusy('regen')
     setError(null)
     try {
-      // strip UI-only fields stored alongside the API payload
+      // strip UI-only fields stored alongside the questionnaire payload
       const { goal, planStyle, allergyNames, conditionNames, ...q } = row.questionnaire
-      // Never send restrictions to the API — its filter corrupts the plan
-      // (0 g quantities, dropped ingredients). generateSafePlan applies them
-      // itself and backfills replaced dishes from extra API calls.
       q.conditionIdSet = []
       q.allergyIdSet = []
-      const { plan: model, apiResponse, substitutions } = await generateSafePlan(q, {
+      // Catalog generator (same as NewPlan): meals are scaled to per-meal targets
+      // that sum to the goal-adjusted daily total, and restrictions are applied
+      // via ingredient swaps — so the header always matches the meal totals.
+      const { plan: model, apiResponse, substitutions } = await generateCatalogPlan(q, {
         allergyNames: row.questionnaire?.allergyNames || [],
         conditionNames: row.questionnaire?.conditionNames || [],
       }, {
         fullName: plan.header.fullName,
         dob: plan.header.dob,
-        // Goal-adjusted so the header matches the API's ±500-shifted meal totals.
         dailyKcal: goalAdjustedKcal(q.kilocalorieNeeded, goal),
         goalText: plan.header.dietType,
       })
