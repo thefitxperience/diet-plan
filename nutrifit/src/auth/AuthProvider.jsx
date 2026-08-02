@@ -40,8 +40,12 @@ export function AuthProvider({ children }) {
       setProfileError(null)
       setNeedsOnboarding(false)
       try {
-        const { data: prof } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
+        const { data: prof, error: profErr } = await supabase.from('profiles').select('*').eq('id', userId).maybeSingle()
         if (cancelled) return
+        // supabase-js resolves (rather than throwing) on a network/RLS failure,
+        // so this error must be handled here — treating it as "no row" would
+        // send an already-registered user back through onboarding.
+        if (profErr) { setProfile(null); setGym(null); setProfileError(profErr.message); return }
         // No profile row → the user hasn't registered a role/gym yet.
         if (!prof) { setProfile(null); setGym(null); setNeedsOnboarding(true); return }
         setProfile(prof)

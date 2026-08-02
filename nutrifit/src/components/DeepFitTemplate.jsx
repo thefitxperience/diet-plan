@@ -337,6 +337,9 @@ export default function DeepFitTemplate({
   const pages = planPageList(plan)
   const mealById = Object.fromEntries(plan.meals.map((m) => [m.id, m]))
   const h = plan.header
+  // submit() stamps the sign-off on the plan root; accept either position so a
+  // plan saved under the older shape still renders it.
+  const approval = plan.approval || h.approval
 
   const infoRow = (
     <div className="deepfit-info-row">
@@ -417,18 +420,18 @@ export default function DeepFitTemplate({
                 </p>
               )}
               {sections.map((s, i) => <GuidelinesSection section={s} t={t} key={i} />)}
-              {page.type === 'guidelines2' && h.approval?.name && (
+              {page.type === 'guidelines2' && approval?.name && (
                 <div className="deepfit-signoff">
                   <div className="deepfit-signoff-label">{t.ui('Reviewed & approved by')}</div>
                   <div className="deepfit-signoff-name">
-                    {h.approval.name}
-                    {h.approval.title ? `, ${h.approval.title}` : ''}
-                    {h.approval.registration ? ` · ${h.approval.registration}` : ''}
+                    {approval.name}
+                    {approval.title ? `, ${approval.title}` : ''}
+                    {approval.registration ? ` · ${approval.registration}` : ''}
                   </div>
-                  {h.approval.date && (
-                    <div className="deepfit-signoff-date">{t.ui('Date')}: {t.num(fmtDate(h.approval.date))}</div>
+                  {approval.date && (
+                    <div className="deepfit-signoff-date">{t.ui('Date')}: {t.num(fmtDate(approval.date))}</div>
                   )}
-                  {h.approval.note && <div className="deepfit-signoff-note">{h.approval.note}</div>}
+                  {approval.note && <div className="deepfit-signoff-note">{approval.note}</div>}
                 </div>
               )}
               <Wave variant={page.type === 'guidelines1' ? 'low' : undefined} />

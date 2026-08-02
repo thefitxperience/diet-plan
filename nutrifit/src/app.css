@@ -723,6 +723,12 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .client-grid > div > span:last-child { font-size: 0.9rem; }
 .intake-range { margin: 8px 0 0; }
 
+/* Fallback row shown when the browser blocks the WhatsApp popup. */
+.share-recover {
+  display: flex; flex-wrap: wrap; align-items: center;
+  justify-content: space-between; gap: 8px 12px;
+}
+
 /* Site-styled ingredient autocomplete. */
 .ingredient-add { position: relative; }
 .ingredient-dropdown {

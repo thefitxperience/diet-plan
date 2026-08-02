@@ -138,7 +138,9 @@ export default function InBodyUpload() {
           </button>
           <input
             ref={inputRef} type="file" accept=".pdf,image/*" hidden
-            onChange={(e) => handleFile(e.target.files[0])}
+            /* clear the value so re-picking the SAME file after a failed scan
+               still fires a change event */
+            onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; handleFile(f) }}
           />
         </div>
       )}

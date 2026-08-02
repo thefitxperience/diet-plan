@@ -261,7 +261,7 @@ export default function Intake({ slug }) {
                 <p className="muted small">{t('intake.inbodyIntro')}</p>
                 {/* Explicit image types (not image/*) so iOS/Android skip the
                     "Take Photo" camera option and only offer Photo Library + files. */}
-                <input ref={inputRef} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/heic,image/heif,image/webp" hidden onChange={(e) => handleFile(e.target.files[0])} />
+                <input ref={inputRef} type="file" accept="application/pdf,.pdf,image/jpeg,image/png,image/heic,image/heif,image/webp" hidden onChange={(e) => { const f = e.target.files[0]; e.target.value = ''; handleFile(f) }} />
                 {parsing ? (
                   <div className="card center" style={{ minHeight: 160 }}>
                     <Spinner />

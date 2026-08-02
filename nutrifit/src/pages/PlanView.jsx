@@ -54,6 +54,8 @@ export default function PlanView() {
   const [busy, setBusy] = useState(null)
   const [error, setError] = useState(null)
   const [notice, setNotice] = useState(null)
+  // Last WhatsApp link built, kept so a blocked popup is still reachable.
+  const [shareLink, setShareLink] = useState(null)
   const [deliveries, setDeliveries] = useState([])
   const [refresh, setRefresh] = useState(0)
   const canvasRef = useRef()
@@ -90,6 +92,7 @@ export default function PlanView() {
     setBusy(channel)
     setError(null)
     setNotice(null)
+    setShareLink(null)
     try {
       const blob = await makePdf()
       const pdfPath = await uploadPdfSnapshot(row.gym_id, row.id, blob, lang2)
@@ -115,7 +118,14 @@ export default function PlanView() {
         // no giant signed URL in the message, no manual attach.
         const shareUrl = planShareUrl(deliveryId)
         const msg = `${t('delivery.messageLink', { name: client.first_name, gym: planGym?.name || 'your gym' })}\n${shareUrl}`
-        window.open(waLink(client.phone, msg), '_blank')
+        const url = waLink(client.phone, msg)
+        // Always surface the link in the UI too. By this point the click's user
+        // activation may have expired (PDF render + upload take a few seconds),
+        // so window.open can be blocked — on a slow machine or a long plan it
+        // silently does nothing. The panel below is then the way back to it, and
+        // a real click can never be blocked.
+        setShareLink({ wa: url, share: shareUrl })
+        window.open(url, '_blank')
       } else if (channel === 'email') {
         const pdfBase64 = await blobToBase64(blob)
         await sendEmail({
@@ -129,12 +139,15 @@ export default function PlanView() {
         })
       }
 
-      if (row.status !== 'SENT') {
+      // Downloading is the dietitian taking their own copy — it never reaches the
+      // client, so it must not mark the plan delivered. The dashboard's delivery
+      // rate is derived from SENT status, so counting it here overstated it.
+      if (channel !== 'download' && row.status !== 'SENT') {
         const { error: trErr } = await supabase.rpc('transition_plan', { p_plan_id: row.id, p_action: 'sent' })
         if (trErr) throw trErr
         setRow({ ...row, status: 'SENT' })
       }
-      setNotice(t('delivery.recorded'))
+      setNotice(t(channel === 'download' ? 'delivery.downloaded' : 'delivery.recorded'))
       setRefresh((r) => r + 1)
       const { data: d } = await supabase.from('deliveries').select('*').eq('plan_id', id).order('created_at', { ascending: false })
       setDeliveries(d || [])
@@ -185,6 +198,20 @@ export default function PlanView() {
               </button>
             </div>
           </div>
+          {shareLink && (
+            <Alert kind="info">
+              <div className="share-recover">
+                <span>{t('delivery.openManually')}</span>
+                <div className="row">
+                  <a className="btn sm" href={shareLink.wa} target="_blank" rel="noreferrer">{t('delivery.whatsapp')}</a>
+                  <button className="btn secondary sm" onClick={() => {
+                    navigator.clipboard?.writeText(shareLink.share)
+                    setNotice(t('delivery.linkCopied'))
+                  }}>{t('delivery.copyLink')}</button>
+                </div>
+              </div>
+            </Alert>
+          )}
           {deliveries.length > 0 && (
             <>
               <h3>{t('delivery.history')}</h3>
@@ -197,6 +224,14 @@ export default function PlanView() {
                       d.recipient,
                       fmtDateTime(d.created_at, lang),
                     ].filter(Boolean).join(' · ')}
+                    {/* The share URL is derived from the delivery id, so every past
+                        shared delivery stays reachable even if its popup was blocked. */}
+                    {(d.channel === 'whatsapp_link' || d.channel === 'email') && (
+                      <>
+                        {' · '}
+                        <a href={planShareUrl(d.id)} target="_blank" rel="noreferrer">{t('delivery.viewLink')}</a>
+                      </>
+                    )}
                   </li>
                 ))}
               </ul>

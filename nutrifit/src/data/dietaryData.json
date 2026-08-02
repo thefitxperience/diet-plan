@@ -1,2234 +1,2278 @@
 {
- "_note": "Generated from Ingredients.xlsx + Meal Breakdown.xlsx (exports from the FIT DB). Regenerate with scripts/gen_dietary_data.py; do not hand-edit.",
- "restrictionCanonical": {
-  "cardiovascular disease": "cardiovascular disease",
-  "cardiovascular diseases": "cardiovascular disease",
-  "celiac disease": "celiac disease",
-  "chronic kidney disease": "chronic kidney disease",
-  "diabetes": "diabetes",
-  "diabetes mellitus": "diabetes",
-  "egg allergy": "egg allergy",
-  "fatty liver disease": "fatty liver disease",
-  "favism": "favism",
-  "gerd": "gerd",
-  "gerd (acid reflux)": "gerd",
-  "gluten sensitivity": "gluten sensitivity",
-  "gout": "gout",
-  "hemochromatosis": "hemochromatosis",
-  "histamine intolerance": "histamine intolerance",
-  "hypercholesterolemia": "hypercholesterolemia",
-  "hyperkalemia": "hyperkalemia",
-  "hyperkaliemia": "hyperkalemia",
-  "hypertension": "hypertension",
-  "hyperthyroidism": "hyperthyroidism",
-  "hypoglycemia": "hypoglycemia",
-  "ibs": "ibs",
-  "kidney stones": "kidney stones",
-  "lactose intolerance": "lactose intolerance",
-  "latex-fruit cross-reactivity": "latex-fruit cross-reactivity",
-  "latex-fruit syndrome": "latex-fruit syndrome",
-  "legume family cross-reactivity": "legume family cross-reactivity",
-  "mellitus": "diabetes",
-  "nut allergy": "nut allergy",
-  "oral allergy syndrome": "oral allergy syndrome",
-  "pancreatitis": "pancreatitis",
-  "phenylketonuria": "phenylketonuria",
-  "seafood allergy": "seafood allergy",
-  "sesame allergy": "sesame allergy",
-  "soy allergy": "soy allergy",
-  "thyroid": "thyroid",
-  "thyroid dysfunction": "thyroid",
-  "wheat allergy": "wheat allergy",
-  "wilson's disease": "wilson's disease"
- },
- "restrictionExpand": {
-  "celiac disease / gluten sensitivity": [
-   "celiac disease",
-   "gluten sensitivity"
-  ]
- },
- "ingredients": {
-  "almond butter": {
-   "name": "Almond butter",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
+  "_note": "Generated from Ingredients.xlsx + Meal Breakdown.xlsx (exports from the FIT DB). Regenerate with scripts/gen_dietary_data.py; do not hand-edit.",
+  "restrictionCanonical": {
+    "cardiovascular disease": "cardiovascular disease",
+    "cardiovascular diseases": "cardiovascular disease",
+    "celiac disease": "celiac disease",
+    "chronic kidney disease": "chronic kidney disease",
+    "diabetes": "diabetes",
+    "diabetes mellitus": "diabetes",
+    "egg allergy": "egg allergy",
+    "fatty liver disease": "fatty liver disease",
+    "favism": "favism",
+    "gerd": "gerd",
+    "gerd (acid reflux)": "gerd",
+    "gluten sensitivity": "gluten sensitivity",
+    "gout": "gout",
+    "hemochromatosis": "hemochromatosis",
+    "histamine intolerance": "histamine intolerance",
+    "hypercholesterolemia": "hypercholesterolemia",
+    "hyperkalemia": "hyperkalemia",
+    "hyperkaliemia": "hyperkalemia",
+    "hypertension": "hypertension",
+    "hyperthyroidism": "hyperthyroidism",
+    "hypoglycemia": "hypoglycemia",
+    "ibs": "ibs",
+    "kidney stones": "kidney stones",
+    "lactose intolerance": "lactose intolerance",
+    "latex-fruit cross-reactivity": "latex-fruit cross-reactivity",
+    "latex-fruit syndrome": "latex-fruit syndrome",
+    "legume family cross-reactivity": "legume family cross-reactivity",
+    "mellitus": "diabetes",
+    "nut allergy": "nut allergy",
+    "oral allergy syndrome": "oral allergy syndrome",
+    "pancreatitis": "pancreatitis",
+    "phenylketonuria": "phenylketonuria",
+    "seafood allergy": "seafood allergy",
+    "sesame allergy": "sesame allergy",
+    "soy allergy": "soy allergy",
+    "thyroid": "thyroid",
+    "thyroid dysfunction": "thyroid",
+    "wheat allergy": "wheat allergy",
+    "wilson's disease": "wilson's disease"
   },
-  "almond milk latte (unsweetened)": {
-   "name": "Almond Milk Latte (Unsweetened)",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
+  "restrictionExpand": {
+    "celiac disease / gluten sensitivity": [
+      "celiac disease",
+      "gluten sensitivity"
+    ]
   },
-  "almond milk, unsweetened": {
-   "name": "Almond Milk, unsweetened",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "oral allergy syndrome",
-    "phenylketonuria"
-   ]
-  },
-  "almonds": {
-   "name": "Almonds",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
-  },
-  "apple, dried": {
-   "name": "Apple, Dried",
-   "restrictions": [
-    "diabetes",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "apple, unpeeled, small": {
-   "name": "Apple, unpeeled, small",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "apricot, fresh": {
-   "name": "Apricot, fresh",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "apricots dried": {
-   "name": "Apricots Dried",
-   "restrictions": [
-    "diabetes",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "artichoke cooked": {
-   "name": "Artichoke cooked",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "arugula": {
-   "name": "Arugula",
-   "restrictions": []
-  },
-  "asparagus greens, cooked": {
-   "name": "Asparagus Greens, cooked",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "avocado": {
-   "name": "Avocado",
-   "restrictions": [
-    "histamine intolerance",
-    "hyperkalemia",
-    "ibs",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "baba ghanoush": {
-   "name": "Baba Ghanoush",
-   "restrictions": [
-    "sesame allergy"
-   ]
-  },
-  "bagel multigrain": {
-   "name": "Bagel Multigrain",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ]
-  },
-  "baguette, multigrain": {
-   "name": "Baguette, multigrain",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ]
-  },
-  "banana": {
-   "name": "Banana",
-   "restrictions": [
-    "hyperkalemia",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome"
-   ]
-  },
-  "basil": {
-   "name": "Basil",
-   "restrictions": []
-  },
-  "beef strips": {
-   "name": "Beef strips",
-   "restrictions": []
-  },
-  "beets, cooked": {
-   "name": "Beets, cooked",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "bell pepper": {
-   "name": "Bell pepper",
-   "restrictions": []
-  },
-  "black beans": {
-   "name": "Black Beans",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "black coffee (brewed)": {
-   "name": "Black Coffee (Brewed)",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "blackberries, fresh or frozen": {
-   "name": "Blackberries, Fresh or Frozen",
-   "restrictions": []
-  },
-  "blue cheese (gorgonzola)": {
-   "name": "Blue Cheese (Gorgonzola)",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "blueberries, dried": {
-   "name": "Blueberries, Dried",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "blueberries, fresh or frozen": {
-   "name": "Blueberries, Fresh or Frozen",
-   "restrictions": []
-  },
-  "brazil nuts": {
-   "name": "Brazil Nuts",
-   "restrictions": [
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "broccoli cooked": {
-   "name": "Broccoli Cooked",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "broccoli raw": {
-   "name": "Broccoli Raw",
-   "restrictions": [
-    "ibs",
-    "kidney stones"
-   ]
-  },
-  "broth": {
-   "name": "Broth",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "brussels sprouts": {
-   "name": "Brussels sprouts",
-   "restrictions": [
-    "ibs",
-    "thyroid"
-   ]
-  },
-  "buckwheat (cooked)": {
-   "name": "Buckwheat (cooked)",
-   "restrictions": []
-  },
-  "bulgur": {
-   "name": "Bulgur",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Quinoa (cooked, plain)",
-     "restrictions": []
+  "ingredients": {
+    "almond butter": {
+      "name": "Almond butter",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "almond flour": {
+      "name": "Almond flour",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "almond milk latte (unsweetened)": {
+      "name": "Almond Milk Latte (Unsweetened)",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "almond milk, unsweetened": {
+      "name": "Almond Milk, unsweetened",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "oral allergy syndrome",
+        "phenylketonuria"
+      ]
+    },
+    "almonds": {
+      "name": "Almonds",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "apple, dried": {
+      "name": "Apple, Dried",
+      "restrictions": [
+        "diabetes",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "apple, unpeeled, small": {
+      "name": "Apple, unpeeled, small",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "apricot, fresh": {
+      "name": "Apricot, fresh",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "apricots dried": {
+      "name": "Apricots Dried",
+      "restrictions": [
+        "diabetes",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "artichoke cooked": {
+      "name": "Artichoke cooked",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "arugula": {
+      "name": "Arugula",
+      "restrictions": []
+    },
+    "asparagus greens, cooked": {
+      "name": "Asparagus Greens, cooked",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "avocado": {
+      "name": "Avocado",
+      "restrictions": [
+        "histamine intolerance",
+        "hyperkalemia",
+        "ibs",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "baba ghanoush": {
+      "name": "Baba Ghanoush",
+      "restrictions": [
+        "sesame allergy"
+      ]
+    },
+    "bagel multigrain": {
+      "name": "Bagel Multigrain",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ]
+    },
+    "baguette, multigrain": {
+      "name": "Baguette, multigrain",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ]
+    },
+    "banana": {
+      "name": "Banana",
+      "restrictions": [
+        "hyperkalemia",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome"
+      ]
+    },
+    "basil": {
+      "name": "Basil",
+      "restrictions": []
+    },
+    "beef strips": {
+      "name": "Beef strips",
+      "restrictions": []
+    },
+    "beets, cooked": {
+      "name": "Beets, cooked",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "bell pepper": {
+      "name": "Bell pepper",
+      "restrictions": []
+    },
+    "black beans": {
+      "name": "Black Beans",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "black coffee (brewed)": {
+      "name": "Black Coffee (Brewed)",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "blackberries, fresh or frozen": {
+      "name": "Blackberries, Fresh or Frozen",
+      "restrictions": []
+    },
+    "blue cheese (gorgonzola)": {
+      "name": "Blue Cheese (Gorgonzola)",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "blueberries, dried": {
+      "name": "Blueberries, Dried",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "blueberries, fresh or frozen": {
+      "name": "Blueberries, Fresh or Frozen",
+      "restrictions": []
+    },
+    "brazil nuts": {
+      "name": "Brazil Nuts",
+      "restrictions": [
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "broccoli cooked": {
+      "name": "Broccoli Cooked",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "broccoli raw": {
+      "name": "Broccoli Raw",
+      "restrictions": [
+        "ibs",
+        "kidney stones"
+      ]
+    },
+    "broth": {
+      "name": "Broth",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "brussels sprouts": {
+      "name": "Brussels sprouts",
+      "restrictions": [
+        "ibs",
+        "thyroid"
+      ]
+    },
+    "buckwheat (cooked)": {
+      "name": "Buckwheat (cooked)",
+      "restrictions": []
+    },
+    "bulgur": {
+      "name": "Bulgur",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Quinoa (cooked, plain)",
+          "restrictions": []
+        }
+      ]
+    },
+    "bulgur, boiled": {
+      "name": "Bulgur, boiled",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "butter": {
+      "name": "Butter",
+      "restrictions": [
+        "fatty liver disease",
+        "hypercholesterolemia",
+        "hypertension"
+      ],
+      "alternatives": [
+        {
+          "name": "Butter, Reduced-fat",
+          "restrictions": [
+            "ibs",
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "butter, reduced-fat": {
+      "name": "Butter, Reduced-fat",
+      "restrictions": [
+        "ibs",
+        "phenylketonuria"
+      ]
+    },
+    "buttermilk (traditional)": {
+      "name": "Buttermilk (Traditional)",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cabbage": {
+      "name": "Cabbage",
+      "restrictions": [
+        "ibs",
+        "thyroid"
+      ]
+    },
+    "caesar dressing": {
+      "name": "Caesar dressing",
+      "restrictions": [
+        "egg allergy",
+        "lactose intolerance",
+        "seafood allergy"
+      ]
+    },
+    "carbonated water (plain)": {
+      "name": "Carbonated Water (Plain)",
+      "restrictions": []
+    },
+    "carrot juice": {
+      "name": "Carrot Juice",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "carrot, cooked": {
+      "name": "Carrot, cooked",
+      "restrictions": []
+    },
+    "carrots": {
+      "name": "Carrots",
+      "restrictions": []
+    },
+    "cashew milk, unsweetened": {
+      "name": "Cashew Milk, Unsweetened",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "oral allergy syndrome",
+        "phenylketonuria"
+      ]
+    },
+    "cashews": {
+      "name": "Cashews",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "cauliflower": {
+      "name": "Cauliflower",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "celery": {
+      "name": "Celery",
+      "restrictions": []
+    },
+    "chai tea latte (unsweetened)": {
+      "name": "Chai Tea Latte (Unsweetened)",
+      "restrictions": [
+        "lactose intolerance"
+      ]
+    },
+    "chai tea latte, lactose free (unsweetened)": {
+      "name": "Chai Tea Latte, Lactose Free (Unsweetened)",
+      "restrictions": []
+    },
+    "chapati": {
+      "name": "Chapati",
+      "restrictions": [
+        "celiac disease",
+        "wheat allergy"
+      ]
+    },
+    "cheddar": {
+      "name": "Cheddar",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "cheese (double crème cheese/low fat white cheese)": {
+      "name": "Cheese (Double crème cheese/low fat white cheese)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cheese akkawi": {
+      "name": "Cheese Akkawi",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cheese brie": {
+      "name": "Cheese Brie",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cheese feta": {
+      "name": "Cheese Feta",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Cheese Feta, Lactose-Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "cheese feta, lactose-free": {
+      "name": "Cheese Feta, Lactose-Free",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "cheese halloum": {
+      "name": "Cheese Halloum",
+      "restrictions": [
+        "cardiovascular disease",
+        "hypercholesterolemia",
+        "hypertension",
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cheese mozarella low fat": {
+      "name": "Cheese Mozarella Low fat",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cheese mozzarella": {
+      "name": "Cheese Mozzarella",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Cheese Mozzarella, Lactose-Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "cheese mozzarella, lactose-free": {
+      "name": "Cheese Mozzarella, Lactose-Free",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "cheese parmesan": {
+      "name": "Cheese Parmesan",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "cheese swiss": {
+      "name": "Cheese Swiss",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "ibs",
+        "phenylketonuria"
+      ]
+    },
+    "cherries, dried": {
+      "name": "Cherries, Dried",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "cherries, fresh": {
+      "name": "Cherries, fresh",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "cherry tomatoes": {
+      "name": "Cherry tomatoes",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "chestnuts": {
+      "name": "Chestnuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "chia seeds": {
+      "name": "Chia Seeds",
+      "restrictions": []
+    },
+    "chicken breast skeweres, taouk, grilled": {
+      "name": "Chicken breast skeweres, Taouk, grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "chicken breast, without skin, cooked/grilled": {
+      "name": "Chicken Breast, without skin, cooked/grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "chicken thigh, without skin, cooked/grilled": {
+      "name": "Chicken thigh, without skin, cooked/grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "chickpeas beans, cooked or canned": {
+      "name": "Chickpeas Beans, cooked or canned",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "clarified butter (ghee)": {
+      "name": "Clarified Butter (Ghee)",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "cocoa": {
+      "name": "Cocoa",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "ibs"
+      ]
+    },
+    "coconut milk, unsweetened": {
+      "name": "Coconut milk, Unsweetened",
+      "restrictions": []
+    },
+    "coconut oil": {
+      "name": "Coconut oil",
+      "restrictions": [
+        "cardiovascular disease",
+        "hypercholesterolemia"
+      ]
+    },
+    "coffee with skim milk": {
+      "name": "Coffee with Skim Milk",
+      "restrictions": [
+        "gerd",
+        "ibs",
+        "lactose intolerance"
+      ]
+    },
+    "cooked fava beans": {
+      "name": "Cooked fava beans",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "cooked noodles": {
+      "name": "Cooked noodles",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Pasta, Gluten Free, boiled",
+          "restrictions": []
+        }
+      ]
+    },
+    "cooked pasta": {
+      "name": "Cooked pasta",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Pasta, Gluten Free, boiled",
+          "restrictions": []
+        }
+      ]
+    },
+    "corn tortilla": {
+      "name": "Corn Tortilla",
+      "restrictions": []
+    },
+    "corn, canned": {
+      "name": "Corn, canned",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "cottage cheese (full-fat)": {
+      "name": "Cottage Cheese (Full-Fat)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Cottage Cheese, Lactose-Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "cottage cheese (low-fat)": {
+      "name": "Cottage Cheese (Low-Fat)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cottage cheese, lactose-free": {
+      "name": "Cottage Cheese, Lactose-Free",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "couscous, boiled": {
+      "name": "Couscous, boiled",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "cranberries, dried": {
+      "name": "Cranberries, Dried",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "cream cheese (light)": {
+      "name": "Cream Cheese (Light)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "cream cheese, reduced-fat": {
+      "name": "Cream cheese, Reduced-fat",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance"
+      ]
+    },
+    "crushed almonds": {
+      "name": "Crushed Almonds",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "crushed hazelnuts": {
+      "name": "Crushed Hazelnuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "cucumber": {
+      "name": "Cucumber",
+      "restrictions": []
+    },
+    "curry sauce": {
+      "name": "Curry sauce",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "custard apple “kashta”": {
+      "name": "Custard Apple “Kashta”",
+      "restrictions": []
+    },
+    "dark chocolate (70%)": {
+      "name": "Dark Chocolate (70%)",
+      "restrictions": []
+    },
+    "dates (deglet noor)": {
+      "name": "Dates (Deglet Noor)",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "dates (medjool)": {
+      "name": "Dates (Medjool)",
+      "restrictions": []
+    },
+    "dried sweetened mango": {
+      "name": "Dried Sweetened Mango",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "edamame": {
+      "name": "Edamame",
+      "restrictions": [
+        "ibs",
+        "soy allergy"
+      ]
+    },
+    "egg whites": {
+      "name": "Egg whites",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, white, boiled": {
+      "name": "Egg, white, boiled",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, white, fried (with 1 tsp oil)": {
+      "name": "Egg, white, fried (with 1 tsp oil)",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, white, scrambled (no fat added)": {
+      "name": "Egg, white, scrambled (no fat added)",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, whole, boiled": {
+      "name": "Egg, whole, boiled",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, whole, fried (with 1 tsp oil)": {
+      "name": "Egg, whole, Fried (with 1 tsp oil)",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "egg, whole, scrambled (no fat added)": {
+      "name": "Egg, whole, Scrambled (no fat added)",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "eggplant cooked": {
+      "name": "Eggplant cooked",
+      "restrictions": [
+        "histamine intolerance",
+        "ibs"
+      ]
+    },
+    "eggplant raw": {
+      "name": "Eggplant raw",
+      "restrictions": [
+        "histamine intolerance",
+        "ibs"
+      ]
+    },
+    "espresso (single shot)": {
+      "name": "Espresso (Single Shot)",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "falafel, baked with oil": {
+      "name": "Falafel, Baked with oil",
+      "restrictions": [
+        "legume family cross-reactivity"
+      ]
+    },
+    "figs dried": {
+      "name": "Figs Dried",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "figs, fresh": {
+      "name": "Figs, fresh",
+      "restrictions": []
+    },
+    "fish, cod, grilled": {
+      "name": "Fish, Cod, Grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, cod, raw (sashimi)": {
+      "name": "Fish, Cod, Raw (sashimi)",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, salmon, grilled": {
+      "name": "Fish, Salmon, Grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, salmon, raw (sashimi)": {
+      "name": "Fish, Salmon, Raw (sashimi)",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, tuna, canned in oil, drained": {
+      "name": "Fish, Tuna, Canned in Oil, drained",
+      "restrictions": [
+        "histamine intolerance",
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, tuna, canned in water, drained": {
+      "name": "Fish, Tuna, Canned in water, drained",
+      "restrictions": [
+        "histamine intolerance",
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, tuna, grilled": {
+      "name": "Fish, Tuna, Grilled",
+      "restrictions": [
+        "histamine intolerance",
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "fish, tuna, raw (sashimi)": {
+      "name": "Fish, Tuna, Raw (sashimi)",
+      "restrictions": [
+        "histamine intolerance",
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "flaxeed seeds": {
+      "name": "Flaxeed Seeds",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "freekeh, boiled": {
+      "name": "Freekeh, boiled",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "freekeh, cooked": {
+      "name": "Freekeh, cooked",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "frozen yogurt (plain)": {
+      "name": "Frozen Yogurt (Plain)",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "fruit & nut trail mix": {
+      "name": "Fruit & Nut Trail Mix",
+      "restrictions": [
+        "nut allergy"
+      ]
+    },
+    "gluten-free bread": {
+      "name": "Gluten-Free Bread",
+      "restrictions": []
+    },
+    "gluten-free pita bread": {
+      "name": "Gluten-Free Pita Bread",
+      "restrictions": []
+    },
+    "goat's milk": {
+      "name": "Goat’s Milk",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "goji berries": {
+      "name": "Goji Berries",
+      "restrictions": []
+    },
+    "gouda": {
+      "name": "Gouda",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "granola": {
+      "name": "Granola",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "grapefruit": {
+      "name": "Grapefruit",
+      "restrictions": []
+    },
+    "grapefruit juice, fresh": {
+      "name": "Grapefruit Juice, fresh",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "grapes": {
+      "name": "Grapes",
+      "restrictions": []
+    },
+    "greek yogurt 0% fat": {
+      "name": "Greek Yogurt 0% Fat",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Yogurt, Lactose Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "greek yogurt full fat": {
+      "name": "Greek Yogurt Full Fat",
+      "restrictions": [
+        "histamine intolerance",
+        "hypercholesterolemia",
+        "lactose intolerance",
+        "pancreatitis",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Yogurt, Lactose Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "green beans": {
+      "name": "Green Beans",
+      "restrictions": [
+        "favism",
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "green peas, cooked": {
+      "name": "Green peas, cooked",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "grilled steak": {
+      "name": "Grilled steak",
+      "restrictions": []
+    },
+    "grounded chicken, patty, breaded": {
+      "name": "Grounded Chicken, Patty, Breaded",
+      "restrictions": [
+        "cardiovascular disease",
+        "celiac disease",
+        "diabetes",
+        "gluten sensitivity",
+        "hypertension",
+        "phenylketonuria",
+        "wheat allergy"
+      ]
+    },
+    "grounded chicken, patty, grilled": {
+      "name": "Grounded Chicken, Patty, Grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "guava": {
+      "name": "Guava",
+      "restrictions": []
+    },
+    "hamburger 90% lean meat, patty, grilled": {
+      "name": "Hamburger 90% Lean Meat, Patty, Grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "hazelnuts": {
+      "name": "Hazelnuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "homemade pancake": {
+      "name": "Homemade Pancake",
+      "restrictions": [
+        "cardiovascular disease",
+        "celiac disease",
+        "diabetes",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "honey": {
+      "name": "Honey",
+      "restrictions": [
+        "diabetes",
+        "fatty liver disease"
+      ]
+    },
+    "hot chocolate (powder + water)": {
+      "name": "Hot Chocolate (Powder + Water)",
+      "restrictions": []
+    },
+    "hummus": {
+      "name": "Hummus",
+      "restrictions": [
+        "legume family cross-reactivity",
+        "sesame allergy"
+      ]
+    },
+    "jameed (dried yogurt)": {
+      "name": "Jameed (Dried Yogurt)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "jujuba \"ennab\"": {
+      "name": "Jujuba \"Ennab\"",
+      "restrictions": []
+    },
+    "kaak, round": {
+      "name": "Kaak, Round",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "kale, raw": {
+      "name": "Kale, raw",
+      "restrictions": [
+        "hyperkalemia",
+        "ibs",
+        "oral allergy syndrome",
+        "thyroid"
+      ]
+    },
+    "kashkaval cheese": {
+      "name": "Kashkaval Cheese",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "kefir (plain)": {
+      "name": "Kefir (Plain)",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "kidney beans, cooked or canned": {
+      "name": "Kidney Beans, cooked or canned",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "kimchi": {
+      "name": "Kimchi",
+      "restrictions": []
+    },
+    "kiwi": {
+      "name": "Kiwi",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "labneh": {
+      "name": "Labneh",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Labneh, Lactose-Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "labneh, low fat": {
+      "name": "Labneh, low fat",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "lamb, cooked": {
+      "name": "Lamb, cooked",
+      "restrictions": []
+    },
+    "lean meat stew, grilled": {
+      "name": "Lean meat stew, grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "lean minced meat, cooked without oil": {
+      "name": "Lean minced meat, cooked without oil",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "leeks cooked": {
+      "name": "Leeks cooked",
+      "restrictions": [
+        "hyperkalemia",
+        "ibs"
+      ]
+    },
+    "lemon juice": {
+      "name": "Lemon Juice",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "lemon juice & olive oil": {
+      "name": "Lemon Juice & Olive Oil",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "lentil soup": {
+      "name": "Lentil Soup",
+      "restrictions": [
+        "legume family cross-reactivity"
+      ]
+    },
+    "lentils, cooked": {
+      "name": "Lentils, cooked",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "lettuce": {
+      "name": "Lettuce",
+      "restrictions": []
+    },
+    "lima beans, cooked or canned": {
+      "name": "Lima Beans, cooked or canned",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "loquat": {
+      "name": "Loquat",
+      "restrictions": []
+    },
+    "low-carb tortilla": {
+      "name": "Low-Carb Tortilla",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "lupine": {
+      "name": "Lupine",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity"
+      ]
+    },
+    "mango": {
+      "name": "Mango",
+      "restrictions": [
+        "hyperkalemia",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "margarine (plant-based)": {
+      "name": "Margarine (Plant-Based)",
+      "restrictions": []
+    },
+    "markouk bread": {
+      "name": "Markouk bread",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "matcha latte (unsweetened)": {
+      "name": "Matcha Latte (Unsweetened)",
+      "restrictions": [
+        "lactose intolerance"
+      ]
+    },
+    "matcha latte, lactose free (unsweetened)": {
+      "name": "Matcha Latte, Lactose Free (Unsweetened)",
+      "restrictions": []
+    },
+    "mayonnaise, reduced-fat": {
+      "name": "Mayonnaise, Reduced-fat",
+      "restrictions": [
+        "egg allergy"
+      ]
+    },
+    "milk powder - low fat": {
+      "name": "Milk Powder - Low fat",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "milk, fat free": {
+      "name": "Milk, Fat Free",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "milk, full fat": {
+      "name": "Milk, Full Fat",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "hypercholesterolemia",
+        "ibs",
+        "lactose intolerance",
+        "pancreatitis",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Milk, Lactose Free Half Skimmed",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "milk, half skimmed": {
+      "name": "Milk, half Skimmed",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Milk, Lactose Free Half Skimmed",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "milk, lactose free half skimmed": {
+      "name": "Milk, Lactose Free Half Skimmed",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "mint": {
+      "name": "Mint",
+      "restrictions": []
+    },
+    "mixed fresh berries": {
+      "name": "Mixed Fresh Berries",
+      "restrictions": []
+    },
+    "mixed fruit": {
+      "name": "Mixed Fruit",
+      "restrictions": []
+    },
+    "mixed nuts (almonds & walnuts)": {
+      "name": "Mixed nuts (almonds & walnuts)",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "mixed nuts (salted)": {
+      "name": "Mixed Nuts (Salted)",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "mixed vegetables": {
+      "name": "Mixed vegetables",
+      "restrictions": []
+    },
+    "mloukhieh, cooked": {
+      "name": "Mloukhieh, cooked",
+      "restrictions": [
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "muesli": {
+      "name": "Muesli",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "mushrooms cooked": {
+      "name": "Mushrooms Cooked",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "natural honey": {
+      "name": "Natural Honey",
+      "restrictions": [
+        "diabetes",
+        "fatty liver disease"
+      ]
+    },
+    "nectarine": {
+      "name": "Nectarine",
+      "restrictions": [
+        "hyperkalemia"
+      ]
+    },
+    "oat milk latte (unsweetened)": {
+      "name": "Oat Milk Latte (Unsweetened)",
+      "restrictions": []
+    },
+    "oat milk, unsweetened": {
+      "name": "Oat Milk, unsweetened",
+      "restrictions": []
+    },
+    "oats, cooked or dry": {
+      "name": "Oats, Cooked or Dry",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ]
+    },
+    "oats, cooked or dry gluten free": {
+      "name": "Oats, Cooked or Dry Gluten Free",
+      "restrictions": []
+    },
+    "oats, dry": {
+      "name": "Oats, Dry",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ]
+    },
+    "oats, dry gluten free": {
+      "name": "Oats, Dry Gluten Free",
+      "restrictions": []
+    },
+    "oil, olive": {
+      "name": "Oil, olive",
+      "restrictions": []
+    },
+    "okra": {
+      "name": "Okra",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "okra cooked": {
+      "name": "Okra cooked",
+      "restrictions": [
+        "gerd",
+        "ibs"
+      ]
+    },
+    "olives, black or green": {
+      "name": "Olives, black or green",
+      "restrictions": []
+    },
+    "onions cooked": {
+      "name": "Onions Cooked",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "onions raw": {
+      "name": "Onions Raw",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "orange": {
+      "name": "Orange",
+      "restrictions": [
+        "hyperkalemia"
+      ]
+    },
+    "paneer": {
+      "name": "Paneer",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "papaya": {
+      "name": "Papaya",
+      "restrictions": [
+        "hyperkalemia",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "parsley": {
+      "name": "Parsley",
+      "restrictions": []
+    },
+    "pasta, gluten free, boiled": {
+      "name": "Pasta, Gluten Free, boiled",
+      "restrictions": []
+    },
+    "pasta, wheat, boiled": {
+      "name": "Pasta, Wheat, boiled",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "pasta, wheat, whole grain, boiled": {
+      "name": "Pasta, Wheat, Whole grain, Boiled",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy",
+        "wilson's disease"
+      ]
+    },
+    "peanut butter": {
+      "name": "Peanut Butter",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "pancreatitis",
+        "phenylketonuria"
+      ]
+    },
+    "peanuts": {
+      "name": "Peanuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "pear dried": {
+      "name": "Pear Dried",
+      "restrictions": [
+        "diabetes",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "pear fresh": {
+      "name": "Pear Fresh",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "pecans": {
+      "name": "Pecans",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "peppers (green), cooked": {
+      "name": "Peppers (green), cooked",
+      "restrictions": [
+        "gerd",
+        "ibs"
+      ]
+    },
+    "persimmon \"kaki”": {
+      "name": "Persimmon \"Kaki”",
+      "restrictions": [
+        "hyperkalemia"
+      ]
+    },
+    "pesto sauce": {
+      "name": "Pesto sauce",
+      "restrictions": [
+        "lactose intolerance",
+        "nut allergy"
+      ]
+    },
+    "pine nuts": {
+      "name": "Pine nuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "pineapple, dried": {
+      "name": "Pineapple, Dried",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "pineapple, fresh": {
+      "name": "Pineapple, Fresh",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "pinto beans, cooked or canned": {
+      "name": "Pinto Beans, cooked or canned",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "pistachios": {
+      "name": "Pistachios",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria"
+      ]
+    },
+    "pita whole wheat bread": {
+      "name": "Pita Whole Wheat Bread",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Gluten-Free Pita Bread",
+          "restrictions": []
+        }
+      ]
+    },
+    "plain greek yogurt": {
+      "name": "Plain Greek yogurt",
+      "restrictions": [
+        "hypercholesterolemia",
+        "lactose intolerance",
+        "pancreatitis",
+        "phenylketonuria"
+      ],
+      "alternatives": [
+        {
+          "name": "Yogurt, Lactose Free",
+          "restrictions": [
+            "phenylketonuria"
+          ]
+        }
+      ]
+    },
+    "plum": {
+      "name": "Plum",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "pomegranate": {
+      "name": "Pomegranate",
+      "restrictions": []
+    },
+    "pomegranate juice": {
+      "name": "Pomegranate Juice",
+      "restrictions": []
+    },
+    "pomelo": {
+      "name": "Pomelo",
+      "restrictions": []
+    },
+    "potatoes baked or boiled": {
+      "name": "Potatoes baked or boiled",
+      "restrictions": []
+    },
+    "prickly pear": {
+      "name": "Prickly Pear",
+      "restrictions": []
+    },
+    "prunes dried": {
+      "name": "Prunes Dried",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "pumpkin seeds": {
+      "name": "Pumpkin Seeds",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "queso fresco": {
+      "name": "Queso Fresco",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "phenylketonuria"
+      ]
+    },
+    "quinoa (cooked, plain)": {
+      "name": "Quinoa (cooked, plain)",
+      "restrictions": []
+    },
+    "radish": {
+      "name": "Radish",
+      "restrictions": []
+    },
+    "raisins, drie": {
+      "name": "Raisins, Drie",
+      "restrictions": [
+        "diabetes"
+      ]
+    },
+    "raspberries, fresh or frozen": {
+      "name": "Raspberries, Fresh or Frozen",
+      "restrictions": []
+    },
+    "red onion": {
+      "name": "Red onion",
+      "restrictions": [
+        "gerd"
+      ]
+    },
+    "rice brown, whole grain, boiled": {
+      "name": "Rice Brown, Whole grain, boiled",
+      "restrictions": [
+        "wilson's disease"
+      ]
+    },
+    "rice cake, dark chocolate coated": {
+      "name": "Rice Cake, Dark Chocolate Coated",
+      "restrictions": []
+    },
+    "rice cake, multigrain": {
+      "name": "Rice Cake, Multigrain",
+      "restrictions": []
+    },
+    "rice cake, whole grain": {
+      "name": "Rice Cake, Whole Grain",
+      "restrictions": [
+        "wilson's disease"
+      ]
+    },
+    "rice, boiled": {
+      "name": "Rice, boiled",
+      "restrictions": []
+    },
+    "ricotta (part-skim)": {
+      "name": "Ricotta (Part-Skim)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "ricotta (whole milk)": {
+      "name": "Ricotta (Whole Milk)",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "roasted chickpeas": {
+      "name": "Roasted Chickpeas",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity"
+      ]
+    },
+    "rolled oats": {
+      "name": "Rolled oats",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Oats, Dry Gluten Free",
+          "restrictions": []
+        }
+      ]
+    },
+    "romaine": {
+      "name": "Romaine",
+      "restrictions": []
+    },
+    "rutabaga": {
+      "name": "Rutabaga",
+      "restrictions": []
+    },
+    "salad greens and lettuce": {
+      "name": "Salad Greens and lettuce",
+      "restrictions": []
+    },
+    "salmon": {
+      "name": "Salmon",
+      "restrictions": [
+        "seafood allergy"
+      ]
+    },
+    "sardine in oil, drained": {
+      "name": "Sardine in oil, drained",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "sauerkraut": {
+      "name": "Sauerkraut",
+      "restrictions": [
+        "gerd",
+        "ibs"
+      ]
+    },
+    "seaweed snacks": {
+      "name": "Seaweed Snacks",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "sesame oil": {
+      "name": "Sesame oil",
+      "restrictions": [
+        "sesame allergy"
+      ]
+    },
+    "sesame seeds": {
+      "name": "Sesame Seeds",
+      "restrictions": [
+        "ibs",
+        "sesame allergy"
+      ]
+    },
+    "sheep's milk": {
+      "name": "Sheep’s Milk",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "shellfish crab, grilled": {
+      "name": "Shellfish Crab, grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "shellfish shrimps, grilled": {
+      "name": "Shellfish Shrimps, grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "seafood allergy"
+      ]
+    },
+    "skyr": {
+      "name": "Skyr",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "sour plums": {
+      "name": "Sour Plums",
+      "restrictions": []
+    },
+    "sparkling flavored water (sweetened)": {
+      "name": "Sparkling Flavored Water (Sweetened)",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "gerd",
+        "ibs"
+      ]
+    },
+    "sparkling flavored water (unsweetened)": {
+      "name": "Sparkling Flavored Water (Unsweetened)",
+      "restrictions": []
+    },
+    "spinach, cooked": {
+      "name": "Spinach, cooked",
+      "restrictions": [
+        "histamine intolerance",
+        "hyperkalemia",
+        "kidney stones"
+      ]
+    },
+    "spinach, raw": {
+      "name": "Spinach, Raw",
+      "restrictions": [
+        "histamine intolerance",
+        "hyperkalemia",
+        "kidney stones"
+      ]
+    },
+    "strawberries": {
+      "name": "Strawberries",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "summer squash cooked": {
+      "name": "Summer squash cooked",
+      "restrictions": []
+    },
+    "sunflower seeds": {
+      "name": "Sunflower Seeds",
+      "restrictions": [
+        "ibs"
+      ]
+    },
+    "sweet potatoes, baked or boiled": {
+      "name": "Sweet potatoes, baked or boiled",
+      "restrictions": []
+    },
+    "taco shell (baked, corn)": {
+      "name": "Taco Shell (Baked, Corn)",
+      "restrictions": []
+    },
+    "taco shell (hard, corn)": {
+      "name": "Taco Shell (Hard, Corn)",
+      "restrictions": []
+    },
+    "tahini/sesame paste": {
+      "name": "Tahini/sesame paste",
+      "restrictions": [
+        "ibs",
+        "sesame allergy"
+      ]
+    },
+    "tamarinds": {
+      "name": "Tamarinds",
+      "restrictions": []
+    },
+    "tea, instant, decaf, unsweetened": {
+      "name": "Tea, Instant, Decaf, Unsweetened",
+      "restrictions": []
+    },
+    "tempeh, grilled": {
+      "name": "Tempeh, Grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "soy allergy"
+      ]
+    },
+    "tempeh, raw": {
+      "name": "Tempeh, Raw",
+      "restrictions": [
+        "phenylketonuria",
+        "soy allergy"
+      ]
+    },
+    "teriyaki saucce": {
+      "name": "Teriyaki saucce",
+      "restrictions": []
+    },
+    "teriyaki sauce": {
+      "name": "Teriyaki sauce",
+      "restrictions": []
+    },
+    "toast dry": {
+      "name": "Toast Dry",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy"
+      ]
+    },
+    "toast whole grains, soft": {
+      "name": "Toast Whole grains, Soft",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "wheat allergy",
+        "wilson's disease"
+      ]
+    },
+    "tofu, cooked": {
+      "name": "Tofu, Cooked",
+      "restrictions": [
+        "soy allergy"
+      ]
+    },
+    "tofu, grilled": {
+      "name": "Tofu, Grilled",
+      "restrictions": [
+        "phenylketonuria",
+        "soy allergy"
+      ]
+    },
+    "tofu, raw": {
+      "name": "Tofu, Raw",
+      "restrictions": [
+        "phenylketonuria",
+        "soy allergy"
+      ]
+    },
+    "tofu, raw firm": {
+      "name": "Tofu, Raw Firm",
+      "restrictions": [
+        "soy allergy"
+      ]
+    },
+    "tomato": {
+      "name": "Tomato",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "tomato juice": {
+      "name": "Tomato Juice",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "tomato salsa": {
+      "name": "Tomato salsa",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "tomato sauce": {
+      "name": "Tomato Sauce",
+      "restrictions": [
+        "gerd",
+        "histamine intolerance",
+        "hyperkalemia"
+      ]
+    },
+    "turkey bacon": {
+      "name": "Turkey Bacon",
+      "restrictions": [
+        "hypertension",
+        "phenylketonuria"
+      ]
+    },
+    "turkey breast, without skin, cooked/grilled": {
+      "name": "Turkey Breast, without skin, cooked/grilled",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "turkey slices": {
+      "name": "Turkey slices",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "hypertension",
+        "wheat allergy"
+      ]
+    },
+    "turnip, cooked": {
+      "name": "Turnip, cooked",
+      "restrictions": [
+        "gerd",
+        "ibs"
+      ]
+    },
+    "vegan burger patty": {
+      "name": "Vegan Burger Patty",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "legume family cross-reactivity",
+        "nut allergy",
+        "soy allergy",
+        "wheat allergy"
+      ]
+    },
+    "vegan cheese": {
+      "name": "Vegan Cheese",
+      "restrictions": [
+        "nut allergy",
+        "soy allergy"
+      ]
+    },
+    "vegan protein powder": {
+      "name": "Vegan Protein Powder",
+      "restrictions": [
+        "legume family cross-reactivity",
+        "soy allergy"
+      ]
+    },
+    "walnuts": {
+      "name": "Walnuts",
+      "restrictions": [
+        "ibs",
+        "nut allergy",
+        "phenylketonuria",
+        "wilson's disease"
+      ]
+    },
+    "watermelon": {
+      "name": "Watermelon",
+      "restrictions": [
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "whey protein powder": {
+      "name": "Whey protein powder",
+      "restrictions": [
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "white beans, cooked": {
+      "name": "White beans, cooked",
+      "restrictions": [
+        "ibs",
+        "legume family cross-reactivity",
+        "phenylketonuria"
+      ]
+    },
+    "whole eggs": {
+      "name": "Whole eggs",
+      "restrictions": [
+        "egg allergy",
+        "phenylketonuria"
+      ]
+    },
+    "whole wheat bread": {
+      "name": "Whole wheat bread",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ],
+      "alternatives": [
+        {
+          "name": "Gluten-Free Bread",
+          "restrictions": []
+        }
+      ]
+    },
+    "whole-grain crackers": {
+      "name": "Whole-Grain Crackers",
+      "restrictions": [
+        "celiac disease",
+        "gluten sensitivity",
+        "ibs",
+        "wheat allergy"
+      ]
+    },
+    "yellow melon": {
+      "name": "Yellow Melon",
+      "restrictions": [
+        "hyperkalemia",
+        "latex-fruit cross-reactivity",
+        "latex-fruit syndrome",
+        "oral allergy syndrome"
+      ]
+    },
+    "yellow moong dal cooked": {
+      "name": "Yellow moong Dal cooked",
+      "restrictions": [
+        "legume family cross-reactivity"
+      ]
+    },
+    "yogurt full fat": {
+      "name": "Yogurt Full Fat",
+      "restrictions": [
+        "cardiovascular disease",
+        "diabetes",
+        "hypercholesterolemia",
+        "ibs",
+        "lactose intolerance",
+        "pancreatitis",
+        "phenylketonuria"
+      ]
+    },
+    "yogurt low fat": {
+      "name": "Yogurt Low Fat",
+      "restrictions": [
+        "ibs",
+        "lactose intolerance",
+        "phenylketonuria"
+      ]
+    },
+    "yogurt sauce": {
+      "name": "Yogurt sauce",
+      "restrictions": [
+        "lactose intolerance"
+      ]
+    },
+    "yogurt, lactose free": {
+      "name": "Yogurt, Lactose Free",
+      "restrictions": [
+        "phenylketonuria"
+      ]
+    },
+    "zucchini": {
+      "name": "Zucchini",
+      "restrictions": []
+    },
+    "zucchini cooked": {
+      "name": "Zucchini cooked",
+      "restrictions": []
     }
-   ]
-  },
-  "bulgur, boiled": {
-   "name": "Bulgur, boiled",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "butter": {
-   "name": "Butter",
-   "restrictions": [
-    "fatty liver disease",
-    "hypercholesterolemia",
-    "hypertension"
-   ],
-   "alternatives": [
-    {
-     "name": "Butter, Reduced-fat",
-     "restrictions": [
-      "ibs",
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "butter, reduced-fat": {
-   "name": "Butter, Reduced-fat",
-   "restrictions": [
-    "ibs",
-    "phenylketonuria"
-   ]
-  },
-  "buttermilk (traditional)": {
-   "name": "Buttermilk (Traditional)",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cabbage": {
-   "name": "Cabbage",
-   "restrictions": [
-    "ibs",
-    "thyroid"
-   ]
-  },
-  "caesar dressing": {
-   "name": "Caesar dressing",
-   "restrictions": [
-    "egg allergy",
-    "lactose intolerance",
-    "seafood allergy"
-   ]
-  },
-  "carbonated water (plain)": {
-   "name": "Carbonated Water (Plain)",
-   "restrictions": []
-  },
-  "carrot juice": {
-   "name": "Carrot Juice",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "carrot, cooked": {
-   "name": "Carrot, cooked",
-   "restrictions": []
-  },
-  "carrots": {
-   "name": "Carrots",
-   "restrictions": []
-  },
-  "cashew milk, unsweetened": {
-   "name": "Cashew Milk, Unsweetened",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "oral allergy syndrome",
-    "phenylketonuria"
-   ]
-  },
-  "cashews": {
-   "name": "Cashews",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
-  },
-  "cauliflower": {
-   "name": "Cauliflower",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "celery": {
-   "name": "Celery",
-   "restrictions": []
-  },
-  "chai tea latte (unsweetened)": {
-   "name": "Chai Tea Latte (Unsweetened)",
-   "restrictions": [
-    "lactose intolerance"
-   ]
-  },
-  "chai tea latte, lactose free (unsweetened)": {
-   "name": "Chai Tea Latte, Lactose Free (Unsweetened)",
-   "restrictions": []
-  },
-  "chapati": {
-   "name": "Chapati",
-   "restrictions": [
-    "celiac disease",
-    "wheat allergy"
-   ]
-  },
-  "cheddar": {
-   "name": "Cheddar",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "cheese (double crème cheese/low fat white cheese)": {
-   "name": "Cheese (Double crème cheese/low fat white cheese)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cheese akkawi": {
-   "name": "Cheese Akkawi",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cheese brie": {
-   "name": "Cheese Brie",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cheese feta": {
-   "name": "Cheese Feta",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Cheese Feta, Lactose-Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "cheese feta, lactose-free": {
-   "name": "Cheese Feta, Lactose-Free",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "cheese halloum": {
-   "name": "Cheese Halloum",
-   "restrictions": [
-    "cardiovascular disease",
-    "hypercholesterolemia",
-    "hypertension",
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cheese mozarella low fat": {
-   "name": "Cheese Mozarella Low fat",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cheese mozzarella": {
-   "name": "Cheese Mozzarella",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Cheese Mozzarella, Lactose-Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "cheese mozzarella, lactose-free": {
-   "name": "Cheese Mozzarella, Lactose-Free",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "cheese parmesan": {
-   "name": "Cheese Parmesan",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "cheese swiss": {
-   "name": "Cheese Swiss",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "ibs",
-    "phenylketonuria"
-   ]
-  },
-  "cherries, dried": {
-   "name": "Cherries, Dried",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "cherries, fresh": {
-   "name": "Cherries, fresh",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "cherry tomatoes": {
-   "name": "Cherry tomatoes",
-   "restrictions": [
-    "gerd",
-    "histamine intolerance",
-    "hyperkalemia"
-   ]
-  },
-  "chestnuts": {
-   "name": "Chestnuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "chia seeds": {
-   "name": "Chia Seeds",
-   "restrictions": []
-  },
-  "chicken breast skeweres, taouk, grilled": {
-   "name": "Chicken breast skeweres, Taouk, grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "chicken breast, without skin, cooked/grilled": {
-   "name": "Chicken Breast, without skin, cooked/grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "chicken thigh, without skin, cooked/grilled": {
-   "name": "Chicken thigh, without skin, cooked/grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "chickpeas beans, cooked or canned": {
-   "name": "Chickpeas Beans, cooked or canned",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "clarified butter (ghee)": {
-   "name": "Clarified Butter (Ghee)",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "coconut milk, unsweetened": {
-   "name": "Coconut milk, Unsweetened",
-   "restrictions": []
-  },
-  "coffee with skim milk": {
-   "name": "Coffee with Skim Milk",
-   "restrictions": [
-    "gerd",
-    "ibs",
-    "lactose intolerance"
-   ]
-  },
-  "cooked fava beans": {
-   "name": "Cooked fava beans",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "cooked noodles": {
-   "name": "Cooked noodles",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Pasta, Gluten Free, boiled",
-     "restrictions": []
-    }
-   ]
-  },
-  "cooked pasta": {
-   "name": "Cooked pasta",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Pasta, Gluten Free, boiled",
-     "restrictions": []
-    }
-   ]
-  },
-  "corn tortilla": {
-   "name": "Corn Tortilla",
-   "restrictions": []
-  },
-  "corn, canned": {
-   "name": "Corn, canned",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "cottage cheese (full-fat)": {
-   "name": "Cottage Cheese (Full-Fat)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Cottage Cheese, Lactose-Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "cottage cheese (low-fat)": {
-   "name": "Cottage Cheese (Low-Fat)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cottage cheese, lactose-free": {
-   "name": "Cottage Cheese, Lactose-Free",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "couscous, boiled": {
-   "name": "Couscous, boiled",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "cranberries, dried": {
-   "name": "Cranberries, Dried",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "cream cheese (light)": {
-   "name": "Cream Cheese (Light)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "cream cheese, reduced-fat": {
-   "name": "Cream cheese, Reduced-fat",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance"
-   ]
-  },
-  "crushed almonds": {
-   "name": "Crushed Almonds",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
-  },
-  "crushed hazelnuts": {
-   "name": "Crushed Hazelnuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "cucumber": {
-   "name": "Cucumber",
-   "restrictions": []
-  },
-  "curry sauce": {
-   "name": "Curry sauce",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "custard apple “kashta”": {
-   "name": "Custard Apple “Kashta”",
-   "restrictions": []
-  },
-  "dark chocolate (70%)": {
-   "name": "Dark Chocolate (70%)",
-   "restrictions": []
-  },
-  "dates (deglet noor)": {
-   "name": "Dates (Deglet Noor)",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "dates (medjool)": {
-   "name": "Dates (Medjool)",
-   "restrictions": []
-  },
-  "dried sweetened mango": {
-   "name": "Dried Sweetened Mango",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "edamame": {
-   "name": "Edamame",
-   "restrictions": [
-    "ibs",
-    "soy allergy"
-   ]
-  },
-  "egg whites": {
-   "name": "Egg whites",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, white, boiled": {
-   "name": "Egg, white, boiled",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, white, fried (with 1 tsp oil)": {
-   "name": "Egg, white, fried (with 1 tsp oil)",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, white, scrambled (no fat added)": {
-   "name": "Egg, white, scrambled (no fat added)",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, whole, boiled": {
-   "name": "Egg, whole, boiled",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, whole, fried (with 1 tsp oil)": {
-   "name": "Egg, whole, Fried (with 1 tsp oil)",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "egg, whole, scrambled (no fat added)": {
-   "name": "Egg, whole, Scrambled (no fat added)",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "eggplant cooked": {
-   "name": "Eggplant cooked",
-   "restrictions": [
-    "histamine intolerance",
-    "ibs"
-   ]
-  },
-  "eggplant raw": {
-   "name": "Eggplant raw",
-   "restrictions": [
-    "histamine intolerance",
-    "ibs"
-   ]
-  },
-  "espresso (single shot)": {
-   "name": "Espresso (Single Shot)",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "falafel, baked with oil": {
-   "name": "Falafel, Baked with oil",
-   "restrictions": [
-    "legume family cross-reactivity"
-   ]
-  },
-  "figs dried": {
-   "name": "Figs Dried",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "figs, fresh": {
-   "name": "Figs, fresh",
-   "restrictions": []
-  },
-  "fish, cod, grilled": {
-   "name": "Fish, Cod, Grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, cod, raw (sashimi)": {
-   "name": "Fish, Cod, Raw (sashimi)",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, salmon, grilled": {
-   "name": "Fish, Salmon, Grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, salmon, raw (sashimi)": {
-   "name": "Fish, Salmon, Raw (sashimi)",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, tuna, canned in oil, drained": {
-   "name": "Fish, Tuna, Canned in Oil, drained",
-   "restrictions": [
-    "histamine intolerance",
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, tuna, canned in water, drained": {
-   "name": "Fish, Tuna, Canned in water, drained",
-   "restrictions": [
-    "histamine intolerance",
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, tuna, grilled": {
-   "name": "Fish, Tuna, Grilled",
-   "restrictions": [
-    "histamine intolerance",
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "fish, tuna, raw (sashimi)": {
-   "name": "Fish, Tuna, Raw (sashimi)",
-   "restrictions": [
-    "histamine intolerance",
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "flaxeed seeds": {
-   "name": "Flaxeed Seeds",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "freekeh, boiled": {
-   "name": "Freekeh, boiled",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "frozen yogurt (plain)": {
-   "name": "Frozen Yogurt (Plain)",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "fruit & nut trail mix": {
-   "name": "Fruit & Nut Trail Mix",
-   "restrictions": [
-    "nut allergy"
-   ]
-  },
-  "gluten-free bread": {
-   "name": "Gluten-Free Bread",
-   "restrictions": []
-  },
-  "gluten-free pita bread": {
-   "name": "Gluten-Free Pita Bread",
-   "restrictions": []
-  },
-  "goat's milk": {
-   "name": "Goat’s Milk",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "goji berries": {
-   "name": "Goji Berries",
-   "restrictions": []
-  },
-  "gouda": {
-   "name": "Gouda",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "granola": {
-   "name": "Granola",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "grapefruit": {
-   "name": "Grapefruit",
-   "restrictions": []
-  },
-  "grapefruit juice, fresh": {
-   "name": "Grapefruit Juice, fresh",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "grapes": {
-   "name": "Grapes",
-   "restrictions": []
-  },
-  "greek yogurt 0% fat": {
-   "name": "Greek Yogurt 0% Fat",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Yogurt, Lactose Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "greek yogurt full fat": {
-   "name": "Greek Yogurt Full Fat",
-   "restrictions": [
-    "histamine intolerance",
-    "hypercholesterolemia",
-    "lactose intolerance",
-    "pancreatitis",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Yogurt, Lactose Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "green beans": {
-   "name": "Green Beans",
-   "restrictions": [
-    "favism",
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "green peas, cooked": {
-   "name": "Green peas, cooked",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "grilled steak": {
-   "name": "Grilled steak",
-   "restrictions": []
-  },
-  "grounded chicken, patty, breaded": {
-   "name": "Grounded Chicken, Patty, Breaded",
-   "restrictions": [
-    "cardiovascular disease",
-    "celiac disease",
-    "diabetes",
-    "gluten sensitivity",
-    "hypertension",
-    "phenylketonuria",
-    "wheat allergy"
-   ]
-  },
-  "grounded chicken, patty, grilled": {
-   "name": "Grounded Chicken, Patty, Grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "guava": {
-   "name": "Guava",
-   "restrictions": []
-  },
-  "hamburger 90% lean meat, patty, grilled": {
-   "name": "Hamburger 90% Lean Meat, Patty, Grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "hazelnuts": {
-   "name": "Hazelnuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "homemade pancake": {
-   "name": "Homemade Pancake",
-   "restrictions": [
-    "cardiovascular disease",
-    "celiac disease",
-    "diabetes",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "honey": {
-   "name": "Honey",
-   "restrictions": [
-    "diabetes",
-    "fatty liver disease"
-   ]
-  },
-  "hot chocolate (powder + water)": {
-   "name": "Hot Chocolate (Powder + Water)",
-   "restrictions": []
-  },
-  "hummus": {
-   "name": "Hummus",
-   "restrictions": [
-    "legume family cross-reactivity",
-    "sesame allergy"
-   ]
-  },
-  "jameed (dried yogurt)": {
-   "name": "Jameed (Dried Yogurt)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "freekeh, cooked": {
-   "name": "Freekeh, cooked",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "jujuba \"ennab\"": {
-   "name": "Jujuba \"Ennab\"",
-   "restrictions": []
-  },
-  "kaak, round": {
-   "name": "Kaak, Round",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "kale, raw": {
-   "name": "Kale, raw",
-   "restrictions": [
-    "hyperkalemia",
-    "ibs",
-    "oral allergy syndrome",
-    "thyroid"
-   ]
-  },
-  "kashkaval cheese": {
-   "name": "Kashkaval Cheese",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "kefir (plain)": {
-   "name": "Kefir (Plain)",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "kidney beans, cooked or canned": {
-   "name": "Kidney Beans, cooked or canned",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "kimchi": {
-   "name": "Kimchi",
-   "restrictions": []
-  },
-  "kiwi": {
-   "name": "Kiwi",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "labneh": {
-   "name": "Labneh",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Labneh, Lactose-Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "labneh, low fat": {
-   "name": "Labneh, low fat",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "lamb, cooked": {
-   "name": "Lamb, cooked",
-   "restrictions": []
-  },
-  "lean meat stew, grilled": {
-   "name": "Lean meat stew, grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "lean minced meat, cooked without oil": {
-   "name": "Lean minced meat, cooked without oil",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "leeks cooked": {
-   "name": "Leeks cooked",
-   "restrictions": [
-    "hyperkalemia",
-    "ibs"
-   ]
-  },
-  "lemon juice": {
-   "name": "Lemon Juice",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "lemon juice & olive oil": {
-   "name": "Lemon Juice & Olive Oil",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "lentil soup": {
-   "name": "Lentil Soup",
-   "restrictions": [
-    "legume family cross-reactivity"
-   ]
-  },
-  "lentils, cooked": {
-   "name": "Lentils, cooked",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "lettuce": {
-   "name": "Lettuce",
-   "restrictions": []
-  },
-  "lima beans, cooked or canned": {
-   "name": "Lima Beans, cooked or canned",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "loquat": {
-   "name": "Loquat",
-   "restrictions": []
-  },
-  "low-carb tortilla": {
-   "name": "Low-Carb Tortilla",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "lupine": {
-   "name": "Lupine",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity"
-   ]
-  },
-  "mango": {
-   "name": "Mango",
-   "restrictions": [
-    "hyperkalemia",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "margarine (plant-based)": {
-   "name": "Margarine (Plant-Based)",
-   "restrictions": []
-  },
-  "markouk bread": {
-   "name": "Markouk bread",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "matcha latte (unsweetened)": {
-   "name": "Matcha Latte (Unsweetened)",
-   "restrictions": [
-    "lactose intolerance"
-   ]
-  },
-  "matcha latte, lactose free (unsweetened)": {
-   "name": "Matcha Latte, Lactose Free (Unsweetened)",
-   "restrictions": []
-  },
-  "mayonnaise, reduced-fat": {
-   "name": "Mayonnaise, Reduced-fat",
-   "restrictions": [
-    "egg allergy"
-   ]
-  },
-  "milk powder - low fat": {
-   "name": "Milk Powder - Low fat",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "milk, fat free": {
-   "name": "Milk, Fat Free",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "milk, full fat": {
-   "name": "Milk, Full Fat",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "hypercholesterolemia",
-    "ibs",
-    "lactose intolerance",
-    "pancreatitis",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Milk, Lactose Free Half Skimmed",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "milk, half skimmed": {
-   "name": "Milk, half Skimmed",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Milk, Lactose Free Half Skimmed",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "milk, lactose free half skimmed": {
-   "name": "Milk, Lactose Free Half Skimmed",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "mint": {
-   "name": "Mint",
-   "restrictions": []
-  },
-  "mixed fresh berries": {
-   "name": "Mixed Fresh Berries",
-   "restrictions": []
-  },
-  "mixed fruit": {
-   "name": "Mixed Fruit",
-   "restrictions": []
-  },
-  "mixed nuts (almonds & walnuts)": {
-   "name": "Mixed nuts (almonds & walnuts)",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "mixed nuts (salted)": {
-   "name": "Mixed Nuts (Salted)",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "mixed vegetables": {
-   "name": "Mixed vegetables",
-   "restrictions": []
-  },
-  "muesli": {
-   "name": "Muesli",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "mushrooms cooked": {
-   "name": "Mushrooms Cooked",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "natural honey": {
-   "name": "Natural Honey",
-   "restrictions": [
-    "diabetes",
-    "fatty liver disease"
-   ]
-  },
-  "nectarine": {
-   "name": "Nectarine",
-   "restrictions": [
-    "hyperkalemia"
-   ]
-  },
-  "oat milk latte (unsweetened)": {
-   "name": "Oat Milk Latte (Unsweetened)",
-   "restrictions": []
-  },
-  "oat milk, unsweetened": {
-   "name": "Oat Milk, unsweetened",
-   "restrictions": []
-  },
-  "oats, cooked or dry": {
-   "name": "Oats, Cooked or Dry",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ]
-  },
-  "oats, cooked or dry gluten free": {
-   "name": "Oats, Cooked or Dry Gluten Free",
-   "restrictions": []
-  },
-  "oats, dry": {
-   "name": "Oats, Dry",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ]
-  },
-  "oats, dry gluten free": {
-   "name": "Oats, Dry Gluten Free",
-   "restrictions": []
-  },
-  "oil, olive": {
-   "name": "Oil, olive",
-   "restrictions": []
-  },
-  "okra": {
-   "name": "Okra",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "okra cooked": {
-   "name": "Okra cooked",
-   "restrictions": [
-    "gerd",
-    "ibs"
-   ]
-  },
-  "olives, black or green": {
-   "name": "Olives, black or green",
-   "restrictions": []
-  },
-  "onions cooked": {
-   "name": "Onions Cooked",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "onions raw": {
-   "name": "Onions Raw",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "orange": {
-   "name": "Orange",
-   "restrictions": [
-    "hyperkalemia"
-   ]
-  },
-  "paneer": {
-   "name": "Paneer",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "papaya": {
-   "name": "Papaya",
-   "restrictions": [
-    "hyperkalemia",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "parsley": {
-   "name": "Parsley",
-   "restrictions": []
-  },
-  "pasta, gluten free, boiled": {
-   "name": "Pasta, Gluten Free, boiled",
-   "restrictions": []
-  },
-  "pasta, wheat, boiled": {
-   "name": "Pasta, Wheat, boiled",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "pasta, wheat, whole grain, boiled": {
-   "name": "Pasta, Wheat, Whole grain, Boiled",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy",
-    "wilson's disease"
-   ]
-  },
-  "peanut butter": {
-   "name": "Peanut Butter",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "pancreatitis",
-    "phenylketonuria"
-   ]
-  },
-  "peanuts": {
-   "name": "Peanuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "pear dried": {
-   "name": "Pear Dried",
-   "restrictions": [
-    "diabetes",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "pear fresh": {
-   "name": "Pear Fresh",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "pecans": {
-   "name": "Pecans",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
-  },
-  "peppers (green), cooked": {
-   "name": "Peppers (green), cooked",
-   "restrictions": [
-    "gerd",
-    "ibs"
-   ]
-  },
-  "persimmon \"kaki”": {
-   "name": "Persimmon \"Kaki”",
-   "restrictions": [
-    "hyperkalemia"
-   ]
-  },
-  "pesto sauce": {
-   "name": "Pesto sauce",
-   "restrictions": [
-    "lactose intolerance",
-    "nut allergy"
-   ]
-  },
-  "pine nuts": {
-   "name": "Pine nuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "pineapple, dried": {
-   "name": "Pineapple, Dried",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "pineapple, fresh": {
-   "name": "Pineapple, Fresh",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "pinto beans, cooked or canned": {
-   "name": "Pinto Beans, cooked or canned",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity",
-    "phenylketonuria"
-   ]
-  },
-  "pistachios": {
-   "name": "Pistachios",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria"
-   ]
-  },
-  "pita whole wheat bread": {
-   "name": "Pita Whole Wheat Bread",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Gluten-Free Pita Bread",
-     "restrictions": []
-    }
-   ]
-  },
-  "plain greek yogurt": {
-   "name": "Plain Greek yogurt",
-   "restrictions": [
-    "hypercholesterolemia",
-    "lactose intolerance",
-    "pancreatitis",
-    "phenylketonuria"
-   ],
-   "alternatives": [
-    {
-     "name": "Yogurt, Lactose Free",
-     "restrictions": [
-      "phenylketonuria"
-     ]
-    }
-   ]
-  },
-  "plum": {
-   "name": "Plum",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "pomegranate": {
-   "name": "Pomegranate",
-   "restrictions": []
-  },
-  "pomegranate juice": {
-   "name": "Pomegranate Juice",
-   "restrictions": []
-  },
-  "pomelo": {
-   "name": "Pomelo",
-   "restrictions": []
-  },
-  "potatoes baked or boiled": {
-   "name": "Potatoes baked or boiled",
-   "restrictions": []
-  },
-  "prickly pear": {
-   "name": "Prickly Pear",
-   "restrictions": []
-  },
-  "prunes dried": {
-   "name": "Prunes Dried",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "pumpkin seeds": {
-   "name": "Pumpkin Seeds",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "queso fresco": {
-   "name": "Queso Fresco",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "phenylketonuria"
-   ]
-  },
-  "quinoa (cooked, plain)": {
-   "name": "Quinoa (cooked, plain)",
-   "restrictions": []
-  },
-  "radish": {
-   "name": "Radish",
-   "restrictions": []
-  },
-  "raisins, drie": {
-   "name": "Raisins, Drie",
-   "restrictions": [
-    "diabetes"
-   ]
-  },
-  "raspberries, fresh or frozen": {
-   "name": "Raspberries, Fresh or Frozen",
-   "restrictions": []
-  },
-  "red onion": {
-   "name": "Red onion",
-   "restrictions": [
-    "gerd"
-   ]
-  },
-  "rice brown, whole grain, boiled": {
-   "name": "Rice Brown, Whole grain, boiled",
-   "restrictions": [
-    "wilson's disease"
-   ]
-  },
-  "rice cake, dark chocolate coated": {
-   "name": "Rice Cake, Dark Chocolate Coated",
-   "restrictions": []
-  },
-  "rice cake, multigrain": {
-   "name": "Rice Cake, Multigrain",
-   "restrictions": []
-  },
-  "rice cake, whole grain": {
-   "name": "Rice Cake, Whole Grain",
-   "restrictions": [
-    "wilson's disease"
-   ]
-  },
-  "rice, boiled": {
-   "name": "Rice, boiled",
-   "restrictions": []
-  },
-  "ricotta (part-skim)": {
-   "name": "Ricotta (Part-Skim)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "ricotta (whole milk)": {
-   "name": "Ricotta (Whole Milk)",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "roasted chickpeas": {
-   "name": "Roasted Chickpeas",
-   "restrictions": [
-    "ibs",
-    "legume family cross-reactivity"
-   ]
-  },
-  "rolled oats": {
-   "name": "Rolled oats",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Oats, Dry Gluten Free",
-     "restrictions": []
-    }
-   ]
-  },
-  "romaine": {
-   "name": "Romaine",
-   "restrictions": []
-  },
-  "rutabaga": {
-   "name": "Rutabaga",
-   "restrictions": []
-  },
-  "salad greens and lettuce": {
-   "name": "Salad Greens and lettuce",
-   "restrictions": []
-  },
-  "salmon": {
-   "name": "Salmon",
-   "restrictions": [
-    "seafood allergy"
-   ]
-  },
-  "sardine in oil, drained": {
-   "name": "Sardine in oil, drained",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "sauerkraut": {
-   "name": "Sauerkraut",
-   "restrictions": [
-    "gerd",
-    "ibs"
-   ]
-  },
-  "seaweed snacks": {
-   "name": "Seaweed Snacks",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "sesame seeds": {
-   "name": "Sesame Seeds",
-   "restrictions": [
-    "ibs",
-    "sesame allergy"
-   ]
-  },
-  "sheep's milk": {
-   "name": "Sheep’s Milk",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "shellfish crab, grilled": {
-   "name": "Shellfish Crab, grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "shellfish shrimps, grilled": {
-   "name": "Shellfish Shrimps, grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "seafood allergy"
-   ]
-  },
-  "skyr": {
-   "name": "Skyr",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "sour plums": {
-   "name": "Sour Plums",
-   "restrictions": []
-  },
-  "sparkling flavored water (sweetened)": {
-   "name": "Sparkling Flavored Water (Sweetened)",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "gerd",
-    "ibs"
-   ]
-  },
-  "sparkling flavored water (unsweetened)": {
-   "name": "Sparkling Flavored Water (Unsweetened)",
-   "restrictions": []
-  },
-  "spinach, cooked": {
-   "name": "Spinach, cooked",
-   "restrictions": [
-    "histamine intolerance",
-    "hyperkalemia",
-    "kidney stones"
-   ]
-  },
-  "spinach, raw": {
-   "name": "Spinach, Raw",
-   "restrictions": [
-    "histamine intolerance",
-    "hyperkalemia",
-    "kidney stones"
-   ]
-  },
-  "strawberries": {
-   "name": "Strawberries",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "summer squash cooked": {
-   "name": "Summer squash cooked",
-   "restrictions": []
-  },
-  "sunflower seeds": {
-   "name": "Sunflower Seeds",
-   "restrictions": [
-    "ibs"
-   ]
-  },
-  "sweet potatoes, baked or boiled": {
-   "name": "Sweet potatoes, baked or boiled",
-   "restrictions": []
-  },
-  "taco shell (baked, corn)": {
-   "name": "Taco Shell (Baked, Corn)",
-   "restrictions": []
-  },
-  "taco shell (hard, corn)": {
-   "name": "Taco Shell (Hard, Corn)",
-   "restrictions": []
-  },
-  "tahini/sesame paste": {
-   "name": "Tahini/sesame paste",
-   "restrictions": [
-    "ibs",
-    "sesame allergy"
-   ]
-  },
-  "tamarinds": {
-   "name": "Tamarinds",
-   "restrictions": []
-  },
-  "tea, instant, decaf, unsweetened": {
-   "name": "Tea, Instant, Decaf, Unsweetened",
-   "restrictions": []
-  },
-  "tempeh, grilled": {
-   "name": "Tempeh, Grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "soy allergy"
-   ]
-  },
-  "tempeh, raw": {
-   "name": "Tempeh, Raw",
-   "restrictions": [
-    "phenylketonuria",
-    "soy allergy"
-   ]
-  },
-  "teriyaki saucce": {
-   "name": "Teriyaki saucce",
-   "restrictions": []
-  },
-  "teriyaki sauce": {
-   "name": "Teriyaki sauce",
-   "restrictions": []
-  },
-  "toast dry": {
-   "name": "Toast Dry",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy"
-   ]
-  },
-  "toast whole grains, soft": {
-   "name": "Toast Whole grains, Soft",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "wheat allergy",
-    "wilson's disease"
-   ]
-  },
-  "tofu, cooked": {
-   "name": "Tofu, Cooked",
-   "restrictions": [
-    "soy allergy"
-   ]
-  },
-  "tofu, grilled": {
-   "name": "Tofu, Grilled",
-   "restrictions": [
-    "phenylketonuria",
-    "soy allergy"
-   ]
-  },
-  "tofu, raw": {
-   "name": "Tofu, Raw",
-   "restrictions": [
-    "phenylketonuria",
-    "soy allergy"
-   ]
-  },
-  "tofu, raw firm": {
-   "name": "Tofu, Raw Firm",
-   "restrictions": [
-    "soy allergy"
-   ]
-  },
-  "tomato": {
-   "name": "Tomato",
-   "restrictions": [
-    "gerd",
-    "histamine intolerance",
-    "hyperkalemia"
-   ]
-  },
-  "tomato juice": {
-   "name": "Tomato Juice",
-   "restrictions": [
-    "gerd",
-    "histamine intolerance",
-    "hyperkalemia"
-   ]
-  },
-  "tomato salsa": {
-   "name": "Tomato salsa",
-   "restrictions": [
-    "gerd",
-    "histamine intolerance",
-    "hyperkalemia"
-   ]
-  },
-  "tomato sauce": {
-   "name": "Tomato Sauce",
-   "restrictions": [
-    "gerd",
-    "histamine intolerance",
-    "hyperkalemia"
-   ]
-  },
-  "turkey bacon": {
-   "name": "Turkey Bacon",
-   "restrictions": [
-    "hypertension",
-    "phenylketonuria"
-   ]
-  },
-  "turkey breast, without skin, cooked/grilled": {
-   "name": "Turkey Breast, without skin, cooked/grilled",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "turkey slices": {
-   "name": "Turkey slices",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "hypertension",
-    "wheat allergy"
-   ]
-  },
-  "turnip, cooked": {
-   "name": "Turnip, cooked",
-   "restrictions": [
-    "gerd",
-    "ibs"
-   ]
-  },
-  "vegan burger patty": {
-   "name": "Vegan Burger Patty",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "legume family cross-reactivity",
-    "nut allergy",
-    "soy allergy",
-    "wheat allergy"
-   ]
-  },
-  "vegan cheese": {
-   "name": "Vegan Cheese",
-   "restrictions": [
-    "nut allergy",
-    "soy allergy"
-   ]
-  },
-  "vegan protein powder": {
-   "name": "Vegan Protein Powder",
-   "restrictions": [
-    "legume family cross-reactivity",
-    "soy allergy"
-   ]
-  },
-  "walnuts": {
-   "name": "Walnuts",
-   "restrictions": [
-    "ibs",
-    "nut allergy",
-    "phenylketonuria",
-    "wilson's disease"
-   ]
-  },
-  "watermelon": {
-   "name": "Watermelon",
-   "restrictions": [
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "whey protein powder": {
-   "name": "Whey protein powder",
-   "restrictions": [
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "whole eggs": {
-   "name": "Whole eggs",
-   "restrictions": [
-    "egg allergy",
-    "phenylketonuria"
-   ]
-  },
-  "whole wheat bread": {
-   "name": "Whole wheat bread",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ],
-   "alternatives": [
-    {
-     "name": "Gluten-Free Bread",
-     "restrictions": []
-    }
-   ]
-  },
-  "whole-grain crackers": {
-   "name": "Whole-Grain Crackers",
-   "restrictions": [
-    "celiac disease",
-    "gluten sensitivity",
-    "ibs",
-    "wheat allergy"
-   ]
-  },
-  "yellow melon": {
-   "name": "Yellow Melon",
-   "restrictions": [
-    "hyperkalemia",
-    "latex-fruit cross-reactivity",
-    "latex-fruit syndrome",
-    "oral allergy syndrome"
-   ]
-  },
-  "yellow moong dal cooked": {
-   "name": "Yellow moong Dal cooked",
-   "restrictions": [
-    "legume family cross-reactivity"
-   ]
-  },
-  "yogurt full fat": {
-   "name": "Yogurt Full Fat",
-   "restrictions": [
-    "cardiovascular disease",
-    "diabetes",
-    "hypercholesterolemia",
-    "ibs",
-    "lactose intolerance",
-    "pancreatitis",
-    "phenylketonuria"
-   ]
-  },
-  "yogurt low fat": {
-   "name": "Yogurt Low Fat",
-   "restrictions": [
-    "ibs",
-    "lactose intolerance",
-    "phenylketonuria"
-   ]
-  },
-  "yogurt sauce": {
-   "name": "Yogurt sauce",
-   "restrictions": [
-    "lactose intolerance"
-   ]
-  },
-  "yogurt, lactose free": {
-   "name": "Yogurt, Lactose Free",
-   "restrictions": [
-    "phenylketonuria"
-   ]
-  },
-  "zucchini": {
-   "name": "Zucchini",
-   "restrictions": []
-  },
-  "zucchini cooked": {
-   "name": "Zucchini cooked",
-   "restrictions": []
   }
- }
 }

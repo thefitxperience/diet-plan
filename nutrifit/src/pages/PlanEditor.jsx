@@ -228,8 +228,12 @@ export default function PlanEditor() {
       // Stamp the dietitian sign-off (name/title/registration/note + today's date).
       const stamped = JSON.parse(JSON.stringify(plan))
       stamped.approval = { ...approval, date: new Date().toISOString().slice(0, 10) }
-      const { error: e } = await supabase.from('plans').update({ plan_data: stamped }).eq('id', id)
+      // .select() so an RLS-rejected write (zero rows, no error) can't leave the
+      // plan approved and deliverable with no sign-off block on the PDF.
+      const { data: saved, error: e } = await supabase.from('plans')
+        .update({ plan_data: stamped }).eq('id', id).select('id')
       if (e) throw e
+      if (!saved?.length) throw new Error(t('editor.saveRejected'))
       const { error: e2 } = await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'submitted' })
       if (e2) throw e2
       // Replace the (now locked) editor entry so "back" from the plan/delivery
@@ -798,7 +802,9 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
   return (
     <div className="card">
       <div className="row between">
-        <h3>{t(`meal.${meal.id}`)} · {t('editor.option')} {idx + 1}</h3>
+        {/* Added/renamed meals carry their own title; the slot key only exists
+            for the four standard meals, so fall back to it last. */}
+        <h3>{meal.title?.main || t(`meal.${meal.id}`)} · {t('editor.option')} {idx + 1}</h3>
         <div className="row">
           <button className="btn ghost sm" title={t('editor.moveUp')} onClick={() => move(-1)}>↑</button>
           <button className="btn ghost sm" title={t('editor.moveDown')} onClick={() => move(1)}>↓</button>

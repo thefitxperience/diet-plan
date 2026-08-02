@@ -49,6 +49,11 @@ export function downloadBlob(blob, fileName) {
   const a = document.createElement('a')
   a.href = url
   a.download = fileName
+  // Firefox ignores a click on an anchor that isn't in the document, and
+  // revoking the URL synchronously can cut the transfer short — so attach it,
+  // click, then revoke on a delay (same pattern as PlanShare.download).
+  document.body.appendChild(a)
   a.click()
-  URL.revokeObjectURL(url)
+  a.remove()
+  setTimeout(() => URL.revokeObjectURL(url), 2000)
 }
