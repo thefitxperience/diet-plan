@@ -2950,10 +2950,10 @@
 },
 {
 "id": "100411",
-"name_en": "Jareesh with Chicken",
-"name_ar": "جريش بالدجاج",
-"desc_en": "Crushed wheat simmered with chicken, onion and tomato, finished with a touch of yogurt.",
-"desc_ar": "جريش مطهو مع الدجاج والبصل والطماطم، ويُضاف إليه لمسة من الزبادي.",
+"name_en": "Freekeh with Chicken",
+"name_ar": "فريكة بالدجاج",
+"desc_en": "Freekeh simmered with chicken, onion and tomato, finished with a touch of yogurt.",
+"desc_ar": "فريكة مطهوة مع الدجاج والبصل والطماطم، ويُضاف إليها لمسة من الزبادي.",
 "categories": [
 "dinner",
 "lunch"
@@ -2972,8 +2972,8 @@
 },
 "ingredients": [
 {
-"name_en": "Jareesh, cooked",
-"name_ar": "جريش مطبوخ",
+"name_en": "Freekeh, cooked",
+"name_ar": "فريكة مطبوخة",
 "grams": 200,
 "uom": "g",
 "alt_en": ""
@@ -5451,5 +5451,419 @@
 },
 "ingredientCount": 4,
 "servingGrams": 260
+},
+{
+"id": "900001",
+"name_en": "Mujaddara",
+"name_ar": "مجدرة",
+"desc_en": "Lebanese lentils and rice topped with caramelized onions and olive oil.",
+"desc_ar": "عدس وأرز لبناني مع بصل مكرمل وزيت زيتون.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Vegan",
+"Vegetarian",
+"Pescatarian"
+],
+"kcal": 493,
+"servingGrams": 362,
+"ingredientCount": 4,
+"macros": {
+"protein": 20,
+"carbs": 75,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Lentils, cooked",
+"name_ar": "عدس مطبوخ",
+"grams": 180,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 50,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 12,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900002",
+"name_en": "Rice with Chicken and Almonds",
+"name_ar": "رز على الدجاج بالمكسرات",
+"desc_en": "Lebanese spiced rice with chicken and toasted almonds.",
+"desc_ar": "أرز لبناني متبل مع الدجاج واللوز المحمّص.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 610,
+"servingGrams": 353,
+"ingredientCount": 5,
+"macros": {
+"protein": 51,
+"carbs": 51,
+"fats": 21
+},
+"ingredients": [
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 160,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Chicken Breast, without skin, cooked/grilled",
+"name_ar": "صدر الدجاج بدون جلد مطبوخ/مشوي",
+"grams": 140,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Almonds",
+"name_ar": "لوز",
+"grams": 15,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 8,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900003",
+"name_en": "Zucchini in Yogurt Sauce",
+"name_ar": "كوسا باللبن",
+"desc_en": "Zucchini cooked in a warm yogurt sauce with minced meat and rice.",
+"desc_ar": "كوسا مطهوة بصلصة اللبن مع اللحم المفروم والأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 494,
+"servingGrams": 510,
+"ingredientCount": 4,
+"macros": {
+"protein": 42,
+"carbs": 37,
+"fats": 19
+},
+"ingredients": [
+{
+"name_en": "Zucchini cooked",
+"name_ar": "كوسا مطبوخة",
+"grams": 180,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 90,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 90,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Plain Greek yogurt",
+"name_ar": "زبادي يوناني سادة",
+"grams": 150,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900004",
+"name_en": "Mloukhieh with Chicken",
+"name_ar": "ملوخية بالدجاج",
+"desc_en": "Lebanese jute-leaf stew with chicken, served over rice.",
+"desc_ar": "يخنة الملوخية اللبنانية بالدجاج تُقدّم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 562,
+"servingGrams": 468,
+"ingredientCount": 5,
+"macros": {
+"protein": 51,
+"carbs": 49,
+"fats": 17
+},
+"ingredients": [
+{
+"name_en": "Mloukhieh, cooked",
+"name_ar": "ملوخية مطبوخة",
+"grams": 180,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Chicken Breast, without skin, cooked/grilled",
+"name_ar": "صدر الدجاج بدون جلد مطبوخ/مشوي",
+"grams": 130,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 8,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900005",
+"name_en": "Green Beans in Olive Oil",
+"name_ar": "لوبية بزيت",
+"desc_en": "Green beans braised in olive oil with tomato and onion, served with rice.",
+"desc_ar": "لوبية مطهوة بزيت الزيتون مع الطماطم والبصل، تُقدّم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Vegan",
+"Vegetarian",
+"Pescatarian"
+],
+"kcal": 306,
+"servingGrams": 382,
+"ingredientCount": 5,
+"macros": {
+"protein": 7,
+"carbs": 44,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Green Beans",
+"name_ar": "فاصولياء خضراء",
+"grams": 150,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 80,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 50,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 12,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 90,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900006",
+"name_en": "White Bean Stew with Rice",
+"name_ar": "يخنة فاصولياء مع الأرز",
+"desc_en": "White bean and meat stew in tomato sauce, served with rice.",
+"desc_ar": "يخنة فاصولياء بيضاء ولحم بصلصة الطماطم، تُقدّم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 575,
+"servingGrams": 450,
+"ingredientCount": 5,
+"macros": {
+"protein": 40,
+"carbs": 79,
+"fats": 11
+},
+"ingredients": [
+{
+"name_en": "White beans, cooked",
+"name_ar": "فاصولياء بيضاء مطبوخة",
+"grams": 150,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 80,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 60,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 40,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g",
+"alt_en": ""
+}
+]
+},
+{
+"id": "900007",
+"name_en": "Kafta with Bulgur",
+"name_ar": "كفتة مع البرغل",
+"desc_en": "Grilled minced-meat kafta with parsley and onion, served with bulgur.",
+"desc_ar": "كفتة لحم مشوية مع البقدونس والبصل، تُقدّم مع البرغل.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 456,
+"servingGrams": 380,
+"ingredientCount": 5,
+"macros": {
+"protein": 44,
+"carbs": 29,
+"fats": 19
+},
+"ingredients": [
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 150,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Parsley",
+"name_ar": "بقدونس",
+"grams": 20,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Bulgur",
+"name_ar": "برغل",
+"grams": 120,
+"uom": "g",
+"alt_en": ""
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 60,
+"uom": "g",
+"alt_en": ""
+}
+]
 }
 ]

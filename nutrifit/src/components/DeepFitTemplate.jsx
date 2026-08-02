@@ -222,7 +222,78 @@ function GuidelinesSection({ section, t }) {
   )
 }
 
-const MEAL_PRESENTATION = {
+// Client-facing assessment summary (§4.4): what the plan was calculated from,
+// in plain language — the body-composition findings, the estimated energy
+// needs, the goal, and how those produce the daily target. Renders only when
+// the plan carries an assessment (plans generated before this existed simply
+// omit the block) and only for figures that were actually measured.
+const ASSESS = {
+  energy: 'Your body burns about {bmr} kcal a day at rest. Allowing for how active you are, holding your current weight takes roughly {maintenance} kcal a day.',
+  energyShort: 'Based on your assessment, holding your current weight takes roughly {maintenance} kcal a day.',
+  lose: 'Your goal is to lose weight, so your daily target works out to {target} kcal — about {shift} kcal below that level, a pace that protects muscle while body fat comes down.',
+  gain: 'Your goal is to gain weight, so your daily target works out to {target} kcal — about {shift} kcal above that level, enough to build up gradually rather than all at once.',
+  maintain: 'Your goal is to maintain your current weight, so your daily target works out to {target} kcal, in line with what your body uses.',
+  adjusted: 'Your dietitian reviewed these figures against your full assessment and set your final daily target at {final} kcal.',
+}
+
+function AssessmentSummary({ assessment: a, dailyKcal, t }) {
+  if (!a || (!a.maintenanceKcal && !a.bmr)) return null
+
+  const kcal = (n) => t.num(Math.round(n).toLocaleString('en-US'))
+  // The English sentence is itself the dictionary key (same convention as the
+  // guidelines copy), so an untranslated string degrades to readable English.
+  // Values are localized individually and substituted in.
+  const tpl = (key, vals) => Object.entries(vals)
+    .reduce((s, [k, v]) => s.split(`{${k}}`).join(v), t.ui(key))
+
+  const metrics = [
+    a.weight && { label: 'Weight', value: `${t.num(a.weight)} ${t.ui('kg')}` },
+    a.height && { label: 'Height', value: `${t.num(a.height)} ${t.ui('cm')}` },
+    a.bodyFatPct && { label: 'Body Fat', value: `${t.num(a.bodyFatPct)}%` },
+    a.muscleMass && { label: 'Muscle Mass', value: `${t.num(a.muscleMass)} ${t.ui('kg')}` },
+  ].filter(Boolean)
+
+  // The dietitian's approved target can differ from the calculated one; when it
+  // does, state the calculated figure and then the final decision.
+  const final = Math.round(dailyKcal || 0) || a.recommendedKcal
+  const adjusted = final !== a.recommendedKcal
+
+  const energyLine = a.bmr && a.maintenanceKcal
+    ? tpl(ASSESS.energy, { bmr: kcal(a.bmr), maintenance: kcal(a.maintenanceKcal) })
+    : tpl(ASSESS.energyShort, { maintenance: kcal(a.maintenanceKcal || a.bmr) })
+
+  const goalKey = a.goal === 'lose' ? ASSESS.lose : a.goal === 'gain' ? ASSESS.gain : ASSESS.maintain
+  const goalLine = tpl(goalKey, {
+    target: kcal(adjusted ? a.recommendedKcal : final),
+    shift: kcal(Math.abs(a.goalShift)),
+  })
+
+  return (
+    <div className="deepfit-assessment">
+      <div className="deepfit-assessment-title">{t.ui('YOUR ASSESSMENT SUMMARY')}</div>
+      {metrics.length > 0 && (
+        <div className="deepfit-assessment-metrics">
+          {metrics.map((m) => (
+            <div className="deepfit-assessment-metric" key={m.label}>
+              <span className="deepfit-assessment-metric-label">{t.ui(m.label)}</span>
+              <span className="deepfit-assessment-metric-value">{m.value}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      <div className="deepfit-assessment-body">
+        <p>{energyLine} {goalLine}</p>
+        {adjusted && (
+          <p className="deepfit-assessment-note">
+            {tpl(ASSESS.adjusted, { final: kcal(final) })}
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export const MEAL_PRESENTATION = {
   regular: {
     breakfast: { title: { main: 'MEAL 1: BREAKFAST', sub: '(Choose One)' }, icon: 'Breakfast.png' },
     lunch: { title: { main: 'MEAL 2: LUNCH', sub: '(Choose One)' }, icon: 'Lunch.png' },
@@ -253,6 +324,16 @@ export default function DeepFitTemplate({
   if (!plan?.meals) return null
   const t = makeT(lang)
   const pres = MEAL_PRESENTATION[plan.isIF ? 'if' : 'regular']
+  // Presentation for a meal: a custom/renamed meal carries its own title/icon;
+  // otherwise fall back to the fixed slot presentation, then a safe default so an
+  // added slot never crashes the render.
+  const presFor = (meal) => {
+    const base = pres[meal.id] || {}
+    return {
+      title: meal.title || base.title || { main: String(meal.id || '').toUpperCase(), sub: '' },
+      icon: meal.icon || base.icon || 'Snack.png',
+    }
+  }
   const pages = planPageList(plan)
   const mealById = Object.fromEntries(plan.meals.map((m) => [m.id, m]))
   const h = plan.header
@@ -293,8 +374,9 @@ export default function DeepFitTemplate({
                   <b>{t.ui('DIET TYPE:')}</b> {t.ui(h.dietType)}
                 </div>
                 <div className="deepfit-diet-intro">{t.isAr && UI.diet_intro ? UI.diet_intro : DIET_INTRO}</div>
+                <AssessmentSummary assessment={plan.assessment} dailyKcal={h.dailyKcal} t={t} />
                 {meal && (
-                  <MealTable meal={meal} title={pres[meal.id].title} icon={pres[meal.id].icon}
+                  <MealTable meal={meal} title={presFor(meal).title} icon={presFor(meal).icon}
                     t={t} selectable={selectable} selection={selection} onSelect={onSelect} warnings={warnings} />
                 )}
                 <Wave />
@@ -309,7 +391,7 @@ export default function DeepFitTemplate({
             <div className="deepfit-page" key={idx} ref={ref} style={bgStyle}>
               <Header gym={gym} t={t} />
               <div className="deepfit-content deepfit-meal-page">
-                <MealTable meal={meal} title={pres[meal.id].title} icon={pres[meal.id].icon}
+                <MealTable meal={meal} title={presFor(meal).title} icon={presFor(meal).icon}
                   t={t} selectable={selectable} selection={selection} onSelect={onSelect} warnings={warnings} />
                 <Wave variant="low" />
               </div>
@@ -335,6 +417,20 @@ export default function DeepFitTemplate({
                 </p>
               )}
               {sections.map((s, i) => <GuidelinesSection section={s} t={t} key={i} />)}
+              {page.type === 'guidelines2' && h.approval?.name && (
+                <div className="deepfit-signoff">
+                  <div className="deepfit-signoff-label">{t.ui('Reviewed & approved by')}</div>
+                  <div className="deepfit-signoff-name">
+                    {h.approval.name}
+                    {h.approval.title ? `, ${h.approval.title}` : ''}
+                    {h.approval.registration ? ` · ${h.approval.registration}` : ''}
+                  </div>
+                  {h.approval.date && (
+                    <div className="deepfit-signoff-date">{t.ui('Date')}: {t.num(fmtDate(h.approval.date))}</div>
+                  )}
+                  {h.approval.note && <div className="deepfit-signoff-note">{h.approval.note}</div>}
+                </div>
+              )}
               <Wave variant={page.type === 'guidelines1' ? 'low' : undefined} />
             </div>
             <Footer />

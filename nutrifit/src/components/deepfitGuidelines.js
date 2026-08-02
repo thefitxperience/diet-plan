@@ -11,21 +11,25 @@ export const ABOUT_SECTIONS = [
     paragraphs: ['This meal plan is designed to give you flexibility while still helping you achieve your daily nutrition goals. The protein, carbohydrate, and fat content may vary between meal options, allowing you to choose meals that best suit your appetite, activity level, schedule, and personal preferences. For example, you may prefer a higher-protein breakfast after a workout or a lighter, lower-carbohydrate lunch on a less active day. What matters most is your overall daily intake rather than having identical macronutrients at every meal. Feel free to mix and match your meal choices throughout the day to create a balanced eating pattern that works for you.'],
   },
   {
-    heading: 'Vegetables – Enjoy Freely',
-    paragraphs: ['Non-starchy vegetables are encouraged with every meal and can be eaten generously according to your appetite. They are naturally low in calories and rich in fiber, vitamins, minerals, and antioxidants, helping to improve fullness, digestion, and overall health. Choose fresh, steamed, boiled, grilled, roasted, or air-fried vegetables without dressings. Season with herbs, spices, lemon juice, vinegar, or very small amounts not more than 1 tsp of olive oil if desired.'],
+    heading: 'Non-Starchy Vegetables',
+    paragraphs: ['Non-starchy vegetables are encouraged with every meal — aim for roughly 2 to 4 cups (about 200–400 g) spread across the day. They are naturally low in calories and rich in fiber, vitamins, minerals, and antioxidants, helping improve fullness, digestion, and overall health. Choose them fresh, steamed, boiled, grilled, roasted, or air-fried. Season freely with herbs, spices, lemon juice, or vinegar. Any oil you add is not included in your meal calorie totals, so keep it to no more than 1 tsp (about 5 g) of olive oil and count it toward your daily intake.'],
+  },
+  {
+    heading: 'Swapping Meals & Ingredients',
+    paragraphs: ['The options within each meal category are designed to be broadly comparable in calories and macronutrients, so you can choose whichever you prefer without changing your daily total. If an ingredient is unavailable, replace it with a similar item from the same group — for example, one lean protein for another, or one complex carbohydrate for another — in a similar portion. Unless stated otherwise, listed weights refer to cooked portions, and any oils, sauces, or dressings named in a meal are already included in its calorie total; extras you add on your own are not. To swap a whole meal, pick another option from the same category to keep your intended daily intake.'],
   },
 ]
 
 export const GUIDELINES_TITLE = 'DAILY NUTRITION & LIFESTYLE GUIDELINES'
 export const GUIDELINES_INTRO =
-  'These guidelines are designed to support your meal plan by focusing on daily habits that improve energy, digestion, recovery, and long-term health.'
+  'These guidelines are general nutrition education that applies to everyone, designed to support your meal plan through daily habits that improve energy, digestion, recovery, and long-term health. Any instructions specific to you appear in your dietitian’s approval note on the final page.'
 
 export const DIET_INTRO =
-  'Welcome to your personalized diet plan! This guide is designed to provide you with a structured approach to healthy eating, offering three meal options and one snack daily, ensuring you receive a balanced intake of proteins, carbohydrates, and healthy fats. Choose the options that best fit your preferences and dietary needs.'
+  'Welcome to your personalized diet plan! This guide provides a structured approach to healthy eating, offering several options for every meal and snack so you receive a balanced intake of proteins, carbohydrates, and healthy fats. Choose the options that best fit your preferences and dietary needs.'
 
 export const GUIDELINES_PAGE_1 = [
   {
-    heading: 'Daily Foundations Summary',
+    heading: 'Hydration',
     paragraphs: ['Proper hydration supports digestion, appetite regulation, energy levels, skin health, and mental focus.'],
     orderedList: [
       'Upon waking: 1 glass of water.',
@@ -33,12 +37,6 @@ export const GUIDELINES_PAGE_1 = [
       'Afternoon: 1–2 glasses between lunch and dinner.',
       'Evening: 1 glass, stopping at least 1 hour before bed.',
       'Daily target: Women 1.8–2.2 L / Men 2.2–2.8 L.',
-    ],
-  },
-  {
-    heading: 'Hydration',
-    paragraphs: [
-      'Proper hydration supports digestion, appetite regulation, energy levels, skin health, and mental focus. Upon waking, drink one glass of water. In the morning, drink one to two glasses between breakfast and lunch. In the afternoon, drink one to two glasses between lunch and dinner. In the evening, drink one glass, stopping at least one hour before bed. The daily target is approximately 1.8 to 2.2 liters for women and 2.2 to 2.8 liters for men.',
     ],
   },
   {

@@ -174,7 +174,14 @@ export default function Intake({ slug }) {
       const { plan, apiResponse, substitutions } = await generateCatalogPlan(
         payload,
         { allergyNames, conditionNames },
-        { fullName: `${form.firstName} ${form.lastName}`, dob: form.dob, dailyKcal: goalAdjustedKcal(calories, form.goal), goalText: GOAL_LABELS[form.goal] },
+        {
+          fullName: `${form.firstName} ${form.lastName}`,
+          dob: form.dob,
+          dailyKcal: goalAdjustedKcal(calories, form.goal),
+          goalText: GOAL_LABELS[form.goal],
+          goal: form.goal,
+          activityMultiplier: mult,
+        },
       )
       plan.dietary = { substitutions }
 

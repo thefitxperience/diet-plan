@@ -359,11 +359,23 @@
     "min": 30,
     "max": 120
   },
-  "Jareesh, cooked": {
+  "Freekeh, cooked": {
     "category": "carb",
     "per100g": { "kcal": 120, "protein": 4, "carbs": 24, "fats": 1 },
     "min": 100,
     "max": 300
+  },
+  "Mloukhieh, cooked": {
+    "category": "vegetable",
+    "per100g": { "kcal": 60, "protein": 4, "carbs": 7, "fats": 2 },
+    "min": 100,
+    "max": 250
+  },
+  "White beans, cooked": {
+    "category": "carb",
+    "per100g": { "kcal": 139, "protein": 9.7, "carbs": 25, "fats": 0.5 },
+    "min": 80,
+    "max": 200
   },
   "Labneh": {
     "category": "dairy",

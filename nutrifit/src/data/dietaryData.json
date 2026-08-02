@@ -1111,9 +1111,13 @@
     "phenylketonuria"
    ]
   },
-  "jareesh, cooked": {
-   "name": "Jareesh, cooked",
-   "restrictions": []
+  "freekeh, cooked": {
+   "name": "Freekeh, cooked",
+   "restrictions": [
+    "celiac disease",
+    "gluten sensitivity",
+    "wheat allergy"
+   ]
   },
   "jujuba \"ennab\"": {
    "name": "Jujuba \"Ennab\"",

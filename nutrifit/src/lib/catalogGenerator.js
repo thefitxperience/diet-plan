@@ -9,12 +9,16 @@
 import {
   optionFromCatalog, scaleOptionToKcal, rankByPortion, MAX_OPTIONS_PER_MEAL,
   MEAL_DEFS, optionWeight, MEAL_WEIGHT_CAP, autofillArabic, formatAmount,
+  buildAssessment,
 } from './planModel'
 import { processOption, canonicalTokens, norm } from './dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
 
 const SLOT_CONTRIB = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
 const SNACK_OPTIONS_EATEN = 2 // the plan tells the client to "choose two" snacks
+// Floor for a usable meal. Cross-meal de-duplication may not drop a meal below
+// this, even if that means offering a dish that also appears elsewhere.
+const MIN_OPTIONS_PER_MEAL = 3
 
 // Per-meal calorie target. Normalised over the meals actually in the plan (so an
 // intermittent-fasting plan with no breakfast still sums to the daily total), and
@@ -38,7 +42,10 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
   const daily = ctx.dailyKcal || 0
   const substitutions = []
 
-  const meals = MEAL_DEFS.filter((m) => !(isIF && m.id === 'breakfast')).map((m) => {
+  // ── Phase 1: rank each meal's candidates against its own calorie target ─────
+  // Most catalog dishes belong to more than one category (a steak is both lunch
+  // and dinner), so these pools overlap heavily; phase 2 resolves that.
+  const slots = MEAL_DEFS.filter((m) => !(isIF && m.id === 'breakfast')).map((m) => {
     const target = slotTargetKcal(m.id, daily, isIF)
     const options = []
     const seen = new Set()
@@ -75,7 +82,36 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // never thin.
     const tol = Math.max(60, target * 0.12)
     const inBand = sorted.filter((o) => !oversized(o) && Math.abs(o.kcal - target) <= tol)
-    const ranked = (inBand.length >= 3 ? inBand : sorted).slice(0, MAX_OPTIONS_PER_MEAL)
+    return { def: m, target, pool: inBand.length >= 3 ? inBand : sorted, sorted }
+  })
+
+  // ── Phase 2: hand dishes out so none repeats across meals ───────────────────
+  // A client should not be offered the same dish at lunch and dinner. Meals are
+  // served in order of how few candidates they have, so a slot whose pool is
+  // largely shared with another (lunch/dinner) isn't left picking over scraps.
+  const claimed = new Set()
+  for (const slot of [...slots].sort((a, b) => a.pool.length - b.pool.length)) {
+    const picked = []
+    for (const o of slot.pool) {
+      if (picked.length >= MAX_OPTIONS_PER_MEAL) break
+      const key = norm(o.name_en)
+      if (claimed.has(key)) continue
+      claimed.add(key)
+      picked.push(o)
+    }
+    // Uniqueness must never leave a meal thin: if too few survived, top up from
+    // this meal's own ranked list, repeats included.
+    if (picked.length < MIN_OPTIONS_PER_MEAL) {
+      for (const o of slot.sorted) {
+        if (picked.length >= MIN_OPTIONS_PER_MEAL) break
+        if (!picked.includes(o)) picked.push(o)
+      }
+    }
+    slot.ranked = picked
+  }
+
+  // ── Phase 3: emit in plan order (breakfast → lunch → dinner → snack) ────────
+  const meals = slots.map(({ def: m, target, ranked }) => {
     for (const o of ranked) {
       if (o._swaps) {
         for (const s of o._swaps) substitutions.push({ mealId: m.id, optionId: o.id, ...s })
@@ -85,15 +121,27 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     return { id: m.id, targetKcal: ranked.length ? ranked[0].kcal : target, options: ranked }
   })
 
+  const testDate = ctx.testDate || new Date().toISOString().slice(0, 10)
+  // Auto follow-up ~10 weeks out (editable in the editor) so the field is never
+  // blank; within the reviewer's 2–3 month routine re-assessment window.
+  let nextCheckup = ctx.nextCheckup || ''
+  if (!nextCheckup) {
+    const d = new Date(testDate)
+    d.setDate(d.getDate() + 70)
+    nextCheckup = d.toISOString().slice(0, 10)
+  }
+
   const model = autofillArabic({
     header: {
       fullName: ctx.fullName || '',
       dob: ctx.dob || '',
-      testDate: ctx.testDate || new Date().toISOString().slice(0, 10),
-      nextCheckup: ctx.nextCheckup || '',
+      testDate,
+      nextCheckup,
       dailyKcal: daily,
       dietType: ctx.goalText || '',
     },
+    // Client-facing assessment summary (§4.4) — rendered on the cover page.
+    assessment: buildAssessment(payload, ctx),
     isIF,
     meals,
   })

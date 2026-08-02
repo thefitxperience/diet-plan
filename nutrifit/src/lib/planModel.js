@@ -99,11 +99,60 @@ export function goalAdjustedKcal(kcal, goal) {
   return Math.max(0, (parseFloat(kcal) || 0) + (GOAL_KCAL_SHIFT[goal] || 0))
 }
 
+// ── Client assessment summary (§4.4) ─────────────────────────────────────────
+// A compact, client-readable record of what the plan was calculated from: the
+// body-composition inputs, the estimated energy needs, the selected goal, and
+// the arithmetic that turns the two into a daily target. Stored on the plan
+// itself because the exported PDF must be self-contained — the questionnaire
+// row never travels with it.
+//
+// `recommendedKcal` is what the calculation produces; `header.dailyKcal` is
+// what the dietitian ultimately approved. The two can differ (the reviewer
+// explicitly asks that any such gap be shown), so the summary compares them at
+// render time rather than baking one number in here.
+export function buildAssessment(payload = {}, ctx = {}) {
+  const num = (v) => {
+    const n = parseFloat(v)
+    return Number.isFinite(n) && n > 0 ? n : 0
+  }
+  const weight = num(payload.weight)
+  const fatMass = num(payload.fatMass)
+  const goal = ctx.goal || 'maintain'
+  const maintenanceKcal = Math.round(num(payload.kilocalorieNeeded))
+  return {
+    weight,
+    height: num(payload.height),
+    fatMass,
+    muscleMass: num(payload.muscleMass),
+    // Body-fat % is derived rather than stored: the intake captures fat mass in
+    // kg, but percentage is what a client recognizes from an InBody sheet.
+    bodyFatPct: weight && fatMass ? Math.round((fatMass / weight) * 1000) / 10 : 0,
+    bmr: Math.round(num(payload.bmr)),
+    activityMultiplier: num(ctx.activityMultiplier),
+    maintenanceKcal,
+    goal,
+    goalShift: GOAL_KCAL_SHIFT[goal] || 0,
+    recommendedKcal: goalAdjustedKcal(maintenanceKcal, goal),
+  }
+}
+
 // Per-meal calorie target derived from the daily total (fallback when a meal
 // has no API-provided targetKcal, e.g. a manually-built plan).
 export function mealTargetKcal(slot, dailyKcal) {
   const r = MEAL_KCAL_RATIO[slot]
   return dailyKcal && r ? Math.round(dailyKcal * r) : 0
+}
+
+// Per-meal targets for the meals actually present in a plan, normalized so they
+// sum to the daily total: snacks count twice (two are eaten), and unknown/custom
+// slots get a default share. Returns { [mealId]: perOptionTargetKcal }.
+export function mealTargetsFor(meals, dailyKcal) {
+  const weightOf = (id) => MEAL_KCAL_RATIO[id] ?? 0.15
+  const eaten = (id) => (id === 'snack' ? 2 : 1)
+  const total = (meals || []).reduce((s, m) => s + weightOf(m.id) * eaten(m.id), 0)
+  const out = {}
+  for (const m of meals || []) out[m.id] = total ? Math.round((dailyKcal * weightOf(m.id)) / total) : 0
+  return out
 }
 
 // ── Rule-based calorie scaling ("meal generation engine") ────────────────────
@@ -124,6 +173,12 @@ const SCALE_WEIGHT = {
 export function ingredientMetaFor(name) {
   return ING_META[(name || '').trim().toLowerCase()] || null
 }
+
+// Ingredients the editor can add with accurate nutrition (the keys of
+// ingredientMeta.json, original casing + Arabic name + role), alphabetical.
+export const KNOWN_INGREDIENTS = Object.keys(ingredientMeta)
+  .map((name) => ({ name_en: name, name_ar: translateIngredient(name), category: ingredientMeta[name].category }))
+  .sort((a, b) => a.name_en.localeCompare(b.name_en))
 
 // Tidy servings: nearest 5 g for real portions, nearest 1 g for tiny amounts.
 const roundGrams = (g) => (g >= 40 ? Math.round(g / 5) * 5 : Math.max(0, Math.round(g)))
@@ -230,12 +285,48 @@ export function scaleOptionToKcal(option, targetKcal) {
   }
 }
 
+// Recompute an option's macros + kcal from its CURRENT ingredient grams (no
+// clamp, no redistribute) — used when the dietitian edits ingredients/portions
+// directly in the editor, so the totals always reflect the plate on screen.
+// Ingredients we lack nutrition for contribute nothing; if too few are covered
+// to trust the result, the option's existing values are left untouched.
+export function recomputeOptionNutrition(option) {
+  const ings = option.ingredients || []
+  const macros = { protein: 0, carbs: 0, fats: 0 }
+  let kcal = 0
+  let covered = 0
+  for (const ing of ings) {
+    const meta = ingredientMetaFor(ing.name_en) || ingredientMetaFor(ing.original_en)
+    if (!meta) continue
+    covered++
+    const g = ing.grams || 0
+    const per = meta.per100g
+    kcal += (g / 100) * per.kcal
+    macros.protein += (g / 100) * (per.protein || 0)
+    macros.carbs += (g / 100) * (per.carbs || 0)
+    macros.fats += (g / 100) * (per.fats || 0)
+  }
+  if (ings.length && covered < Math.ceil(ings.length * 0.6)) return option
+  return {
+    ...option,
+    macros: { protein: Math.round(macros.protein), carbs: Math.round(macros.carbs), fats: Math.round(macros.fats) },
+    kcal: Math.round(kcal),
+  }
+}
+
+// True when we have nutrition data for an ingredient (so edits recompute cleanly).
+export function ingredientHasMeta(ing) {
+  return !!(ingredientMetaFor(ing?.name_en) || ingredientMetaFor(ing?.original_en))
+}
+
 // Countable foods: show "2 eggs" / "3 slices" instead of grams. Ordered — the
 // first matching pattern wins (egg-white before egg; pita before bread). `g` is
 // grams per unit, `step` is the rounding increment (0.5 allows "½ avocado").
 const UNIT_FOODS = [
   { re: /egg[,\s]+white/i, g: 33, step: 1, en: ['egg white', 'egg whites'], ar: ['بياض بيضة', 'بياض بيض'] },
-  { re: /\begg/i, g: 50, step: 1, en: ['egg', 'eggs'], ar: ['بيضة', 'بيضات'] },
+  // `\begg` alone also matches "Eggplant" → "4 eggs"; require a word end so only
+  // egg/eggs match.
+  { re: /\beggs?\b/i, g: 50, step: 1, en: ['egg', 'eggs'], ar: ['بيضة', 'بيضات'] },
   // All bread/pita/toast/tortilla stays in grams — loaf/slice/wrap sizes vary too
   // much to count reliably, so grams are the honest portion.
   { re: /pita|bread|toast|tortilla/i, noUnit: true },
@@ -374,6 +465,26 @@ export function kcalWarning(option) {
   return null
 }
 
+// Reviewer-recommended default floor: don't quietly ship a target below this
+// unless a dietitian intentionally approves it.
+export const MIN_SAFE_KCAL = 1450
+
+// Non-blocking clinical plausibility checks on a computed daily target. Returns
+// { code, ...data } entries the UI renders as warnings (never hard blocks — the
+// dietitian stays in control). `maintenanceKcal` is the unadjusted TDEE
+// (BMR × activity) before the goal ±500 shift.
+export function planCalorieWarnings({ bmr = 0, multiplier = 0, goal = 'maintain', targetKcal = 0, maintenanceKcal = 0 } = {}) {
+  const w = []
+  const t = Math.round(targetKcal || 0)
+  if (t && t < MIN_SAFE_KCAL) w.push({ code: 'belowFloor', floor: MIN_SAFE_KCAL, target: t })
+  if (bmr && t && t < Math.round(bmr)) w.push({ code: 'belowBmr', bmr: Math.round(bmr), target: t })
+  if (bmr && t && t > bmr * 2.4) w.push({ code: 'implausiblyHigh', bmr: Math.round(bmr), target: t })
+  // Very high self-reported activity swings the target a lot — flag it so the
+  // dietitian sanity-checks the questionnaire (the "heavy exercise" case).
+  if (multiplier && multiplier >= 1.725) w.push({ code: 'highActivity', multiplier })
+  return w
+}
+
 // Allergen flags: naive keyword check of ingredient names vs allergy names.
 export function allergenWarnings(plan, allergyNames = []) {
   const warnings = []
@@ -391,6 +502,65 @@ export function allergenWarnings(plan, allergyNames = []) {
     }
   }
   return warnings
+}
+
+// Pre-export sanity checks (§11 of the clinical review). Non-blocking — the
+// dietitian stays in control — but surfaced so free-form edits never quietly
+// ship an inconsistent plan. Returns [{ code, ...data }].
+export function validatePlan(plan) {
+  const issues = []
+  const meals = plan?.meals || []
+  if (!meals.length) return issues
+
+  // Recommended day = first option per meal (snacks eaten twice).
+  let sum = 0
+  for (const m of meals) {
+    if (!m.options?.length) { issues.push({ code: 'emptyMeal', meal: m.id }); continue }
+    sum += (m.options[0].kcal || 0) * (m.id === 'snack' ? 2 : 1)
+  }
+  const daily = plan.header?.dailyKcal || 0
+  if (daily && sum && Math.abs(sum - daily) > Math.max(60, daily * 0.05)) {
+    issues.push({ code: 'dailyMismatch', sum: Math.round(sum), daily: Math.round(daily) })
+  }
+
+  // The same dish must not be offered in two different meals of one plan — the
+  // generator de-duplicates, but a dietitian adding meals by hand can reintroduce it.
+  const placedIn = new Map()
+  for (const m of meals) {
+    const seenHere = new Set()
+    for (const o of m.options || []) {
+      const key = (o.name_en || '').trim().toLowerCase()
+      if (!key || seenHere.has(key)) continue // same-meal repeats caught below
+      seenHere.add(key)
+      if (!placedIn.has(key)) placedIn.set(key, [])
+      placedIn.get(key).push(m.id)
+    }
+    // A dish listed twice inside one meal is always a mistake.
+    const names = (m.options || []).map((o) => (o.name_en || '').trim().toLowerCase()).filter(Boolean)
+    for (const dup of new Set(names.filter((n, i) => names.indexOf(n) !== i))) {
+      issues.push({ code: 'duplicateInMeal', meal: m.id, option: dup })
+    }
+  }
+  for (const [name, where] of placedIn) {
+    if (where.length > 1) issues.push({ code: 'duplicateAcrossMeals', option: name, meals: where.join(', ') })
+  }
+
+  for (const m of meals) {
+    // Options within a meal should be interchangeable (comparable calories).
+    if ((m.options?.length || 0) >= 2) {
+      const kcals = m.options.map((o) => o.kcal || 0)
+      const spread = Math.max(...kcals) - Math.min(...kcals)
+      const ref = m.targetKcal || kcals[0] || 0
+      if (spread > Math.max(120, ref * 0.25)) issues.push({ code: 'optionSpread', meal: m.id, spread: Math.round(spread) })
+    }
+    for (const o of m.options || []) {
+      if (kcalWarning(o)) issues.push({ code: 'macroMismatch', meal: m.id, option: o.name_en || '' })
+      for (const ing of o.ingredients || []) {
+        if (!ing.grams || ing.grams <= 0) issues.push({ code: 'badGrams', option: o.name_en || '', ingredient: ing.name_en || '' })
+      }
+    }
+  }
+  return issues
 }
 
 // Fields still missing an Arabic translation (editor highlights these).

@@ -14,7 +14,7 @@ import {
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
-import { goalAdjustedKcal } from '../lib/planModel'
+import { goalAdjustedKcal, planCalorieWarnings } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 
@@ -84,6 +84,17 @@ export default function NewPlan() {
     if (mult) setForm((f) => ({ ...f, calories: Math.round(parseFloat(f.bmr) * mult) }))
   }, [form.bmr, form.activityId, form.caloriesTouched, lookups])
 
+  // Non-blocking clinical sanity checks on the calorie target (floor, plausible
+  // range, high self-reported activity). Shown on the calories step.
+  const calorieInfo = useMemo(() => {
+    const bmr = parseFloat(form.bmr) || 0
+    const maintenance = parseFloat(form.calories) || 0
+    const act = lookups?.activities?.find((a) => a.enumId === form.activityId)
+    const multiplier = act ? (activityMultiplier(act) || 0) : 0
+    const target = goalAdjustedKcal(maintenance, form.goal)
+    return { target, warnings: planCalorieWarnings({ bmr, multiplier, goal: form.goal, targetKcal: target, maintenanceKcal: maintenance }) }
+  }, [form.bmr, form.calories, form.activityId, form.goal, lookups])
+
   if (!client || inbodyList === null) return <Loading />
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value })
@@ -148,7 +159,15 @@ export default function NewPlan() {
         payload,
         { allergyNames, conditionNames },
         // dailyKcal = the goal-adjusted intake the client actually eats.
-        { fullName: `${client.first_name} ${client.last_name}`, dob: client.dob, dailyKcal: goalAdjustedKcal(payload.kilocalorieNeeded, form.goal), goalText: GOAL_LABELS[form.goal] },
+        // goal + activityMultiplier feed the client-facing assessment summary.
+        {
+          fullName: `${client.first_name} ${client.last_name}`,
+          dob: client.dob,
+          dailyKcal: goalAdjustedKcal(payload.kilocalorieNeeded, form.goal),
+          goalText: GOAL_LABELS[form.goal],
+          goal: form.goal,
+          activityMultiplier: activityMultiplier(lookups?.activities?.find((a) => a.enumId === form.activityId)) || 0,
+        },
       )
       planModel.dietary = { substitutions } // silent audit trail
 
@@ -277,6 +296,12 @@ export default function NewPlan() {
             <Field label={t('wizard.calories')} required hint={t('wizard.caloriesHint')}>
               <input type="number" step="1" min="500" max="10000" value={form.calories} onChange={setNum('calories')} />
             </Field>
+            {form.calories > 0 && form.goal !== 'maintain' && (
+              <p className="muted small">{t('wizard.goalAdjustedNote', { target: calorieInfo.target, goal: GOAL_LABELS[form.goal] })}</p>
+            )}
+            {calorieInfo.warnings.map((w, i) => (
+              <Alert kind="warn" key={i}>{t(`wizard.warn.${w.code}`, w)}</Alert>
+            ))}
           </div>
         </div>
       )}

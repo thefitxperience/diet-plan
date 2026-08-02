@@ -7,17 +7,21 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../components/ui'
-import DeepFitTemplate, { planPageList } from '../components/DeepFitTemplate'
+import DeepFitTemplate, { planPageList, MEAL_PRESENTATION } from '../components/DeepFitTemplate'
 import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
-  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL, formatAmount,
-  goalAdjustedKcal,
+  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  goalAdjustedKcal, recomputeOptionNutrition, ingredientHasMeta, KNOWN_INGREDIENTS,
+  mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
+import { GOAL_LABELS } from '../lib/fitApi'
 import mealCatalog from '../data/mealCatalog.json'
 import { arDigits } from '../lib/digits'
 import { generateCatalogPlan } from '../lib/planGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
+import { useAuth } from '../auth/AuthProvider'
+import { listCustomMeals, saveCustomMeal } from '../lib/customMeals'
 
 const EDITABLE = ['DRAFT', 'GENERATED', 'IN_REVIEW', 'CHANGES_REQUESTED']
 
@@ -25,6 +29,7 @@ export default function PlanEditor() {
   const { id } = useParams()
   const navigate = useNavigate()
   const { t } = useI18n()
+  const { profile } = useAuth()
   const [row, setRow] = useState(null)
   const [gym, setGym] = useState(null)
   const [plan, setPlan] = useState(null)
@@ -35,6 +40,10 @@ export default function PlanEditor() {
   const [busy, setBusy] = useState(null) // 'save' | 'submit' | 'regen' | 'pdf'
   const [notice, setNotice] = useState(null)
   const [error, setError] = useState(null)
+  const [customMeals, setCustomMeals] = useState([]) // gym's reusable saved meals
+  const [savedIds, setSavedIds] = useState(() => new Set()) // options saved this session
+  const [approving, setApproving] = useState(false) // sign-off dialog open
+  const [approval, setApproval] = useState({ name: '', title: '', registration: '', note: '' })
   const canvasRef = useRef()
   const pageEls = useRef({})
 
@@ -48,6 +57,9 @@ export default function PlanEditor() {
       setPlan(JSON.parse(JSON.stringify(p.plan_data)))
       const { data: g } = await supabase.from('gyms').select('*').eq('id', p.gym_id).maybeSingle()
       setGym(g)
+      // Load the gym's saved custom meals for the picker (table may not exist yet
+      // until migration 012 is applied — fail soft so the editor still works).
+      try { setCustomMeals(await listCustomMeals(p.gym_id)) } catch { /* no-op */ }
     })()
   }, [id])
 
@@ -64,6 +76,10 @@ export default function PlanEditor() {
     const keys = new Set([...kcal, ...allergen].map((w) => `${w.mealId}:${w.optionId}`))
     return { kcal, allergen, keys }
   }, [plan, row])
+
+  // Pre-export sanity checks (header vs meal totals, option spread, macros,
+  // units). Non-blocking — shown as a panel and echoed in the sign-off dialog.
+  const validation = useMemo(() => (plan ? validatePlan(plan) : []), [plan])
 
   if (error && !row) return <Alert kind="error">{error}</Alert>
   if (!row || !plan) return <Loading />
@@ -111,14 +127,79 @@ export default function PlanEditor() {
     setPicker(null)
   }
 
+  // Save the edited option as a reusable meal for this gym (custom_meals table).
+  async function saveCustom(option, mealId) {
+    setError(null)
+    try {
+      const entry = await saveCustomMeal({
+        gymId: row.gym_id,
+        createdBy: profile?.id,
+        slot: mealId,
+        option,
+        diets: row.questionnaire?.dietaryTypeId ? [row.questionnaire.dietaryTypeId] : [],
+      })
+      setCustomMeals((prev) => [entry, ...prev])
+      setSavedIds((prev) => new Set(prev).add(option.id))
+      setNotice(t('editor.mealSaved'))
+    } catch (e) { setError(e.message) }
+  }
+
+  const setHeader = (key, val) => mutate((p) => { p.header[key] = val })
+
+  // Recompute every meal's per-option target from the daily total and rescale all
+  // options to it, so the plan re-balances to the header calories in one action.
+  function applyDistribution() {
+    mutate((p) => {
+      const targets = mealTargetsFor(p.meals, p.header.dailyKcal || 0)
+      for (const m of p.meals) {
+        const tgt = targets[m.id] || m.targetKcal || 0
+        m.targetKcal = tgt
+        if (tgt) m.options = m.options.map((o) => scaleOptionToKcal(o, tgt))
+      }
+    })
+    setNotice(t('editor.distributed'))
+  }
+
+  function addMeal() {
+    mutate((p) => {
+      const n = p.meals.filter((m) => String(m.id).startsWith('custom_')).length + 1
+      p.meals.push({
+        id: `custom_${n}_${Math.random().toString(36).slice(2, 6)}`,
+        title: { main: t('editor.newMealTitle', { n }), sub: t('editor.chooseOne') },
+        icon: 'Snack.png',
+        targetKcal: mealTargetKcal('snack', p.header.dailyKcal || 0) || null,
+        options: [],
+      })
+    })
+  }
+
+  function removeMeal(mealId) {
+    if (!window.confirm(t('editor.removeMealConfirm'))) return
+    mutate((p) => { p.meals = p.meals.filter((m) => m.id !== mealId) })
+    if (selection?.mealId === mealId) setSelection(null)
+  }
+
+  const renameMeal = (mealId, part, val) => mutate((p) => {
+    const m = p.meals.find((x) => x.id === mealId)
+    if (!m) return
+    // Seed from the current effective title (existing override, else the preset
+    // default) so editing one part never wipes the other's default value.
+    const preset = MEAL_PRESENTATION[p.isIF ? 'if' : 'regular'][mealId] || {}
+    const base = m.title || { main: preset.title?.main || t(`meal.${mealId}`), sub: preset.title?.sub || '' }
+    m.title = { ...base, [part]: val }
+  })
+
   async function saveDraft() {
     setBusy('save')
     setError(null)
     try {
-      const { error: e } = await supabase.from('plans').update({ plan_data: plan }).eq('id', id)
+      const { data: saved, error: e } = await supabase.from('plans')
+        .update({ plan_data: plan }).eq('id', id).select('id')
       if (e) throw e
+      if (!saved?.length) throw new Error(t('editor.saveRejected'))
       if (row.status !== 'IN_REVIEW') {
-        await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'edited' })
+        const { error: e2 } = await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'edited' })
+        if (e2) throw e2
         setRow({ ...row, status: 'IN_REVIEW', plan_data: plan })
       } else {
         await supabase.rpc('log_plan_event', { p_plan_id: id, p_action: 'edited', p_comment: 'saved draft' })
@@ -129,18 +210,32 @@ export default function PlanEditor() {
     } catch (e) { setError(e.message) } finally { setBusy(null) }
   }
 
+  // Open the sign-off dialog, prefilling the dietitian's name from their profile.
+  function openApproval() {
+    setApproval({
+      name: plan.approval?.name || profile?.full_name || '',
+      title: plan.approval?.title || '',
+      registration: plan.approval?.registration || '',
+      note: plan.approval?.note || '',
+    })
+    setApproving(true)
+  }
+
   async function submit() {
     setBusy('submit')
     setError(null)
     try {
-      const { error: e } = await supabase.from('plans').update({ plan_data: plan }).eq('id', id)
+      // Stamp the dietitian sign-off (name/title/registration/note + today's date).
+      const stamped = JSON.parse(JSON.stringify(plan))
+      stamped.approval = { ...approval, date: new Date().toISOString().slice(0, 10) }
+      const { error: e } = await supabase.from('plans').update({ plan_data: stamped }).eq('id', id)
       if (e) throw e
       const { error: e2 } = await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'submitted' })
       if (e2) throw e2
       // Replace the (now locked) editor entry so "back" from the plan/delivery
       // page returns to the approvals list, not the locked-editor screen.
       navigate(`/plans/${id}`, { replace: true })
-    } catch (e) { setError(e.message) } finally { setBusy(null) }
+    } catch (e) { setError(e.message); setBusy(null); setApproving(false) }
   }
 
   async function regenerate() {
@@ -149,9 +244,26 @@ export default function PlanEditor() {
     setError(null)
     try {
       // strip UI-only fields stored alongside the questionnaire payload
-      const { goal, planStyle, allergyNames, conditionNames, ...q } = row.questionnaire
+      const { goal: qGoal, planStyle, allergyNames, conditionNames, ...q } = row.questionnaire || {}
       q.conditionIdSet = []
       q.allergyIdSet = []
+
+      // Older and seeded plans stored only allergy/condition names, so the goal
+      // and calorie target are missing. Recover them from the plan on screen
+      // rather than regenerating against a target of 0 — which silently yields a
+      // plan with no daily total and minimum-size portions.
+      const goal = qGoal || plan.assessment?.goal ||
+        Object.keys(GOAL_LABELS).find((k) => GOAL_LABELS[k] === plan.header.dietType) || 'maintain'
+      if (!q.kilocalorieNeeded) {
+        // header.dailyKcal is already goal-adjusted; undo the shift to recover
+        // the maintenance figure the generator expects.
+        const daily = plan.assessment?.maintenanceKcal ||
+          (plan.header.dailyKcal ? plan.header.dailyKcal - (GOAL_KCAL_SHIFT[goal] || 0) : 0)
+        q.kilocalorieNeeded = daily
+      }
+      if (!q.kilocalorieNeeded) throw new Error(t('editor.regenerateNoTarget'))
+      if (!q.dietaryTypeId) q.dietaryTypeId = ''            // no diet filter
+      if (!q.secondaryTypeId) q.secondaryTypeId = plan.isIF ? 'IntermittentFasting' : 'Regular'
       // Catalog generator (same as NewPlan): meals are scaled to per-meal targets
       // that sum to the goal-adjusted daily total, and restrictions are applied
       // via ingredient swaps — so the header always matches the meal totals.
@@ -162,14 +274,23 @@ export default function PlanEditor() {
         fullName: plan.header.fullName,
         dob: plan.header.dob,
         dailyKcal: goalAdjustedKcal(q.kilocalorieNeeded, goal),
-        goalText: plan.header.dietType,
+        goalText: plan.header.dietType || GOAL_LABELS[goal],
+        goal,
+        // The activity lookups aren't loaded here; carry forward the factor the
+        // plan was first generated with so the assessment summary survives.
+        activityMultiplier: plan.assessment?.activityMultiplier || 0,
       })
       model.header.nextCheckup = plan.header.nextCheckup
       model.dietary = { substitutions } // silent audit trail
-      const { error: e } = await supabase.from('plans')
-        .update({ plan_data: model, api_response: apiResponse }).eq('id', id)
+      // .select() so a write that matched no rows (blocked by RLS — wrong role,
+      // another gym, or a status that is no longer editable) is not mistaken for
+      // success and silently discarded.
+      const { data: saved, error: e } = await supabase.from('plans')
+        .update({ plan_data: model, api_response: apiResponse }).eq('id', id).select('id')
       if (e) throw e
-      await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'generated' })
+      if (!saved?.length) throw new Error(t('editor.saveRejected'))
+      const { error: e2 } = await supabase.rpc('transition_plan', { p_plan_id: id, p_action: 'generated' })
+      if (e2) throw e2
       setPlan(model)
       setRow({ ...row, status: 'GENERATED' })
       setSelection(null)
@@ -209,7 +330,7 @@ export default function PlanEditor() {
           <button className="btn secondary sm" onClick={saveDraft} disabled={!!busy || !dirty}>
             {busy === 'save' ? <Spinner /> : t('editor.saveDraft')}
           </button>
-          <button className="btn sm" onClick={submit} disabled={!!busy}>
+          <button className="btn sm" onClick={openApproval} disabled={!!busy}>
             {busy === 'submit' ? <Spinner /> : t('editor.submit')}
           </button>
         </div>
@@ -222,6 +343,15 @@ export default function PlanEditor() {
           {t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy })}
         </Alert>
       ))}
+      {validation.length > 0 && (
+        <Alert kind="warn">
+          <b>{t('editor.checksTitle', { count: validation.length })}</b>
+          <ul style={{ margin: '4px 0 0', paddingInlineStart: 18 }}>
+            {validation.slice(0, 6).map((v, i) => <li key={i}>{t(`editor.check.${v.code}`, v)}</li>)}
+            {validation.length > 6 && <li>{t('editor.checkMore', { n: validation.length - 6 })}</li>}
+          </ul>
+        </Alert>
+      )}
 
 
       <div className="editor-shell">
@@ -253,26 +383,12 @@ export default function PlanEditor() {
 
         {/* inspector */}
         <div className="editor-inspector">
-          {/* per-meal add buttons */}
-          <div className="card">
-            {plan.meals.map((meal) => (
-              <div className="row between" key={meal.id} style={{ marginBottom: 6 }}>
-                <b>{t(`meal.${meal.id}`)}</b>
-                <div className="row">
-                  <input type="number" style={{ width: 90 }} value={meal.targetKcal ?? ''}
-                    placeholder={t('editor.mealTargetKcal')}
-                    onChange={(e) => mutate((p) => {
-                      p.meals.find((m) => m.id === meal.id).targetKcal = parseInt(e.target.value) || null
-                    })} />
-                  <button className="btn ghost sm"
-                    disabled={meal.options.length >= MAX_OPTIONS_PER_MEAL}
-                    onClick={() => setPicker(meal.id)}>
-                    + {t('editor.addOption')}
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
+          <ClientCard t={t} q={row.questionnaire || {}} />
+          <PlanSettings
+            t={t} plan={plan} setHeader={setHeader} applyDistribution={applyDistribution}
+            addMeal={addMeal} removeMeal={removeMeal} renameMeal={renameMeal}
+            mutate={mutate} setPicker={setPicker}
+          />
 
           {!selOption ? (
             <div className="card muted small">{t('editor.clickToEdit')}</div>
@@ -285,8 +401,9 @@ export default function PlanEditor() {
               kcalWarn={kcalWarning(selOption)}
               updateOption={updateOption}
               mutate={mutate}
-              selection={selection}
               setSelection={setSelection}
+              onSaveCustom={saveCustom}
+              saved={savedIds.has(selOption.id)}
             />
           )}
         </div>
@@ -301,33 +418,249 @@ export default function PlanEditor() {
           used={new Set(plan.meals.flatMap((m) => m.options.map((o) => (o.name_en || '').trim().toLowerCase())))}
           allergyNames={row.questionnaire?.allergyNames || []}
           conditionNames={row.questionnaire?.conditionNames || []}
+          customMeals={customMeals}
           onPick={(opt) => addOption(picker, opt)}
           onClose={() => setPicker(null)}
         />
+      )}
+
+      {approving && (
+        <div className="modal-overlay" onClick={() => !busy && setApproving(false)}>
+          <div className="modal-card approval-modal" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <div className="approval-head">
+              <div>
+                <h2 style={{ margin: 0 }}>{t('editor.approveTitle')}</h2>
+                <p className="muted small" style={{ margin: '2px 0 0' }}>{t('editor.approveSubtitle')}</p>
+              </div>
+              <button className="btn ghost sm" onClick={() => setApproving(false)}>✕</button>
+            </div>
+
+            <div className="approval-body">
+              {validation.length > 0 && (
+                <Alert kind="warn">{t('editor.approveChecks', { count: validation.length })}</Alert>
+              )}
+              <Field label={t('editor.approverName')}>
+                <input type="text" autoFocus value={approval.name}
+                  onChange={(e) => setApproval({ ...approval, name: e.target.value })} />
+              </Field>
+              <div className="grid cols-2" style={{ gap: 12 }}>
+                <Field label={t('editor.approverTitle')}>
+                  <input type="text" value={approval.title} placeholder={t('editor.approverTitleHint')}
+                    onChange={(e) => setApproval({ ...approval, title: e.target.value })} />
+                </Field>
+                <Field label={t('editor.approverReg')}>
+                  <input type="text" value={approval.registration}
+                    onChange={(e) => setApproval({ ...approval, registration: e.target.value })} />
+                </Field>
+              </div>
+              <Field label={t('editor.approverNote')}>
+                <textarea rows={2} value={approval.note}
+                  onChange={(e) => setApproval({ ...approval, note: e.target.value })} />
+              </Field>
+              <p className="muted small approval-date-note">
+                {t('editor.approveDateNote', { date: new Date().toISOString().slice(0, 10) })}
+              </p>
+            </div>
+
+            <div className="approval-foot">
+              <button className="btn secondary" onClick={() => setApproving(false)} disabled={!!busy}>{t('common.cancel')}</button>
+              <button className="btn" onClick={submit} disabled={!!busy || !approval.name.trim()}>
+                {busy === 'submit' ? <Spinner /> : t('editor.approveSubmit')}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
 }
 
+// Client questionnaire + a prominent conditions/allergies highlight so the
+// dietitian can verify the inputs the plan was generated from (review §4.1, §5).
+function ClientCard({ t, q }) {
+  const conditions = q.conditionNames || []
+  const allergies = q.allergyNames || []
+  const flagged = conditions.length > 0 || allergies.length > 0
+  const pretty = (s) => String(s || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  const rows = [
+    ['qGoal', GOAL_LABELS[q.goal] || pretty(q.goal)],
+    ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
+    ['qActivity', pretty(q.activityLevelTypeEnumId)],
+    ['qAgeGender', [q.age, pretty(q.gender)].filter((v) => v || v === 0).join(' · ')],
+    ['qHeightWeight', [q.height && `${q.height} cm`, q.weight && `${q.weight} kg`].filter(Boolean).join(' · ')],
+    ['qBodyComp', [q.fatMass && `${q.fatMass}kg ${t('editor.fat')}`, q.muscleMass && `${q.muscleMass}kg ${t('editor.muscle')}`].filter(Boolean).join(' · ')],
+    ['qBmr', q.bmr ? `${q.bmr} kcal` : ''],
+    ['qTdee', q.kilocalorieNeeded ? `${q.kilocalorieNeeded} kcal` : ''],
+  ].filter(([, v]) => v)
+
+  return (
+    <div className="card client-card">
+      <div className={`client-flags${flagged ? ' has-flags' : ''}`}>
+        <div><span className="muted small">{t('editor.reportedConditions')}: </span>{conditions.length ? conditions.join(', ') : t('editor.noneReported')}</div>
+        <div><span className="muted small">{t('editor.reportedAllergies')}: </span>{allergies.length ? allergies.join(', ') : t('editor.noneReported')}</div>
+      </div>
+      <details className="client-details">
+        <summary>{t('editor.questionnaire')}</summary>
+        <div className="client-grid">
+          {rows.map(([k, v]) => (
+            <div key={k}><span className="muted small">{t(`editor.${k}`)}</span><span>{v}</span></div>
+          ))}
+        </div>
+      </details>
+    </div>
+  )
+}
+
+// Site-styled ingredient autocomplete (replaces the native <datalist>). Filters
+// the known-ingredient list; Enter or click adds it.
+function AddIngredient({ t, onAdd }) {
+  const [q, setQ] = useState('')
+  const [open, setOpen] = useState(false)
+  const [hi, setHi] = useState(0)
+  const query = q.trim().toLowerCase()
+  const matches = query
+    ? KNOWN_INGREDIENTS.filter((k) => k.name_en.toLowerCase().includes(query)).slice(0, 8)
+    : []
+  const add = (name) => { onAdd(name); setQ(''); setOpen(false); setHi(0) }
+  const onKey = (e) => {
+    if (e.key === 'ArrowDown') { e.preventDefault(); setOpen(true); setHi((h) => Math.min(h + 1, matches.length - 1)) }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)) }
+    else if (e.key === 'Enter') { e.preventDefault(); add(open && matches[hi] ? matches[hi].name_en : q) }
+    else if (e.key === 'Escape') setOpen(false)
+  }
+  return (
+    <div className="ingredient-add">
+      <div className="row" style={{ gap: 6 }}>
+        <input type="text" placeholder={t('editor.addIngredient')} value={q} style={{ flex: 1 }}
+          onChange={(e) => { setQ(e.target.value); setOpen(true); setHi(0) }}
+          onFocus={() => setOpen(true)}
+          onBlur={() => setTimeout(() => setOpen(false), 120)}
+          onKeyDown={onKey} />
+        <button className="btn ghost sm" onClick={() => add(q)}>＋</button>
+      </div>
+      {open && matches.length > 0 && (
+        <ul className="ingredient-dropdown">
+          {matches.map((k, i) => (
+            <li key={k.name_en}>
+              <button type="button" className={`ingredient-dropdown-item${i === hi ? ' active' : ''}`}
+                onMouseEnter={() => setHi(i)}
+                onMouseDown={(e) => { e.preventDefault(); add(k.name_en) }}>
+                {k.name_en}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  )
+}
+
+// Plan-level controls: daily target + redistribution, follow-up date, and meal
+// management (rename / target / add option / remove / add meal).
+function PlanSettings({ t, plan, setHeader, applyDistribution, addMeal, removeMeal, renameMeal, mutate, setPicker }) {
+  const daily = plan.header.dailyKcal || 0
+
+  // What the client can actually land on depending on which options they pick
+  // (review §2.4 / §11): recommended = first option per meal, min/max = the
+  // lightest/heaviest, snacks counted twice.
+  const range = plan.meals.reduce((acc, m) => {
+    if (!m.options.length) return acc
+    const mult = m.id === 'snack' ? 2 : 1
+    const kcals = m.options.map((o) => o.kcal || 0)
+    acc.exp += (m.options[0].kcal || 0) * mult
+    acc.min += Math.min(...kcals) * mult
+    acc.max += Math.max(...kcals) * mult
+    return acc
+  }, { exp: 0, min: 0, max: 0 })
+
+  return (
+    <>
+      <div className="card">
+        <h3 style={{ marginTop: 0 }}>{t('editor.planSettings')}</h3>
+        <div className="row" style={{ gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <Field label={t('editor.dailyTarget')}>
+            <input type="number" style={{ width: 120 }} min="0" step="10" value={daily || ''}
+              onChange={(e) => setHeader('dailyKcal', parseInt(e.target.value, 10) || 0)} />
+          </Field>
+          <Field label={t('editor.nextCheckup')}>
+            <input type="date" value={plan.header.nextCheckup || ''}
+              onChange={(e) => setHeader('nextCheckup', e.target.value)} />
+          </Field>
+        </div>
+        <div className="row" style={{ gap: 10, alignItems: 'center', marginTop: 8 }}>
+          <button className="btn secondary sm" onClick={applyDistribution}>{t('editor.applyDistribution')}</button>
+          <span className="muted small">{t('editor.applyDistributionHint')}</span>
+        </div>
+        {range.exp > 0 && (
+          <p className="muted small intake-range">
+            {t('editor.intakeRange')}: <b>{Math.round(range.exp)}</b> {t('editor.kcal')}
+            {range.min !== range.max && <> · {t('editor.intakeSpread', { min: Math.round(range.min), max: Math.round(range.max) })}</>}
+          </p>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="row between" style={{ marginBottom: 6 }}>
+          <h3 style={{ margin: 0 }}>{t('editor.meals')}</h3>
+          <button className="btn ghost sm" onClick={addMeal}>＋ {t('editor.addMeal')}</button>
+        </div>
+        {plan.meals.map((meal) => {
+          // Prefill from the current override, else the template's default title
+          // for this slot (e.g. "MEAL 1: BREAKFAST" / "(Choose One)") so the boxes
+          // show what actually prints.
+          const preset = MEAL_PRESENTATION[plan.isIF ? 'if' : 'regular'][meal.id]?.title || {}
+          const mainVal = meal.title?.main ?? preset.main ?? t(`meal.${meal.id}`)
+          const subVal = meal.title?.sub ?? preset.sub ?? ''
+          const isCustom = String(meal.id).startsWith('custom_')
+          return (
+            <div key={meal.id} className="meal-row" style={{ marginBottom: 8, borderBottom: '1px solid var(--border, #eee)', paddingBottom: 6 }}>
+              <div className="row between" style={{ gap: 6 }}>
+                <input type="text" style={{ flex: 1, fontWeight: 600 }} value={mainVal}
+                  onChange={(e) => renameMeal(meal.id, 'main', e.target.value)} />
+                <input type="number" style={{ width: 80 }} value={meal.targetKcal ?? ''} placeholder={t('editor.mealTargetKcal')}
+                  onChange={(e) => mutate((p) => { p.meals.find((m) => m.id === meal.id).targetKcal = parseInt(e.target.value, 10) || null })} />
+              </div>
+              <div className="row between" style={{ gap: 6, marginTop: 4 }}>
+                <input type="text" className="small" style={{ flex: 1 }} value={subVal}
+                  placeholder={t('editor.subtitle')} onChange={(e) => renameMeal(meal.id, 'sub', e.target.value)} />
+                <button className="btn ghost sm" disabled={meal.options.length >= MAX_OPTIONS_PER_MEAL}
+                  onClick={() => setPicker(meal.id)}>＋ {t('editor.addOption')}</button>
+                <button className="btn ghost sm icon-btn" title={t('editor.removeMeal')} onClick={() => removeMeal(meal.id)}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18" /><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6" />
+                    <line x1="10" y1="11" x2="10" y2="17" /><line x1="14" y1="11" x2="14" y2="17" />
+                  </svg>
+                </button>
+              </div>
+              {isCustom && <span className="badge sm">{t('editor.customMealBadge')}</span>}
+            </div>
+          )
+        })}
+      </div>
+    </>
+  )
+}
+
 // Searchable catalog of the gym's real meals (src/data/mealCatalog.json).
 // Picking one inserts a fully-populated option; "blank" starts a manual one.
-function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, onPick, onClose }) {
+function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, customMeals = [], onPick, onClose }) {
   const { t, lang } = useI18n() // follow the site language, not the plan-preview toggle
   const [q, setQ] = useState('')
   const query = q.trim().toLowerCase()
 
-  // Vet every catalog meal against the client's conditions/allergies: build the
-  // option, scale its quantities/macros to this meal's calorie target (like the
-  // API does), apply safe ingredient swaps, and drop any dish that still has an
-  // unsuitable ingredient with no safe alternative. `opt` is the final result.
+  // Vet every catalog meal (plus the gym's saved custom meals) against the
+  // client's conditions/allergies: build the option, scale its quantities/macros
+  // to this meal's calorie target, apply safe ingredient swaps, and drop any dish
+  // that still has an unsuitable ingredient with no safe alternative.
   const vetted = useMemo(() => {
     const tokens = canonicalTokens([...(allergyNames || []), ...(conditionNames || [])])
-    return mealCatalog.map((entry) => {
+    return [...customMeals, ...mealCatalog].map((entry) => {
       const opt = scaleOptionToKcal(optionFromCatalog(entry), targetKcal)
       const { swaps, conflicts } = tokens.size ? processOption(opt, tokens) : { swaps: [], conflicts: [] }
       return { entry, opt, swaps, safe: conflicts.length === 0 }
     })
-  }, [allergyNames, conditionNames, targetKcal])
+  }, [allergyNames, conditionNames, targetKcal, customMeals])
 
   // Show only meals valid for this slot AND the client's dietary type (empty
   // categories/diets = allowed anywhere, until harvested); hide unfixable meals
@@ -372,7 +705,7 @@ function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, con
             return (
               <button key={m.id} className="meal-picker-item" onClick={() => onPick(opt)}>
                 <div className="row between">
-                  <b>{name}</b>
+                  <b>{name}{m.isCustom ? <span className="badge sm" style={{ marginInlineStart: 6 }}>{t('editor.customBadge')}</span> : ''}</b>
                   <span className="muted small">{arDigits(opt.kcal, lang)} {lang === 'ar' ? 'كيلو سعرة' : 'kcal'}</span>
                 </div>
                 <div className="muted small">
@@ -395,35 +728,57 @@ function ThumbPage({ plan, pageIndex, lang, gym }) {
   return <DeepFitTemplate plan={plan} lang={lang} gym={gym} only={pageIndex} />
 }
 
-function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate, selection, setSelection }) {
+function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate, setSelection, onSaveCustom, saved }) {
   const idx = meal.options.findIndex((o) => o.id === option.id)
-  // Edit only the currently-previewed language's fields (the other language is
-  // preserved untouched behind the scenes).
+  // Edit the currently-previewed language's text; the other language is kept.
   const ar = lang === 'ar'
   const nameKey = ar ? 'name_ar' : 'name_en'
   const descKey = ar ? 'desc_ar' : 'desc_en'
   const ingKey = ar ? 'name_ar' : 'name_en'
   const dir = ar ? 'rtl' : 'ltr'
-
-  const move = (dir) => mutate((p) => {
+  const move = (d) => mutate((p) => {
     const m = p.meals.find((x) => x.id === meal.id)
     const i = m.options.findIndex((o) => o.id === option.id)
-    const j = i + dir
+    const j = i + d
     if (j < 0 || j >= m.options.length) return
     ;[m.options[i], m.options[j]] = [m.options[j], m.options[i]]
   })
 
   const num = (n) => arDigits(Math.round(n ?? 0), lang)
-  // Re-portion the whole option: scale grams + macros + kcal by one factor so
-  // they stay consistent (macros are stored per dish, not per ingredient, so a
-  // single scale is the only accurate way to change the serving size).
-  const rescale = (mult) => updateOption((o) => {
-    const target = Math.max(50, Math.round((o.kcal || 0) * mult))
-    const s = scaleOptionToKcal(o, target)
-    o.ingredients = s.ingredients
-    o.macros = s.macros
-    o.kcal = s.kcal
+  // Recompute macros/kcal from the current ingredient grams after any edit.
+  const recompute = (o) => { const r = recomputeOptionNutrition(o); o.macros = r.macros; o.kcal = r.kcal }
+
+  // Whole-option re-portion (grams + macros + kcal scale together, clamped to
+  // realistic servings by the engine).
+  const rescaleTo = (targetKcal) => updateOption((o) => {
+    const s = scaleOptionToKcal(o, Math.max(50, Math.round(targetKcal)))
+    o.ingredients = s.ingredients; o.macros = s.macros; o.kcal = s.kcal
   })
+
+  const setGrams = (i, val) => updateOption((o) => {
+    o.ingredients[i].grams = Math.max(0, parseInt(val, 10) || 0)
+    recompute(o)
+  })
+  const removeIng = (i) => updateOption((o) => { o.ingredients.splice(i, 1); recompute(o) })
+  // Manual macro override: kcal follows the macros (4/4/9) so they stay in sync.
+  // (Editing an ingredient recomputes both again — last edit wins.)
+  const setMacro = (k, val) => updateOption((o) => {
+    o.macros = { ...o.macros, [k]: Math.max(0, parseInt(val, 10) || 0) }
+    o.kcal = Math.round((o.macros.protein || 0) * 4 + (o.macros.carbs || 0) * 4 + (o.macros.fats || 0) * 9)
+  })
+  const addIng = (name) => {
+    const clean = (name || '').trim()
+    if (!clean) return
+    const known = KNOWN_INGREDIENTS.find((k) => k.name_en.toLowerCase() === clean.toLowerCase())
+    updateOption((o) => {
+      o.ingredients.push({
+        name_en: known ? known.name_en : clean,
+        name_ar: known ? known.name_ar : '',
+        grams: 50,
+      })
+      recompute(o)
+    })
+  }
 
   return (
     <div className="card">
@@ -439,46 +794,66 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
         <Alert kind="warn">{t('editor.kcalWarning', { est: kcalWarn.estimated, stated: kcalWarn.stated })}</Alert>
       )}
 
-      {/* Name and description are read-only too — they come from the meal
-          database; the nutritionist picks and portions, they don't rewrite. */}
       <Field label={t('editor.optionName')}>
-        <p className="readonly-text" dir={dir}>{option[nameKey] || option.name_en || '—'}</p>
+        <input type="text" dir={dir} value={option[nameKey] || ''}
+          onChange={(e) => updateOption((o) => { o[nameKey] = e.target.value })} />
       </Field>
-      {(option[descKey] || option.desc_en) && (
-        <Field label={t('editor.optionDesc')}>
-          <p className="readonly-text muted" dir={dir}>{option[descKey] || option.desc_en}</p>
-        </Field>
-      )}
+      <Field label={t('editor.optionDesc')}>
+        <textarea rows={2} dir={dir} value={option[descKey] || ''}
+          onChange={(e) => updateOption((o) => { o[descKey] = e.target.value })} />
+      </Field>
 
-      {/* Portion: scale the whole option (grams + macros + kcal move together by
-          a single factor — the only accurate way to re-portion, since macros are
-          stored per dish, not per ingredient). */}
-      <h3 style={{ marginTop: '0.9rem' }}>{t('editor.portion')}</h3>
-      <div className="portion-control">
-        <button className="btn ghost sm" title={t('editor.smaller')}
-          disabled={!option.kcal} onClick={() => rescale(0.9)}>−</button>
-        <span className="portion-kcal">{num(option.kcal)} {t('editor.kcal')}</span>
-        <button className="btn ghost sm" title={t('editor.larger')}
-          disabled={!option.kcal} onClick={() => rescale(1.1)}>＋</button>
-      </div>
+      {/* Portion: type a target calorie value; the engine re-portions the whole
+          plate to it (clamped to realistic servings). */}
+      <Field label={t('editor.portion')} hint={t('editor.portionHint')}>
+        <div className="row" style={{ gap: 6, alignItems: 'center' }}>
+          <input type="number" style={{ width: 100 }} min="50" step="10"
+            key={option.kcal} defaultValue={option.kcal || ''}
+            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}
+            onBlur={(e) => { const v = parseInt(e.target.value, 10); if (v && v !== option.kcal) rescaleTo(v) }} />
+          <span className="muted small">{t('editor.kcal')}</span>
+        </div>
+      </Field>
 
-      {/* Ingredients and macros are read-only — they come from the meal database
-          and are kept consistent by the portion scaler above. */}
+      {/* Editable ingredients — grams drive the recomputed macros/kcal above. */}
       <h3 style={{ marginTop: '0.9rem' }}>{t('editor.ingredients')}</h3>
-      <ul className="readonly-list" dir={dir}>
-        {option.ingredients.map((ing, i) => (
-          <li key={i}><span>{ing[ingKey] || ing.name_en}</span><span className="muted">{formatAmount(ing, lang)}</span></li>
-        ))}
+      <ul className="ingredient-edit-list" dir={dir}>
+        {option.ingredients.map((ing, i) => {
+          const noMeta = !ingredientHasMeta(ing)
+          return (
+            <li key={i} className="row between" style={{ gap: 6 }}>
+              <span className="ing-name" title={noMeta ? t('editor.noNutrition') : ''}>
+                {ing[ingKey] || ing.name_en}{noMeta ? ' ⚠︎' : ''}
+              </span>
+              <span className="row" style={{ gap: 4 }}>
+                <input type="number" min="0" step="5" style={{ width: 70 }} placeholder="0" value={ing.grams ? ing.grams : ''}
+                  onChange={(e) => setGrams(i, e.target.value)} />
+                <button className="btn ghost sm" title={t('editor.removeIngredient')} onClick={() => removeIng(i)}>✕</button>
+              </span>
+            </li>
+          )
+        })}
       </ul>
+      <AddIngredient t={t} onAdd={addIng} />
 
       <h3 style={{ marginTop: '0.9rem' }}>{t('editor.macros')}</h3>
-      <div className="readonly-macros">
+      <div className="macro-edit">
         {[['protein', 'editor.protein'], ['carbs', 'editor.carbs'], ['fats', 'editor.fats']].map(([k, lk]) => (
-          <div key={k}><span className="muted small">{t(lk)}</span><b>{option.macros[k] != null ? `${num(option.macros[k])} ${t('editor.grams')}` : '—'}</b></div>
+          <label key={k} className="macro-edit-item">
+            <span className="muted small">{t(lk)}</span>
+            <span className="macro-edit-input">
+              <input type="number" min="0" step="1" placeholder="0" value={option.macros[k] ? option.macros[k] : ''}
+                onChange={(e) => setMacro(k, e.target.value)} />
+              <span className="muted small">{t('editor.grams')}</span>
+            </span>
+          </label>
         ))}
       </div>
 
-      <div className="row end" style={{ marginTop: '1rem' }}>
+      <div className="row between" style={{ marginTop: '1rem' }}>
+        <button className="btn secondary sm" disabled={saved} onClick={() => onSaveCustom(option, meal.id)}>
+          {saved ? t('editor.savedMeal') : t('editor.saveMeal')}
+        </button>
         <button className="btn danger sm" onClick={() => {
           mutate((p) => {
             const m = p.meals.find((x) => x.id === meal.id)
