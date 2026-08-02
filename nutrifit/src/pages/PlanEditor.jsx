@@ -15,7 +15,7 @@ import {
   mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
-import { GOAL_LABELS } from '../lib/fitApi'
+import { GOAL_LABELS, activityDisplayName } from '../lib/fitApi'
 import mealCatalog from '../data/mealCatalog.json'
 import { arDigits } from '../lib/digits'
 import { generateCatalogPlan } from '../lib/planGenerator'
@@ -481,17 +481,29 @@ export default function PlanEditor() {
 // Client questionnaire + a prominent conditions/allergies highlight so the
 // dietitian can verify the inputs the plan was generated from (review §4.1, §5).
 function ClientCard({ t, q }) {
+  const { lang } = useI18n()
   const conditions = q.conditionNames || []
   const allergies = q.allergyNames || []
   const flagged = conditions.length > 0 || allergies.length > 0
-  const pretty = (s) => String(s || '').replace(/[_-]+/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+  // FIT enum ids arrive as e.g. "AltModeratelyActive": split the camel case and
+  // drop the API's "Alt" prefix so they read as words.
+  const pretty = (s) => String(s || '')
+    .replace(/[_-]+/g, ' ')
+    .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+    .replace(/^alt\s+/i, '')
+    .trim()
+    .replace(/\b\w/g, (c) => c.toUpperCase())
+  // Show the same wording the dietitian picked in the wizard, so the
+  // questionnaire can actually be checked against what was selected.
+  const activity = () => {
+    const words = pretty(q.activityLevelTypeEnumId)
+    return words ? activityDisplayName(words, lang) : ''
+  }
   const rows = [
     ['qGoal', GOAL_LABELS[q.goal] || pretty(q.goal)],
     ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
-    ['qActivity', pretty(q.activityLevelTypeEnumId)],
+    ['qActivity', activity()],
     ['qAgeGender', [q.age, pretty(q.gender)].filter((v) => v || v === 0).join(' · ')],
-    ['qHeightWeight', [q.height && `${q.height} cm`, q.weight && `${q.weight} kg`].filter(Boolean).join(' · ')],
-    ['qBodyComp', [q.fatMass && `${q.fatMass}kg ${t('editor.fat')}`, q.muscleMass && `${q.muscleMass}kg ${t('editor.muscle')}`].filter(Boolean).join(' · ')],
     ['qBmr', q.bmr ? `${q.bmr} kcal` : ''],
     ['qTdee', q.kilocalorieNeeded ? `${q.kilocalorieNeeded} kcal` : ''],
   ].filter(([, v]) => v)
