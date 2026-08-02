@@ -82,7 +82,24 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // never thin.
     const tol = Math.max(60, target * 0.12)
     const inBand = sorted.filter((o) => !oversized(o) && Math.abs(o.kcal - target) <= tol)
-    return { def: m, target, pool: inBand.length >= 3 ? inBand : sorted, sorted }
+    let pool = inBand.length >= 3 ? inBand : sorted
+
+    // Regenerating should offer a genuinely different selection, not recompute an
+    // identical plan — there are usually far more in-band candidates than the
+    // seven we show. The closest-to-target option stays pinned first so the
+    // meal's headline calories (and therefore the plan's daily total) don't move;
+    // only the alternatives rotate. Stride = the number of alternative rows, so
+    // one step swaps the whole set rather than shifting it by one.
+    // Only rotate where there is real surplus: on a restrictive diet the pool is
+    // barely bigger than the table, and churning it just forces the duplicate
+    // fallback below without buying the client any new choices.
+    const variant = Math.max(0, Math.trunc(ctx.variant || 0))
+    if (variant > 0 && pool.length > MAX_OPTIONS_PER_MEAL + 1) {
+      const [best, ...rest] = pool
+      const off = (variant * (MAX_OPTIONS_PER_MEAL - 1)) % rest.length
+      pool = [best, ...rest.slice(off), ...rest.slice(0, off)]
+    }
+    return { def: m, target, pool, sorted }
   })
 
   // ── Phase 2: hand dishes out so none repeats across meals ───────────────────
@@ -107,6 +124,11 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
         if (!picked.includes(o)) picked.push(o)
       }
     }
+    // De-duplication and rotation can both take a meal's closest-to-target dish
+    // (another meal claimed it first), so re-rank what survived. The meal's
+    // headline calories come from options[0], and the plan's daily total is the
+    // sum of those — this keeps that total on target.
+    picked.sort((a, b) => Math.abs(a.kcal - slot.target) - Math.abs(b.kcal - slot.target))
     slot.ranked = picked
   }
 
@@ -142,6 +164,9 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     },
     // Client-facing assessment summary (§4.4) — rendered on the cover page.
     assessment: buildAssessment(payload, ctx),
+    // Which rotation of the candidate pools produced this plan; the editor
+    // increments it so each regeneration offers a different selection.
+    variant: Math.max(0, Math.trunc(ctx.variant || 0)),
     isIF,
     meals,
   })

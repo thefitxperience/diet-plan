@@ -279,6 +279,9 @@ export default function PlanEditor() {
         // The activity lookups aren't loaded here; carry forward the factor the
         // plan was first generated with so the assessment summary survives.
         activityMultiplier: plan.assessment?.activityMultiplier || 0,
+        // Advance the rotation so this produces a different selection than the
+        // plan currently on screen — generation is otherwise deterministic.
+        variant: (plan.variant || 0) + 1,
       })
       model.header.nextCheckup = plan.header.nextCheckup
       model.dietary = { substitutions } // silent audit trail
