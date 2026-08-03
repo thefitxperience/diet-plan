@@ -13,7 +13,7 @@ export function ClientForm({ initial, onSaved, onCancel }) {
   const { profile } = useAuth()
   const [form, setForm] = useState(initial || {
     first_name: '', last_name: '', dob: '', gender: 'M',
-    phone: '', email: '', notes: '', consent: false,
+    phone: '', email: '', notes: '', consent: false, language: '',
   })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState(null)
@@ -48,7 +48,8 @@ export function ClientForm({ initial, onSaved, onCancel }) {
     setBusy(true)
     setError(null)
     try {
-      const row = { ...form, dob: form.dob || null }
+      // '' would violate the language CHECK constraint — "no preference" is NULL.
+      const row = { ...form, dob: form.dob || null, language: form.language || null }
       let res
       if (initial?.id) {
         res = await supabase.from('clients').update(row).eq('id', initial.id).select().single()
@@ -91,6 +92,13 @@ export function ClientForm({ initial, onSaved, onCancel }) {
         </Field>
         <Field label={`${t('clients.email')} (${t('common.optional')})`} error={errors.email} hint={errors.email}>
           <input type="email" className={errors.email ? 'invalid' : ''} value={form.email || ''} onChange={set('email')} />
+        </Field>
+        <Field label={t('pref.language')}>
+          <select value={form.language || ''} onChange={set('language')}>
+            <option value="">{t('common.none')}</option>
+            <option value="en">{t('delivery.lang.en')}</option>
+            <option value="ar">{t('delivery.lang.ar')}</option>
+          </select>
         </Field>
       </div>
       <Field label={t('clients.notes')}>

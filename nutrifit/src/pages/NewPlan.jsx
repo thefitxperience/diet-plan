@@ -17,6 +17,7 @@ import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal, planCalorieWarnings } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
+import { DislikePicker } from '../components/PreferenceFields'
 
 export default function NewPlan() {
   const { id: clientId } = useParams()
@@ -36,6 +37,7 @@ export default function NewPlan() {
     inbodyId: '', height: '', weight: '', muscle: '', fat: '', lbm: '', bmr: '',
     calories: '', caloriesTouched: false,
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
+    dislikes: [],   // §4.2 food preferences
   })
 
   useEffect(() => {
@@ -157,7 +159,7 @@ export default function NewPlan() {
       // dishes dropped) and every meal realistic at the client's calorie level.
       const { plan: planModel, apiResponse, substitutions } = await generateCatalogPlan(
         payload,
-        { allergyNames, conditionNames },
+        { allergyNames, conditionNames, dislikedIngredients: form.dislikes },
         // dailyKcal = the goal-adjusted intake the client actually eats.
         // goal + activityMultiplier feed the client-facing assessment summary.
         {
@@ -176,7 +178,10 @@ export default function NewPlan() {
         client_id: clientId,
         inbody_result_id: form.inbodyId || null,
         created_by: profile.id,
-        questionnaire: { ...payload, goal: form.goal, planStyle: form.planStyle, allergyNames, conditionNames },
+        questionnaire: {
+          ...payload, goal: form.goal, planStyle: form.planStyle, allergyNames, conditionNames,
+          dislikes: form.dislikes,
+        },
         plan_data: planModel,
         api_response: apiResponse,
       }).select().single()
@@ -342,6 +347,9 @@ export default function NewPlan() {
               </div>
             </Field>
           </div>
+          <Field label={t('pref.dislikes')} hint={t('pref.dislikesHint')}>
+            <DislikePicker value={form.dislikes} onChange={(v) => setForm({ ...form, dislikes: v })} />
+          </Field>
         </div>
       )}
 

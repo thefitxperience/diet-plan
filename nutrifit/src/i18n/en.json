@@ -10,7 +10,6 @@
   "nav.users": "Users",
   "nav.activity": "Activity Log",
   "nav.signout": "Sign out",
-
   "auth.signin": "Sign in",
   "auth.signup": "Sign up",
   "auth.createAccount": "Create account",
@@ -21,7 +20,6 @@
   "auth.fullname": "Full name",
   "auth.signingIn": "Signing in…",
   "auth.error": "Sign-in failed",
-
   "common.save": "Save",
   "common.cancel": "Cancel",
   "common.delete": "Delete",
@@ -42,7 +40,6 @@
   "common.name": "Name",
   "common.language": "Language",
   "common.error": "Something went wrong",
-
   "onboarding.title": "Set up your account",
   "onboarding.subtitle": "Tell us your role so we can route you to the right place.",
   "onboarding.firstUser": "You're the first user — you'll be set up as the platform administrator.",
@@ -58,26 +55,21 @@
   "onboarding.enterGym": "Please enter a gym name",
   "onboarding.noGyms": "No gyms exist yet — ask the platform admin to create yours first, or register as a gym owner.",
   "onboarding.submit": "Continue",
-
   "pending.title": "Waiting for approval",
   "pending.bodyNutritionist": "Your account is pending approval by your gym's admin. You'll get access as soon as they approve you.",
   "pending.bodyGymAdmin": "Your account is pending approval by the platform administrator. You'll get access as soon as they approve you.",
   "pending.rejectedTitle": "Account not approved",
   "pending.rejectedBody": "Your registration was not approved. Please contact your administrator.",
   "pending.refresh": "Check again",
-
   "team.pending": "Pending approval",
   "team.noPending": "No one is waiting for approval",
-
   "submit.empty": "Nothing awaiting approval — all your plans are approved or sent",
-
   "role.nutritionist": "Nutritionist",
   "role.gym_admin": "Gym Admin",
   "role.platform_admin": "Platform Admin",
   "acct.active": "Active",
   "acct.pending": "Pending",
   "acct.rejected": "Rejected",
-
   "status.DRAFT": "Draft",
   "status.GENERATED": "Awaiting approval",
   "status.IN_REVIEW": "In review",
@@ -85,7 +77,6 @@
   "status.CHANGES_REQUESTED": "Changes requested",
   "status.GYM_APPROVED": "Gym approved",
   "status.SENT": "Sent",
-
   "clients.title": "Clients",
   "clients.new": "New client",
   "clients.firstName": "First name",
@@ -128,7 +119,6 @@
   "clients.inbodyResults": "InBody results",
   "clients.newPlan": "New diet plan",
   "clients.uploadInbody": "Upload InBody",
-
   "inbody.title": "InBody upload",
   "inbody.dropHint": "Drop an InBody PDF here, or click to browse",
   "inbody.parsing": "Extracting values…",
@@ -150,7 +140,6 @@
   "inbody.field.testDate": "Test date",
   "inbody.manual": "Enter values manually",
   "inbody.saved": "InBody result saved",
-
   "wizard.title": "New diet plan",
   "wizard.step1": "Personal Details",
   "wizard.step2": "Body Composition",
@@ -188,14 +177,12 @@
   "wizard.fromInbody": "Pre-filled from InBody result",
   "wizard.selectInbody": "InBody result",
   "wizard.noInbody": "No InBody result — enter values manually",
-
   "plans.title": "Plans",
   "plans.empty": "No plans found",
   "plans.client": "Client",
   "plans.updated": "Updated",
   "plans.version": "Version",
   "plans.open": "Open",
-
   "editor.title": "Plan editor",
   "editor.pages": "Pages",
   "editor.inspector": "Inspector",
@@ -273,6 +260,9 @@
   "editor.check.badGrams": "\"{ingredient}\" in \"{option}\" has no amount.",
   "editor.check.duplicateAcrossMeals": "\"{option}\" is offered in more than one meal ({meals}) — the client would see the same dish twice.",
   "editor.check.duplicateInMeal": "\"{option}\" is listed twice in the same meal.",
+  "editor.check.portionHigh": "\"{ingredient}\" in \"{option}\" is {grams} g — that may be too large a serving.",
+  "editor.check.portionLow": "\"{ingredient}\" in \"{option}\" is {grams} g — that may be too small a serving.",
+  "editor.check.heavyPlate": "\"{option}\" totals {grams} g of food — that may be too much for one plate.",
   "editor.approveTitle": "Review & sign off",
   "editor.approveSubtitle": "This is the final approval — your sign-off is printed on the client's plan and it becomes ready to send.",
   "editor.approveDateNote": "This plan will be approved and dated {date}.",
@@ -309,12 +299,10 @@
   "editor.noMealsFound": "No meals match your search",
   "editor.ingredientsCount": "{count} ingredients",
   "editor.autoAdjusted": "adjusted for restrictions",
-
   "meal.breakfast": "Breakfast",
   "meal.lunch": "Lunch",
   "meal.dinner": "Dinner",
   "meal.snack": "Snack",
-
   "approvals.title": "Approvals",
   "approvals.pending": "Pending approval",
   "approvals.empty": "Nothing waiting for approval",
@@ -325,7 +313,6 @@
   "approvals.approved": "Plan approved",
   "approvals.changesRequested": "Changes requested — sent back to the nutritionist",
   "approvals.toFix": "Returned with comments",
-
   "delivery.title": "Deliver to client",
   "delivery.download": "Download PDF",
   "delivery.whatsapp": "Send via WhatsApp",
@@ -357,7 +344,6 @@
   "share.copied": "Link copied",
   "share.notFound": "This plan link is no longer available.",
   "delivery.emailSubject": "Your personalized diet plan from {gym}",
-
   "dashboard.title": "Dashboard",
   "dashboard.inProgress": "In progress",
   "dashboard.returned": "Returned with comments",
@@ -374,10 +360,8 @@
   "dashboard.waitingGym": "Waiting for gym approval",
   "dashboard.waitingNutritionist": "Waiting for nutritionist approval",
   "dashboard.deliveryRate": "Delivery rate",
-
   "filter.allGyms": "All gyms",
   "dashboard.plansTotal": "Total plans",
-
   "team.title": "Team",
   "team.invite": "Invite instructions",
   "team.inviteHint": "Create the user in Supabase Auth (or have them sign up), then add their profile row with role and gym. See README §Team.",
@@ -393,13 +377,11 @@
   "settings.copyLink": "Copy link",
   "settings.copied": "Copied!",
   "settings.qrCode": "QR code",
-
   "admin.gyms": "Gyms",
   "admin.newGym": "New gym",
   "admin.users": "Users",
   "admin.role": "Role",
   "admin.gym": "Gym",
-
   "event.created": "created the plan",
   "event.you": "You",
   "eventYou.generated": "generated the plan",
@@ -418,5 +400,12 @@
   "event.rejected": "requested changes",
   "event.sent": "sent the plan",
   "event.toClient": "to the client",
-  "event.for": "for {name}"
+  "event.for": "for {name}",
+  "pref.language": "Preferred language",
+  "pref.dislikes": "Foods you'd rather avoid",
+  "pref.dislikesHint": "Ingredients you dislike, not allergies",
+  "pref.dislikesPlaceholder": "Search a food, e.g. eggs, fish, mushrooms",
+  "editor.qDislikes": "Foods to avoid",
+  "delivery.clientPrefers": "— the client's preferred language",
+  "delivery.notClientPref": "⚠ the client asked for {lang}"
 }

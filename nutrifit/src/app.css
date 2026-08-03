@@ -179,6 +179,11 @@ button.btn, a.btn {
 .btn.sm { padding: 0.3rem 0.7rem; font-size: 0.8rem; }
 
 label.field { display: block; margin-bottom: 0.9rem; font-weight: 600; font-size: 0.88rem; }
+/* In a field grid, the row gap and each field's own bottom margin both applied,
+   so grid rows sat ~2x further apart than single-column fields. Drop the row gap
+   and let the field margin be the single owner of vertical rhythm — that also
+   keeps the trailing space after the grid, which a zeroed field margin wouldn't. */
+.grid:has(> label.field) { row-gap: 0; }
 label.field > span { display: block; margin-bottom: 0.3rem; color: var(--navy); }
 label.field .hint { font-weight: 400; color: var(--muted); font-size: 0.78rem; margin-top: 0.25rem; }
 
@@ -723,6 +728,22 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .client-grid > div > span:last-child { font-size: 0.9rem; }
 .intake-range { margin: 8px 0 0; }
 
+/* Selected food dislikes — removable chips under the search box. */
+.pref-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.pref-chip {
+  display: inline-flex; align-items: center; gap: 2px;
+  padding: 4px 4px 4px 12px; border-radius: 999px;
+  background: rgba(74, 135, 140, 0.14); border: 1px solid rgba(74, 135, 140, 0.4);
+  color: var(--navy); font-size: 0.85rem; font-weight: 600;
+}
+.pref-chip button {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 18px; height: 18px; border: 0; border-radius: 50%;
+  background: rgba(12, 43, 73, 0.1); cursor: pointer; padding: 0;
+  font-size: 0.95rem; line-height: 1; color: inherit;
+}
+.pref-chip button:hover { background: var(--danger, #c0392b); color: #fff; }
+
 /* Fallback row shown when the browser blocks the WhatsApp popup. */
 .share-recover {
   display: flex; flex-wrap: wrap; align-items: center;
@@ -790,10 +811,20 @@ html.intake-active, body.intake-active { background: #4A878C; }
   padding: 1.1rem 1.25rem 0.85rem;
   border-bottom: 1px solid var(--border, #e6e9ee);
 }
-.approval-body { padding: 1.1rem 1.25rem; overflow-y: auto; }
-.approval-body .field:last-of-type { margin-bottom: 0; }
+/* One owner for vertical rhythm: the body's flex gap. Children ship their own
+   margins (.alert and label.field are both 0.9rem), which stacked on top of the
+   grid gap and made the spacing uneven — so they're zeroed here. */
+.approval-body {
+  padding: 1.1rem 1.25rem; overflow-y: auto;
+  display: flex; flex-direction: column; gap: 0.9rem;
+}
+.approval-body .alert,
+.approval-body label.field { margin-bottom: 0; }
+/* An explicit 2-up: the global cols-2 is auto-fit minmax(260px), which always
+   collapses inside a ~480px modal and left the pair stacked. */
+.approval-body .grid.cols-2 { grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .approval-date-note {
-  margin: 0.9rem 0 0; padding-top: 0.75rem;
+  margin: 0; padding-top: 0.75rem;
   border-top: 1px dashed var(--border, #e6e9ee);
 }
 .approval-foot {
@@ -802,7 +833,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
   border-top: 1px solid var(--border, #e6e9ee);
 }
 @media (max-width: 520px) {
-  .approval-modal .cols-2 { grid-template-columns: 1fr; }
+  .approval-body .grid.cols-2 { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 800px) {
@@ -811,3 +842,6 @@ html.intake-active, body.intake-active { background: #4A878C; }
   .sidebar nav { flex-direction: row; flex-wrap: wrap; }
   .main { padding: 1rem; }
 }
+
+/* Delivery language differs from what the client asked for. */
+.lang-override { color: var(--warn, #b26a00); font-weight: 600 !important; }

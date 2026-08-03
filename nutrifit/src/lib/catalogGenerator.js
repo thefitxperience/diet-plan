@@ -35,12 +35,20 @@ export function slotTargetKcal(slot, daily, isIF) {
  * @param restrictions {allergyNames?, conditionNames?}
  * @param ctx {dailyKcal (goal-adjusted), fullName?, dob?, testDate?, nextCheckup?, goalText?}
  */
-export async function generateCatalogPlan(payload, { allergyNames = [], conditionNames = [] } = {}, ctx = {}) {
+export async function generateCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}) {
   const tokens = canonicalTokens([...allergyNames, ...conditionNames])
   const isIF = payload.secondaryTypeId === 'IntermittentFasting'
   const diet = payload.dietaryTypeId
   const daily = ctx.dailyKcal || 0
   const substitutions = []
+
+  // Review §4.2 — disliked ingredients. Unlike an allergy this is a preference,
+  // not a safety rule: a dish containing one is ranked out rather than dropped,
+  // so a long dislike list can never leave a meal empty. Matched against the
+  // ORIGINAL name too, so an allergy swap can't smuggle a disliked food back in.
+  const disliked = new Set(dislikedIngredients.map(norm).filter(Boolean))
+  const isDisliked = (opt) => disliked.size > 0 && (opt.ingredients || [])
+    .some((ing) => disliked.has(norm(ing.name_en)) || disliked.has(norm(ing.original_en)))
 
   // ── Phase 1: rank each meal's candidates against its own calorie target ─────
   // Most catalog dishes belong to more than one category (a steak is both lunch
@@ -71,8 +79,12 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // meals that can't reach a high target — e.g. intermittent-fasting — don't
     // lead the list). Ties keep catalog order, preserving variety.
     const oversized = (o) => optionWeight(o) > MEAL_WEIGHT_CAP
+    // Preference tiers, best first: 0 = fits and is liked, 1 = oversized plate,
+    // 2 = contains something the client dislikes (last resort — only surfaces if
+    // the meal would otherwise be thin).
+    const rank = (o) => (isDisliked(o) ? 2 : 0) + (oversized(o) ? 1 : 0)
     const sorted = options.sort((a, b) => {
-      if (oversized(a) !== oversized(b)) return oversized(a) ? 1 : -1
+      if (rank(a) !== rank(b)) return rank(a) - rank(b)
       return Math.abs(a.kcal - target) - Math.abs(b.kcal - target)
     })
     // Keep only options that land within a tolerance band of the meal target, so
@@ -81,7 +93,7 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // on a restrictive/IF plan), fall back to the closest ones so the meal is
     // never thin.
     const tol = Math.max(60, target * 0.12)
-    const inBand = sorted.filter((o) => !oversized(o) && Math.abs(o.kcal - target) <= tol)
+    const inBand = sorted.filter((o) => rank(o) === 0 && Math.abs(o.kcal - target) <= tol)
     let pool = inBand.length >= 3 ? inBand : sorted
 
     // Regenerating should offer a genuinely different selection, not recompute an
@@ -95,9 +107,16 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     // fallback below without buying the client any new choices.
     const variant = Math.max(0, Math.trunc(ctx.variant || 0))
     if (variant > 0 && pool.length > MAX_OPTIONS_PER_MEAL + 1) {
-      const [best, ...rest] = pool
-      const off = (variant * (MAX_OPTIONS_PER_MEAL - 1)) % rest.length
-      pool = [best, ...rest.slice(off), ...rest.slice(0, off)]
+      // Rotate only the plates that fit the weight guideline, keeping oversized
+      // ones pinned at the back. Rotating the whole list would promote them into
+      // the visible seven and undo the ranking above.
+      const fit = pool.filter((o) => rank(o) === 0)
+      const over = pool.filter((o) => rank(o) !== 0)
+      if (fit.length > 2) {
+        const [best, ...rest] = fit
+        const off = (variant * (MAX_OPTIONS_PER_MEAL - 1)) % rest.length
+        pool = [best, ...rest.slice(off), ...rest.slice(0, off), ...over]
+      }
     }
     return { def: m, target, pool, sorted }
   })

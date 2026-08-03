@@ -274,6 +274,7 @@ export default function PlanEditor() {
       const { plan: model, apiResponse, substitutions } = await generateCatalogPlan(q, {
         allergyNames: row.questionnaire?.allergyNames || [],
         conditionNames: row.questionnaire?.conditionNames || [],
+        dislikedIngredients: row.questionnaire?.dislikes || [],
       }, {
         fullName: plan.header.fullName,
         dob: plan.header.dob,
@@ -450,7 +451,7 @@ export default function PlanEditor() {
                 <input type="text" autoFocus value={approval.name}
                   onChange={(e) => setApproval({ ...approval, name: e.target.value })} />
               </Field>
-              <div className="grid cols-2" style={{ gap: 12 }}>
+              <div className="grid cols-2">
                 <Field label={t('editor.approverTitle')}>
                   <input type="text" value={approval.title} placeholder={t('editor.approverTitleHint')}
                     onChange={(e) => setApproval({ ...approval, title: e.target.value })} />
@@ -508,6 +509,7 @@ function ClientCard({ t, q }) {
     ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
     ['qActivity', activity()],
     ['qAgeGender', [q.age, pretty(q.gender)].filter((v) => v || v === 0).join(' · ')],
+    ['qDislikes', (q.dislikes || []).join(' · ')],
     ['qBmr', q.bmr ? `${q.bmr} kcal` : ''],
     ['qTdee', q.kilocalorieNeeded ? `${q.kilocalorieNeeded} kcal` : ''],
   ].filter(([, v]) => v)

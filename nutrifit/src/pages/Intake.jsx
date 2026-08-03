@@ -21,6 +21,7 @@ import { goalAdjustedKcal } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 import PhoneField from '../components/PhoneField'
+import { DislikePicker } from '../components/PreferenceFields'
 
 // Mifflin–St Jeor fallback when the InBody sheet has no BMR.
 function estimateBmr({ weight, height, age, gender }) {
@@ -67,6 +68,10 @@ export default function Intake({ slug }) {
     firstName: '', lastName: '', dob: '', gender: '', phone: '', email: '', consent: false,
     goal: 'maintain', planStyle: 'normal', activityId: '', dietaryTypeId: '',
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
+    // §4.2 preferences: language persists on the client, dislikes are a per-plan
+    // answer. Language mirrors whatever they're reading the form in until they
+    // pick one themselves (languageTouched).
+    language: lang === 'ar' ? 'ar' : 'en', languageTouched: false, dislikes: [],
   })
 
   const [submitting, setSubmitting] = useState(false)
@@ -84,6 +89,12 @@ export default function Intake({ slug }) {
       document.documentElement.classList.remove('intake-active')
     }
   }, [])
+
+  // They can switch the form language at any point; follow it until they set the
+  // field themselves.
+  useEffect(() => {
+    setForm((f) => (f.languageTouched ? f : { ...f, language: lang === 'ar' ? 'ar' : 'en' }))
+  }, [lang])
 
   useEffect(() => {
     supabase.rpc('get_intake_gym', { p_token: token }).then(({ data, error }) => {
@@ -173,7 +184,7 @@ export default function Intake({ slug }) {
       // goal-adjusted daily total shown in the header.
       const { plan, apiResponse, substitutions } = await generateCatalogPlan(
         payload,
-        { allergyNames, conditionNames },
+        { allergyNames, conditionNames, dislikedIngredients: form.dislikes },
         {
           fullName: `${form.firstName} ${form.lastName}`,
           dob: form.dob,
@@ -190,9 +201,13 @@ export default function Intake({ slug }) {
         p_client: {
           first_name: form.firstName, last_name: form.lastName, dob: form.dob,
           gender: form.gender, phone: form.phone, email: form.email, consent: form.consent, notes: '',
+          language: form.language,
         },
         p_inbody: { source_type: sourceType, model, extracted: extracted || {}, confirmed, test_date: testDate || null },
-        p_questionnaire: { ...payload, goal: form.goal, planStyle: form.planStyle, allergyNames, conditionNames },
+        p_questionnaire: {
+          ...payload, goal: form.goal, planStyle: form.planStyle, allergyNames, conditionNames,
+          dislikes: form.dislikes,
+        },
         p_plan_data: plan,
         p_api_response: apiResponse,
       })
@@ -327,6 +342,13 @@ export default function Intake({ slug }) {
                       {(lookups?.dietaryTypes || []).map((d) => <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName, lang)}</option>)}
                     </select>
                   </Field>
+                  <Field label={t('pref.language')}>
+                    <select value={form.language}
+                      onChange={(e) => setForm({ ...form, language: e.target.value, languageTouched: true })}>
+                      <option value="en">{t('delivery.lang.en')}</option>
+                      <option value="ar">{t('delivery.lang.ar')}</option>
+                    </select>
+                  </Field>
                 </div>
 
                 <label className="field">
@@ -375,6 +397,10 @@ export default function Intake({ slug }) {
                     </div>
                   </Field>
                 </div>
+
+                <Field label={t('pref.dislikes')} hint={t('pref.dislikesHint')}>
+                  <DislikePicker value={form.dislikes} onChange={(v) => setForm({ ...form, dislikes: v })} />
+                </Field>
 
                 <label className="checkbox-list" style={{ marginTop: 8 }}>
                   <label>

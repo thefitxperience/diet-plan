@@ -10,7 +10,6 @@
   "nav.users": "المستخدمون",
   "nav.activity": "سجل النشاط",
   "nav.signout": "تسجيل الخروج",
-
   "auth.signin": "تسجيل الدخول",
   "auth.signup": "إنشاء حساب",
   "auth.createAccount": "إنشاء حساب",
@@ -21,7 +20,6 @@
   "auth.fullname": "الاسم الكامل",
   "auth.signingIn": "جارٍ تسجيل الدخول…",
   "auth.error": "فشل تسجيل الدخول",
-
   "common.save": "حفظ",
   "common.cancel": "إلغاء",
   "common.delete": "حذف",
@@ -42,7 +40,6 @@
   "common.name": "الاسم",
   "common.language": "اللغة",
   "common.error": "حدث خطأ ما",
-
   "onboarding.title": "إعداد حسابك",
   "onboarding.subtitle": "أخبرنا بدورك لتوجيهك إلى المكان المناسب.",
   "onboarding.firstUser": "أنت أول مستخدم — سيتم إعدادك كمسؤول للمنصة.",
@@ -58,26 +55,21 @@
   "onboarding.enterGym": "الرجاء إدخال اسم النادي",
   "onboarding.noGyms": "لا توجد أندية بعد — اطلب من مسؤول المنصة إنشاء ناديك أولاً، أو سجّل كمالك نادٍ.",
   "onboarding.submit": "متابعة",
-
   "pending.title": "بانتظار الموافقة",
   "pending.bodyNutritionist": "حسابك بانتظار موافقة مدير ناديك. ستحصل على الوصول بمجرد الموافقة عليك.",
   "pending.bodyGymAdmin": "حسابك بانتظار موافقة مسؤول المنصة. ستحصل على الوصول بمجرد الموافقة عليك.",
   "pending.rejectedTitle": "لم تتم الموافقة على الحساب",
   "pending.rejectedBody": "لم تتم الموافقة على تسجيلك. يرجى التواصل مع المسؤول.",
   "pending.refresh": "تحقق مرة أخرى",
-
   "team.pending": "بانتظار الموافقة",
   "team.noPending": "لا أحد بانتظار الموافقة",
-
   "submit.empty": "لا يوجد ما ينتظر الموافقة — كل خططك معتمدة أو مُرسلة",
-
   "role.nutritionist": "أخصائي تغذية",
   "role.gym_admin": "مدير النادي",
   "role.platform_admin": "مسؤول المنصة",
   "acct.active": "نشط",
   "acct.pending": "قيد الانتظار",
   "acct.rejected": "مرفوض",
-
   "status.DRAFT": "مسودة",
   "status.GENERATED": "بانتظار الموافقة",
   "status.IN_REVIEW": "قيد المراجعة",
@@ -85,7 +77,6 @@
   "status.CHANGES_REQUESTED": "مطلوب تعديلات",
   "status.GYM_APPROVED": "معتمد من النادي",
   "status.SENT": "تم الإرسال",
-
   "clients.title": "العملاء",
   "clients.new": "عميل جديد",
   "clients.firstName": "الاسم الأول",
@@ -128,7 +119,6 @@
   "clients.inbodyResults": "نتائج تحليل الجسم",
   "clients.newPlan": "خطة غذائية جديدة",
   "clients.uploadInbody": "رفع تقرير InBody",
-
   "inbody.title": "رفع تقرير InBody",
   "inbody.dropHint": "أسقط ملف PDF لتقرير InBody هنا، أو انقر للاختيار",
   "inbody.parsing": "جارٍ استخراج القيم…",
@@ -150,7 +140,6 @@
   "inbody.field.testDate": "تاريخ الفحص",
   "inbody.manual": "إدخال القيم يدوياً",
   "inbody.saved": "تم حفظ نتيجة InBody",
-
   "wizard.title": "خطة غذائية جديدة",
   "wizard.step1": "البيانات الشخصية",
   "wizard.step2": "تكوين الجسم",
@@ -188,14 +177,12 @@
   "wizard.fromInbody": "معبأة مسبقاً من نتيجة InBody",
   "wizard.selectInbody": "نتيجة InBody",
   "wizard.noInbody": "لا توجد نتيجة InBody — أدخل القيم يدوياً",
-
   "plans.title": "الخطط",
   "plans.empty": "لا توجد خطط",
   "plans.client": "العميل",
   "plans.updated": "آخر تحديث",
   "plans.version": "النسخة",
   "plans.open": "فتح",
-
   "editor.title": "محرر الخطة",
   "editor.pages": "الصفحات",
   "editor.inspector": "التفاصيل",
@@ -273,6 +260,9 @@
   "editor.check.badGrams": "«{ingredient}» في «{option}» بلا كمية.",
   "editor.check.duplicateAcrossMeals": "«{option}» مُقدَّم في أكثر من وجبة ({meals}) — سيرى العميل الطبق نفسه مرتين.",
   "editor.check.duplicateInMeal": "«{option}» مُدرج مرتين في الوجبة نفسها.",
+  "editor.check.portionHigh": "«{ingredient}» في «{option}» بمقدار {grams} غرام — قد تكون هذه الحصة كبيرة جداً.",
+  "editor.check.portionLow": "«{ingredient}» في «{option}» بمقدار {grams} غرام — قد تكون هذه الحصة صغيرة جداً.",
+  "editor.check.heavyPlate": "«{option}» يبلغ مجموعه {grams} غرام من الطعام — قد تكون هذه كمية كبيرة جداً لطبق واحد.",
   "editor.approveTitle": "المراجعة والتوقيع",
   "editor.approveSubtitle": "هذا هو الاعتماد النهائي — يظهر توقيعك على خطة العميل وتصبح جاهزة للإرسال.",
   "editor.approveDateNote": "سيتم اعتماد هذه الخطة بتاريخ {date}.",
@@ -309,12 +299,10 @@
   "editor.noMealsFound": "لا توجد وجبات تطابق بحثك",
   "editor.ingredientsCount": "{count} مكوّنات",
   "editor.autoAdjusted": "مُعدّلة حسب القيود الغذائية",
-
   "meal.breakfast": "الفطور",
   "meal.lunch": "الغداء",
   "meal.dinner": "العشاء",
   "meal.snack": "وجبة خفيفة",
-
   "approvals.title": "الموافقات",
   "approvals.pending": "بانتظار الموافقة",
   "approvals.empty": "لا يوجد شيء بانتظار الموافقة",
@@ -325,7 +313,6 @@
   "approvals.approved": "تمت الموافقة على الخطة",
   "approvals.changesRequested": "تم طلب التعديلات — أُعيدت إلى أخصائي التغذية",
   "approvals.toFix": "معادة مع ملاحظات",
-
   "delivery.title": "تسليم للعميل",
   "delivery.download": "تنزيل PDF",
   "delivery.whatsapp": "إرسال عبر واتساب",
@@ -357,7 +344,6 @@
   "share.copied": "تم نسخ الرابط",
   "share.notFound": "لم يعد رابط الخطة متاحاً.",
   "delivery.emailSubject": "خطتك الغذائية الشخصية من {gym}",
-
   "dashboard.title": "لوحة التحكم",
   "dashboard.inProgress": "قيد الإنجاز",
   "dashboard.returned": "معادة مع ملاحظات",
@@ -374,10 +360,8 @@
   "dashboard.waitingGym": "بانتظار موافقة النادي",
   "dashboard.waitingNutritionist": "بانتظار موافقة أخصائي التغذية",
   "dashboard.deliveryRate": "معدل التسليم",
-
   "filter.allGyms": "كل الأندية",
   "dashboard.plansTotal": "إجمالي الخطط",
-
   "team.title": "الفريق",
   "team.invite": "تعليمات الدعوة",
   "team.inviteHint": "أنشئ المستخدم في Supabase Auth (أو دعه يسجل)، ثم أضف صف الملف الشخصي مع الدور والنادي. راجع README.",
@@ -393,13 +377,11 @@
   "settings.copyLink": "نسخ الرابط",
   "settings.copied": "تم النسخ!",
   "settings.qrCode": "رمز QR",
-
   "admin.gyms": "الصالات الرياضية",
   "admin.newGym": "نادٍ جديد",
   "admin.users": "المستخدمون",
   "admin.role": "الدور",
   "admin.gym": "النادي",
-
   "event.created": "أنشأ الخطة",
   "event.you": "أنت",
   "eventYou.generated": "أنشأت الخطة",
@@ -418,5 +400,12 @@
   "event.rejected": "طلب تعديلات",
   "event.sent": "أرسل الخطة",
   "event.toClient": "إلى العميل",
-  "event.for": "لـ {name}"
+  "event.for": "لـ {name}",
+  "pref.language": "اللغة المفضّلة",
+  "pref.dislikes": "أطعمة تفضّل تجنّبها",
+  "pref.dislikesHint": "مكوّنات لا تحبّها، وليست حساسية",
+  "pref.dislikesPlaceholder": "ابحث عن طعام، مثل البيض أو السمك أو الفطر",
+  "editor.qDislikes": "أطعمة يجب تجنّبها",
+  "delivery.clientPrefers": "— اللغة التي اختارها العميل",
+  "delivery.notClientPref": "⚠ العميل طلب {lang}"
 }

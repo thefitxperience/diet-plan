@@ -70,6 +70,8 @@ export default function PlanView() {
       supabase.from('deliveries').select('*').eq('plan_id', id).order('created_at', { ascending: false }),
     ])
     setClient(c)
+    // Deliver in the language the client asked for (§4.2), when they stated one.
+    if (c?.language === 'en' || c?.language === 'ar') setLang2(c.language)
     setPlanGym(g)
     setDeliveries(d || [])
   }
@@ -184,6 +186,15 @@ export default function PlanView() {
                 <option value="en">{t('delivery.lang.en')}</option>
                 <option value="ar">{t('delivery.lang.ar')}</option>
               </select>
+              {/* Explain why this may have pre-selected Arabic — and make it
+                  obvious when the sender is overriding the client's choice. */}
+              {(client.language === 'en' || client.language === 'ar') && (
+                <span className={`small ${client.language === lang2 ? 'muted' : 'lang-override'}`} style={{ fontWeight: 400 }}>
+                  {client.language === lang2
+                    ? t('delivery.clientPrefers', { lang: t(`delivery.lang.${client.language}`) })
+                    : t('delivery.notClientPref', { lang: t(`delivery.lang.${client.language}`) })}
+                </span>
+              )}
             </label>
             <div className="row">
               <button className="btn secondary" disabled={!!busy} onClick={() => deliver('download')}>

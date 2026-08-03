@@ -556,7 +556,31 @@ export function validatePlan(plan) {
     for (const o of m.options || []) {
       if (kcalWarning(o)) issues.push({ code: 'macroMismatch', meal: m.id, option: o.name_en || '' })
       for (const ing of o.ingredients || []) {
-        if (!ing.grams || ing.grams <= 0) issues.push({ code: 'badGrams', option: o.name_en || '', ingredient: ing.name_en || '' })
+        if (!ing.grams || ing.grams <= 0) {
+          issues.push({ code: 'badGrams', option: o.name_en || '', ingredient: ing.name_en || '' })
+          continue
+        }
+        // Portion outside the realistic serving range for this food. Generation
+        // always clamps into [min, max], so this only fires on a hand edit —
+        // which is exactly the outlier the reviewer wanted surfaced. The range
+        // itself is deliberately NOT shown: the judgement is the dietitian's, and
+        // quoting a number invites them to just match it.
+        const meta = ingredientMetaFor(ing.name_en) || ingredientMetaFor(ing.original_en)
+        if (meta && (ing.grams < meta.min || ing.grams > meta.max)) {
+          issues.push({
+            code: ing.grams > meta.max ? 'portionHigh' : 'portionLow',
+            meal: m.id,
+            option: o.name_en || '',
+            ingredient: ing.name_en || '',
+            grams: Math.round(ing.grams),
+          })
+        }
+      }
+      // Total plate weight — a dish can be within its calorie target yet be far
+      // more food than anyone would serve.
+      const weight = optionWeight(o)
+      if (weight > MEAL_WEIGHT_CAP) {
+        issues.push({ code: 'heavyPlate', meal: m.id, option: o.name_en || '', grams: Math.round(weight) })
       }
     }
   }
