@@ -2,6 +2,13 @@
    True page proportions: 595×842 px (A4 at 72dpi). */
 
 .deepfit-page {
+  /* The plan is a fixed 595px-wide block. On a phone that is wider than the
+     viewport, Chrome/Safari "font boosting" inflates text inside wide blocks
+     (prose paragraphs) while leaving narrow ones (table cells) alone — and
+     because the delivery PDF is rasterised in whichever browser sends it, that
+     inflation gets baked into the client's PDF. Pinning this disables it. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   width: 595px;
   min-height: 842px;
   background: white var(--deepfit-bg, none) no-repeat center bottom;

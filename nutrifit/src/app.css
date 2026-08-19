@@ -22,6 +22,11 @@
 html, body, #root { height: 100%; margin: 0; }
 
 body {
+  /* Stop iOS/Android inflating arbitrary blocks of text ("font boosting"), which
+     makes some paragraphs render much larger than authored — very visible on the
+     public plan-share link, which is mostly opened on phones. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
