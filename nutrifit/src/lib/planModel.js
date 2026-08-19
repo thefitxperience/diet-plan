@@ -346,6 +346,22 @@ function fmtCount(n) {
 
 // Human-friendly serving for an ingredient: "2 eggs" / "3 slices" for countable
 // foods, otherwise "45 g". Fully localized (Arabic digits + noun).
+// Whether a listed weight is a dry, raw or cooked portion, for the few foods
+// where it materially changes the amount on the plate (dietitian review §20).
+// Inferred from the per-100 g figures in ingredientMeta: 389 kcal/100 g oats is
+// dry, 83 kcal/100 g bulgur is cooked, and so on. Shown next to the ingredient
+// so the client does not have to rely on a general note elsewhere in the plan.
+const INGREDIENT_STATE = {
+  'rolled oats': 'dry',
+  'bulgur': 'cooked',
+  'black beans': 'cooked',
+  'salmon': 'raw',
+  'beef strips': 'raw',
+}
+export function ingredientState(name) {
+  return INGREDIENT_STATE[(name || '').trim().toLowerCase()] || null
+}
+
 export function formatAmount(ing, lang = 'en') {
   const grams = ing?.grams || 0
   const u = UNIT_FOODS.find((x) => x.re.test(ing?.name_en || ''))
@@ -473,10 +489,14 @@ export const MIN_SAFE_KCAL = 1450
 // { code, ...data } entries the UI renders as warnings (never hard blocks — the
 // dietitian stays in control). `maintenanceKcal` is the unadjusted TDEE
 // (BMR × activity) before the goal ±500 shift.
-export function planCalorieWarnings({ bmr = 0, multiplier = 0, goal = 'maintain', targetKcal = 0, maintenanceKcal = 0 } = {}) {
+// `floor` is the approving practitioner's own minimum, which they set themselves —
+// thresholds differ between dietitians, so it must not be imposed globally.
+// MIN_SAFE_KCAL is only the default when they haven't set one.
+export function planCalorieWarnings({ bmr = 0, multiplier = 0, goal = 'maintain', targetKcal = 0, maintenanceKcal = 0, floor = MIN_SAFE_KCAL } = {}) {
   const w = []
   const t = Math.round(targetKcal || 0)
-  if (t && t < MIN_SAFE_KCAL) w.push({ code: 'belowFloor', floor: MIN_SAFE_KCAL, target: t })
+  const fl = Math.round(floor || MIN_SAFE_KCAL)
+  if (t && t < fl) w.push({ code: 'belowFloor', floor: fl, target: t })
   if (bmr && t && t < Math.round(bmr)) w.push({ code: 'belowBmr', bmr: Math.round(bmr), target: t })
   if (bmr && t && t > bmr * 2.4) w.push({ code: 'implausiblyHigh', bmr: Math.round(bmr), target: t })
   // Very high self-reported activity swings the target a lot — flag it so the
@@ -585,6 +605,25 @@ export function validatePlan(plan) {
     }
   }
   return issues
+}
+
+// ── Auto-approval eligibility stamp ──────────────────────────────────────────
+// The safety checks live here in JS, but the 24-hour auto-approval job runs in
+// the database and cannot re-run them. So every time a plan is written we record
+// the verdict on the plan itself, and the job only releases plans whose verdict
+// is clean. A plan with no stamp is never auto-approved (fail closed) — which is
+// also what keeps plans created before this feature out of scope.
+export function stampPlanChecks(plan, allergyNames = []) {
+  if (!plan) return plan
+  const issues = validatePlan(plan)
+  const allergens = allergenWarnings(plan, allergyNames)
+  plan.checks = {
+    count: issues.length + allergens.length,
+    codes: [...new Set(issues.map((i) => i.code))],
+    allergens: allergens.length,
+    at: new Date().toISOString(),
+  }
+  return plan
 }
 
 // Fields still missing an Arabic translation (editor highlights these).

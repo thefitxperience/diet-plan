@@ -14,7 +14,7 @@ import {
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
-import { goalAdjustedKcal, planCalorieWarnings } from '../lib/planModel'
+import { goalAdjustedKcal, planCalorieWarnings, stampPlanChecks } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 import { DislikePicker } from '../components/PreferenceFields'
@@ -172,6 +172,8 @@ export default function NewPlan() {
         },
       )
       planModel.dietary = { substitutions } // silent audit trail
+      // Record the safety verdict so the 24-hour auto-approval job can read it.
+      stampPlanChecks(planModel, allergyNames)
 
       const { data: plan, error: insErr } = await supabase.from('plans').insert({
         gym_id: profile.gym_id,

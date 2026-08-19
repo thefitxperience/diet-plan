@@ -184,6 +184,9 @@ label.field { display: block; margin-bottom: 0.9rem; font-weight: 600; font-size
    and let the field margin be the single owner of vertical rhythm — that also
    keeps the trailing space after the grid, which a zeroed field margin wouldn't. */
 .grid:has(> label.field) { row-gap: 0; }
+/* Same reasoning in a horizontal flex row: the field's bottom margin just leaves
+   a gap under the inputs, since the row itself handles spacing. */
+.row > label.field { margin-bottom: 0; }
 label.field > span { display: block; margin-bottom: 0.3rem; color: var(--navy); }
 label.field .hint { font-weight: 400; color: var(--muted); font-size: 0.78rem; margin-top: 0.25rem; }
 
@@ -637,8 +640,6 @@ html.intake-active, body.intake-active { background: #4A878C; }
   gap: 0.6rem;
   position: sticky;
   top: 1rem;
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
 }
 .editor-thumb {
   border: 2px solid var(--border);
@@ -671,8 +672,6 @@ html.intake-active, body.intake-active { background: #4A878C; }
   direction: ltr;
 }
 .editor-canvas {
-  overflow: auto;
-  max-height: calc(100vh - 2rem);
   background: #e9edf2;
   border-radius: var(--radius);
   padding: 1.25rem;
@@ -680,8 +679,6 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .editor-inspector {
   position: sticky;
   top: 1rem;
-  max-height: calc(100vh - 2rem);
-  overflow-y: auto;
 }
 .inspector-bilingual { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .inspector-bilingual .ar-missing input, input.ar-missing { border-color: var(--warn); background: #fffbeb; }
@@ -845,3 +842,59 @@ html.intake-active, body.intake-active { background: #4A878C; }
 
 /* Delivery language differs from what the client asked for. */
 .lang-override { color: var(--warn, #b26a00); font-weight: 600 !important; }
+
+/* Explicit choice after the daily target changes (dietitian review item 12). */
+.target-resync {
+  /* Stacked, because the inspector is only 340px wide: the explanation takes the
+     full width and the two buttons then share one line without wrapping. */
+  display: flex; flex-direction: column; gap: 8px;
+  margin-top: 8px; padding: 8px 10px;
+  border: 1px solid var(--warn, #b45309); border-radius: 8px;
+  background: rgba(180, 83, 9, 0.07);
+}
+.target-resync .row { flex-wrap: nowrap; gap: 8px; }
+.target-resync .btn { white-space: nowrap; flex: 1 1 auto; justify-content: center; }
+
+/* One notification card groups every item needing attention, instead of a
+   separate panel per allergen / calorie warning / check. */
+.notice-group { margin-top: 6px; }
+.notice-group-label {
+  display: block; font-size: 0.72rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.05em; opacity: 0.75;
+}
+.notice-group ul { margin: 2px 0 0; padding-inline-start: 18px; }
+.notice-group li { margin-bottom: 2px; }
+
+/* ── Editor layout (dietitian review §3) ────────────────────────────────────
+   One document scroll: the panes no longer each own a scroll container, which
+   is what produced three competing scrollbars and forced horizontal scrolling
+   of the preview. The side panes stick so they stay usable while scrolling. */
+.editor-pages { transform-origin: top center; }
+.editor-thumbs, .editor-inspector {
+  /* top: 1rem is set on each above — don't override it here. */
+  align-self: start;
+  max-height: calc(100vh - 2rem); overflow-y: auto;
+}
+.editor-view-controls { display: inline-flex; align-items: center; gap: 4px; margin-inline-end: 4px; }
+.editor-view-controls .btn.ghost {
+  border: 1px solid var(--border); background: #fff; font-weight: 600;
+}
+.editor-view-controls .btn.ghost.on {
+  background: var(--navy); color: #fff; border-color: var(--navy);
+}
+.editor-view-controls select { min-height: 2rem; padding: 0.2rem 0.4rem; font-size: 0.8rem; }
+
+/* Collapsible header for the review panel. */
+.notice-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
+.notice-toggle {
+  flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center;
+  width: 22px; height: 22px; margin: -2px -2px 0 0;
+  border: 0; border-radius: 6px; background: transparent;
+  color: inherit; cursor: pointer; opacity: 0.7;
+  transform: rotate(-90deg);          /* collapsed: chevron points inward */
+  transition: transform 0.15s, opacity 0.15s, background 0.15s;
+}
+.notice-toggle.open { transform: rotate(0deg); }
+.notice-toggle:hover { opacity: 1; background: rgba(146, 64, 14, 0.12); }
+.deepfit-root[dir='rtl'] .notice-toggle,
+[dir='rtl'] .notice-toggle { margin: -2px 0 0 -2px; }

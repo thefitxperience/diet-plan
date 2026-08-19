@@ -17,7 +17,7 @@ import {
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
-import { goalAdjustedKcal } from '../lib/planModel'
+import { goalAdjustedKcal, stampPlanChecks } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
 import { arDigits } from '../lib/digits'
 import PhoneField from '../components/PhoneField'
@@ -195,6 +195,7 @@ export default function Intake({ slug }) {
         },
       )
       plan.dietary = { substitutions }
+      stampPlanChecks(plan, allergyNames)
 
       const { error: rpcErr } = await supabase.rpc('submit_intake', {
         p_token: token,

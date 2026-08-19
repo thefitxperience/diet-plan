@@ -12,7 +12,8 @@ import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
   optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
   goalAdjustedKcal, recomputeOptionNutrition, ingredientHasMeta, KNOWN_INGREDIENTS,
-  mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT,
+  mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT, planCalorieWarnings, MIN_SAFE_KCAL,
+  stampPlanChecks,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import { GOAL_LABELS, activityDisplayName } from '../lib/fitApi'
@@ -39,12 +40,67 @@ export default function PlanEditor() {
   const [previewLang, setPreviewLang] = useState('en')
   const [busy, setBusy] = useState(null) // 'save' | 'submit' | 'regen' | 'pdf'
   const [notice, setNotice] = useState(null)
+  // Success messages ("Meals rebalanced…", "Saved") are confirmations, not things
+  // to act on, so they clear themselves. Errors and the review panel stay put.
+  useEffect(() => {
+    if (!notice) return
+    const id = setTimeout(() => setNotice(null), 4000)
+    return () => clearTimeout(id)
+  }, [notice])
   const [error, setError] = useState(null)
   const [customMeals, setCustomMeals] = useState([]) // gym's reusable saved meals
   const [savedIds, setSavedIds] = useState(() => new Set()) // options saved this session
   const [approving, setApproving] = useState(false) // sign-off dialog open
+  const [noticesOpen, setNoticesOpen] = useState(true) // review panel collapsed?
   const [approval, setApproval] = useState({ name: '', title: '', registration: '', note: '' })
+  // Practitioner's own minimum target (dietitian review item 11). NULL on the
+  // profile means fall back to the application default.
+  const [floorKcal, setFloorKcal] = useState(MIN_SAFE_KCAL)
+  useEffect(() => { setFloorKcal(profile?.min_kcal || MIN_SAFE_KCAL) }, [profile])
+  async function saveFloor(v) {
+    const n = parseInt(v, 10)
+    if (!Number.isFinite(n)) return
+    const clamped = Math.min(4000, Math.max(800, n))
+    setFloorKcal(clamped)
+    // Best-effort: the warning threshold is a preference, so a failure here must
+    // not block plan editing.
+    await supabase.from('profiles').update({ min_kcal: clamped }).eq('id', profile.id)
+  }
+  // ── Preview scale and pane visibility (dietitian review §3) ──────────────
+  // The preview used to render a 595px A4 page inside a ~500px column, so it
+  // needed horizontal scrolling; and all three panes had their own overflow,
+  // giving three competing scrollbars. Now: fit-to-width by default, one
+  // document scroll, and both side panes collapsible (choice remembered).
+  const PREVIEW_SCALE = 1.25
+  const pref = (k, d) => {
+    try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v) } catch { return d }
+  }
+  const [showThumbs, setShowThumbs] = useState(() => pref('nf.editor.thumbs', false))
+  const [showInspector, setShowInspector] = useState(() => pref('nf.editor.inspector', true))
+  const [fitScale, setFitScale] = useState(1)
+  const [exporting, setExporting] = useState(false)
+  useEffect(() => { try { localStorage.setItem('nf.editor.thumbs', JSON.stringify(showThumbs)) } catch {} }, [showThumbs])
+  useEffect(() => { try { localStorage.setItem('nf.editor.inspector', JSON.stringify(showInspector)) } catch {} }, [showInspector])
+
+  // Measure the preview column so "Fit width" tracks pane collapse and resizing.
   const canvasRef = useRef()
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      // clientWidth includes the canvas padding, so take it off — otherwise
+      // "fit width" overshoots by 40px and reintroduces horizontal scrolling.
+      const cs = getComputedStyle(el)
+      const w = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)
+      if (w > 0) setFitScale(Math.min(1.5, Math.max(0.5, w / 595)))
+    })
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [showThumbs, showInspector])
+  // Fixed 125% preview. Capped by the measured width so a narrower window can't
+  // push the page wider than the column and bring back horizontal scrolling.
+  // Never scale during export — html2canvas would capture the rendered size.
+  const scale = exporting ? 1 : Math.min(PREVIEW_SCALE, fitScale)
   const pageEls = useRef({})
 
   useEffect(() => {
@@ -80,6 +136,58 @@ export default function PlanEditor() {
   // Pre-export sanity checks (header vs meal totals, option spread, macros,
   // units). Non-blocking — shown as a panel and echoed in the sign-off dialog.
   const validation = useMemo(() => (plan ? validatePlan(plan) : []), [plan])
+
+  // Clinical sanity checks on the calorie target itself. These previously only
+  // ran in the new-plan wizard, so a target below the safe floor reached approval
+  // with nothing flagged — which is how a 1,195 kcal plan got through.
+  const calorieWarnings = useMemo(() => {
+    if (!plan) return []
+    const a = plan.assessment || {}
+    const goal = a.goal
+      || Object.keys(GOAL_LABELS).find((k) => GOAL_LABELS[k] === plan.header?.dietType)
+      || 'maintain'
+    return planCalorieWarnings({
+      bmr: a.bmr || 0,
+      multiplier: a.activityMultiplier || 0,
+      goal,
+      targetKcal: plan.header?.dailyKcal || 0,
+      maintenanceKcal: a.maintenanceKcal || 0,
+      floor: floorKcal,
+    })
+  }, [plan, floorKcal])
+
+  const belowFloor = calorieWarnings.some((w) => w.code === 'belowFloor')
+
+  // Bring the selected meal's page into view only when it isn't already — with
+  // block:'nearest' this is a no-op if visible, so the preview never jumps.
+  useEffect(() => {
+    if (!selection || !plan) return
+    const idx = planPageList(plan).findIndex((pg) => pg.mealId === selection.mealId)
+    if (idx >= 0) pageEls.current[idx]?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    // only react to which meal is selected, not to every option click
+  }, [selection?.mealId])
+
+  // Everything needing attention, as one list. Each allergen and each calorie
+  // warning used to render its own panel, so a plan with a few issues stacked
+  // five or six boxes above the preview. Grouped, ordered most serious first.
+  const notices = [
+    ...warnings.allergen.map((w) => ({
+      group: 'safety',
+      text: t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy }),
+    })),
+    ...calorieWarnings.map((w) => ({ group: 'calories', text: t(`wizard.warn.${w.code}`, w) })),
+    ...validation.map((v) => ({ group: 'checks', text: t(`editor.check.${v.code}`, v) })),
+  ]
+
+  // If a new problem appears while the panel is collapsed, open it again — a
+  // clinical warning must never be hidden by an earlier collapse.
+  const noticeCount = notices.length
+  const prevNoticeCount = useRef(0)
+  useEffect(() => {
+    if (noticeCount > prevNoticeCount.current) setNoticesOpen(true)
+    prevNoticeCount.current = noticeCount
+  }, [noticeCount])
+
 
   if (error && !row) return <Alert kind="error">{error}</Alert>
   if (!row || !plan) return <Loading />
@@ -146,6 +254,24 @@ export default function PlanEditor() {
 
   const setHeader = (key, val) => mutate((p) => { p.header[key] = val })
 
+  // Item 13 — keep an audit trail of the calorie decision. The first time the
+  // target is changed we stash what the system originally recommended, so the
+  // plan always carries both figures plus who changed it and when.
+  function setDailyTarget(val) {
+    mutate((p) => {
+      const before = p.header.dailyKcal || 0
+      if (val === before) return
+      p.calorieAudit = {
+        recommended: p.calorieAudit?.recommended ?? (p.assessment?.recommendedKcal || before),
+        approved: val,
+        changedBy: profile?.full_name || '',
+        changedAt: new Date().toISOString().slice(0, 10),
+        note: p.calorieAudit?.note || '',
+      }
+      p.header.dailyKcal = val
+    })
+  }
+
   // Recompute every meal's per-option target from the daily total and rescale all
   // options to it, so the plan re-balances to the header calories in one action.
   function applyDistribution() {
@@ -159,6 +285,15 @@ export default function PlanEditor() {
     })
     setNotice(t('editor.distributed'))
   }
+
+  // Item 12 — after the target changes the dietitian must choose explicitly:
+  // rebalance every meal, or keep their manual allocations and adjust by hand.
+  const targetOutOfSync = (() => {
+    const d = plan?.header?.dailyKcal || 0
+    if (!d || !plan?.meals?.length) return false
+    const sum = plan.meals.reduce((acc, m) => acc + ((m.options[0]?.kcal || 0) * (m.id === 'snack' ? 2 : 1)), 0)
+    return Math.abs(sum - d) > Math.max(60, d * 0.05)
+  })()
 
   function addMeal() {
     mutate((p) => {
@@ -193,8 +328,11 @@ export default function PlanEditor() {
     setBusy('save')
     setError(null)
     try {
+      // Re-stamp the verdict: an edit can introduce or clear an issue, and the
+      // auto-approval job trusts this stamp.
+      const toSave = stampPlanChecks(JSON.parse(JSON.stringify(plan)), row.questionnaire?.allergyNames || [])
       const { data: saved, error: e } = await supabase.from('plans')
-        .update({ plan_data: plan }).eq('id', id).select('id')
+        .update({ plan_data: toSave }).eq('id', id).select('id')
       if (e) throw e
       if (!saved?.length) throw new Error(t('editor.saveRejected'))
       if (row.status !== 'IN_REVIEW') {
@@ -228,6 +366,9 @@ export default function PlanEditor() {
       // Stamp the dietitian sign-off (name/title/registration/note + today's date).
       const stamped = JSON.parse(JSON.stringify(plan))
       stamped.approval = { ...approval, date: new Date().toISOString().slice(0, 10) }
+      // Keep the clinical rationale with the calorie decision, not only the sign-off.
+      if (stamped.calorieAudit) stamped.calorieAudit.note = approval.note || ''
+      stampPlanChecks(stamped, row.questionnaire?.allergyNames || [])
       // .select() so an RLS-rejected write (zero rows, no error) can't leave the
       // plan approved and deliverable with no sign-off block on the PDF.
       const { data: saved, error: e } = await supabase.from('plans')
@@ -290,6 +431,7 @@ export default function PlanEditor() {
       })
       model.header.nextCheckup = plan.header.nextCheckup
       model.dietary = { substitutions } // silent audit trail
+      stampPlanChecks(model, row.questionnaire?.allergyNames || [])
       // .select() so a write that matched no rows (blocked by RLS — wrong role,
       // another gym, or a status that is no longer editable) is not mistaken for
       // success and silently discarded.
@@ -308,10 +450,14 @@ export default function PlanEditor() {
 
   async function previewPdf() {
     setBusy('pdf')
+    // Capture at 1:1 — html2canvas reads the rendered size, so a zoomed preview
+    // would otherwise be baked into the PDF.
+    setExporting(true)
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
     try {
       const blob = await renderPlanPdf(canvasRef.current)
       downloadBlob(blob, `${plan.header.fullName || 'Client'} - Diet Plan.pdf`)
-    } catch (e) { setError(e.message) } finally { setBusy(null) }
+    } catch (e) { setError(e.message) } finally { setExporting(false); setBusy(null) }
   }
 
   const pages = planPageList(plan)
@@ -326,6 +472,13 @@ export default function PlanEditor() {
           {dirty && <span className="muted small">●</span>}
         </div>
         <div className="row">
+          {/* View controls: pane toggles + preview scale. */}
+          <div className="editor-view-controls">
+            <button className={`btn ghost sm${showThumbs ? ' on' : ''}`} onClick={() => setShowThumbs(!showThumbs)}
+              title={t('editor.togglePages')}>{t('editor.pagesShort')}</button>
+            <button className={`btn ghost sm${showInspector ? ' on' : ''}`} onClick={() => setShowInspector(!showInspector)}
+              title={t('editor.toggleEditor')}>{t('editor.editorShort')}</button>
+          </div>
           <button className="btn secondary sm" onClick={() => setPreviewLang(previewLang === 'en' ? 'ar' : 'en')}>
             {previewLang === 'en' ? t('editor.arabic') : t('editor.english')}
           </button>
@@ -346,24 +499,46 @@ export default function PlanEditor() {
 
       <Alert kind="error">{error}</Alert>
       <Alert kind="ok">{notice}</Alert>
-      {warnings.allergen.map((w, i) => (
-        <Alert kind="warn" key={`a${i}`}>
-          {t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy })}
-        </Alert>
-      ))}
-      {validation.length > 0 && (
+      {notices.length > 0 && (
         <Alert kind="warn">
-          <b>{t('editor.checksTitle', { count: validation.length })}</b>
-          <ul style={{ margin: '4px 0 0', paddingInlineStart: 18 }}>
-            {validation.slice(0, 6).map((v, i) => <li key={i}>{t(`editor.check.${v.code}`, v)}</li>)}
-            {validation.length > 6 && <li>{t('editor.checkMore', { n: validation.length - 6 })}</li>}
-          </ul>
+          <div className="notice-head">
+            <b>{t('editor.noticesTitle', { count: notices.length })}</b>
+            <button type="button" className={`notice-toggle${noticesOpen ? ' open' : ''}`}
+              onClick={() => setNoticesOpen(!noticesOpen)}
+              aria-expanded={noticesOpen}
+              title={t(noticesOpen ? 'editor.hideNotices' : 'editor.showNotices')}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </button>
+          </div>
+          {noticesOpen && ['safety', 'calories', 'checks'].map((g) => {
+            const items = notices.filter((n) => n.group === g)
+            if (!items.length) return null
+            const shown = items.slice(0, 6)
+            return (
+              <div className="notice-group" key={g}>
+                <span className="notice-group-label">{t(`editor.noticeGroup.${g}`)}</span>
+                <ul>
+                  {shown.map((n, i) => <li key={i}>{n.text}</li>)}
+                  {items.length > shown.length && (
+                    <li className="muted">{t('editor.checkMore', { n: items.length - shown.length })}</li>
+                  )}
+                </ul>
+              </div>
+            )
+          })}
         </Alert>
       )}
 
 
-      <div className="editor-shell">
-        {/* thumbnails */}
+      <div className="editor-shell" style={{
+        gridTemplateColumns: `${showThumbs ? '117px ' : ''}minmax(0, 1fr)${showInspector ? ' 340px' : ''}`,
+      }}>
+        {/* thumbnails — collapsed by default; the pages scroll continuously so
+            this is an optional navigation aid, not the primary way to move. */}
+        {showThumbs && (
         <div className="editor-thumbs">
           {pages.map((p, idx) => (
             <div key={idx} className="editor-thumb" onClick={() => pageEls.current[idx]?.scrollIntoView({ behavior: 'smooth' })}>
@@ -374,9 +549,11 @@ export default function PlanEditor() {
             </div>
           ))}
         </div>
+        )}
 
-        {/* canvas */}
+        {/* canvas — no scroll container of its own: the page scrolls as one */}
         <div className="editor-canvas" ref={canvasRef}>
+          <div className="editor-pages" style={{ zoom: scale }}>
           <DeepFitTemplate
             plan={plan}
             lang={previewLang}
@@ -387,14 +564,18 @@ export default function PlanEditor() {
             warnings={warnings.keys}
             pageRefs={(i, el) => { pageEls.current[i] = el }}
           />
+          </div>
         </div>
 
         {/* inspector */}
+        {showInspector && (
         <div className="editor-inspector">
           <ClientCard t={t} q={row.questionnaire || {}} />
           <PlanSettings
             t={t} plan={plan} setHeader={setHeader} applyDistribution={applyDistribution}
             addMeal={addMeal} removeMeal={removeMeal} renameMeal={renameMeal}
+            setDailyTarget={setDailyTarget} floorKcal={floorKcal} saveFloor={saveFloor}
+            targetOutOfSync={targetOutOfSync}
             mutate={mutate} setPicker={setPicker}
           />
 
@@ -415,6 +596,7 @@ export default function PlanEditor() {
             />
           )}
         </div>
+        )}
       </div>
 
       {picker && (
@@ -447,6 +629,13 @@ export default function PlanEditor() {
               {validation.length > 0 && (
                 <Alert kind="warn">{t('editor.approveChecks', { count: validation.length })}</Alert>
               )}
+              {/* Item 11 — a target under the practitioner's own minimum must be
+                  shown here and can only be approved with a written reason. */}
+              {belowFloor && (
+                <Alert kind="warn">
+                  {t('editor.belowFloorApprove', { target: plan.header.dailyKcal, floor: floorKcal })}
+                </Alert>
+              )}
               <Field label={t('editor.approverName')}>
                 <input type="text" autoFocus value={approval.name}
                   onChange={(e) => setApproval({ ...approval, name: e.target.value })} />
@@ -461,7 +650,8 @@ export default function PlanEditor() {
                     onChange={(e) => setApproval({ ...approval, registration: e.target.value })} />
                 </Field>
               </div>
-              <Field label={t('editor.approverNote')}>
+              <Field label={belowFloor ? t('editor.overrideReason') : t('editor.approverNote')}
+                hint={belowFloor ? t('editor.overrideReasonHint') : undefined}>
                 <textarea rows={2} value={approval.note}
                   onChange={(e) => setApproval({ ...approval, note: e.target.value })} />
               </Field>
@@ -472,7 +662,8 @@ export default function PlanEditor() {
 
             <div className="approval-foot">
               <button className="btn secondary" onClick={() => setApproving(false)} disabled={!!busy}>{t('common.cancel')}</button>
-              <button className="btn" onClick={submit} disabled={!!busy || !approval.name.trim()}>
+              <button className="btn" onClick={submit}
+                disabled={!!busy || !approval.name.trim() || (belowFloor && !approval.note.trim())}>
                 {busy === 'submit' ? <Spinner /> : t('editor.approveSubmit')}
               </button>
             </div>
@@ -578,8 +769,30 @@ function AddIngredient({ t, onAdd }) {
 
 // Plan-level controls: daily target + redistribution, follow-up date, and meal
 // management (rename / target / add option / remove / add meal).
-function PlanSettings({ t, plan, setHeader, applyDistribution, addMeal, removeMeal, renameMeal, mutate, setPicker }) {
+function PlanSettings({ t, plan, setHeader, setDailyTarget, applyDistribution, addMeal, removeMeal, renameMeal, mutate, setPicker, floorKcal, saveFloor, targetOutOfSync }) {
   const daily = plan.header.dailyKcal || 0
+
+  // Both calorie boxes keep a local draft while typing. Committing on blur (not
+  // per keystroke) means a half-typed or cleared value is never rejected mid-edit
+  // and never written to the plan — the previous number is restored instead.
+  const [dailyDraft, setDailyDraft] = useState(String(daily || ''))
+  const [floorDraft, setFloorDraft] = useState(String(floorKcal || ''))
+  useEffect(() => { setDailyDraft(String(plan.header.dailyKcal || '')) }, [plan.header.dailyKcal])
+  useEffect(() => { setFloorDraft(String(floorKcal || '')) }, [floorKcal])
+  const digits = (v) => v.replace(/[^0-9]/g, '')
+
+  function commitDaily() {
+    const n = parseInt(dailyDraft, 10)
+    if (!Number.isFinite(n) || n <= 0) { setDailyDraft(String(daily || '')); return }
+    setDailyTarget(n)
+  }
+  function commitFloor() {
+    const n = parseInt(floorDraft, 10)
+    if (!Number.isFinite(n)) { setFloorDraft(String(floorKcal || '')); return }
+    const clamped = Math.min(4000, Math.max(800, n))
+    setFloorDraft(String(clamped))
+    saveFloor(clamped)
+  }
 
   // What the client can actually land on depending on which options they pick
   // (review §2.4 / §11): recommended = first option per meal, min/max = the
@@ -600,18 +813,50 @@ function PlanSettings({ t, plan, setHeader, applyDistribution, addMeal, removeMe
         <h3 style={{ marginTop: 0 }}>{t('editor.planSettings')}</h3>
         <div className="row" style={{ gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
           <Field label={t('editor.dailyTarget')}>
-            <input type="number" style={{ width: 120 }} min="0" step="10" value={daily || ''}
-              onChange={(e) => setHeader('dailyKcal', parseInt(e.target.value, 10) || 0)} />
+            <input type="text" inputMode="numeric" style={{ width: 120 }} value={dailyDraft}
+              onChange={(e) => setDailyDraft(digits(e.target.value))}
+              onBlur={commitDaily}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitDaily() } }} />
+          </Field>
+          <Field label={t('editor.myMinimum')}>
+            <input type="text" inputMode="numeric" style={{ width: 110 }} value={floorDraft}
+              onChange={(e) => setFloorDraft(digits(e.target.value))}
+              onBlur={commitFloor}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitFloor() } }} />
           </Field>
           <Field label={t('editor.nextCheckup')}>
             <input type="date" value={plan.header.nextCheckup || ''}
               onChange={(e) => setHeader('nextCheckup', e.target.value)} />
           </Field>
         </div>
-        <div className="row" style={{ gap: 10, alignItems: 'center', marginTop: 8 }}>
-          <button className="btn secondary sm" onClick={applyDistribution}>{t('editor.applyDistribution')}</button>
-          <span className="muted small">{t('editor.applyDistributionHint')}</span>
-        </div>
+        {/* Item 12 — an explicit choice once the target no longer matches the meals. */}
+        {targetOutOfSync ? (
+          <div className="target-resync">
+            <span className="small">{t('editor.targetChanged')}</span>
+            <div className="row" style={{ gap: 8 }}>
+              <button className="btn sm" onClick={applyDistribution}>{t('editor.rebalanceAll')}</button>
+              <button className="btn secondary sm" onClick={() => {}} title={t('editor.keepManualHint')}>
+                {t('editor.keepManual')}
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="row" style={{ gap: 10, alignItems: 'center', marginTop: 8 }}>
+            <button className="btn secondary sm" onClick={applyDistribution}>{t('editor.applyDistribution')}</button>
+            <span className="muted small">{t('editor.applyDistributionHint')}</span>
+          </div>
+        )}
+        {/* Item 13 — show both figures once the target has been changed. */}
+        {plan.calorieAudit && plan.calorieAudit.recommended !== plan.calorieAudit.approved && (
+          <p className="muted small" style={{ margin: '8px 0 0' }}>
+            {t('editor.calorieAudit', {
+              recommended: plan.calorieAudit.recommended,
+              approved: plan.calorieAudit.approved,
+              who: plan.calorieAudit.changedBy || '—',
+              when: plan.calorieAudit.changedAt || '—',
+            })}
+          </p>
+        )}
         {range.exp > 0 && (
           <p className="muted small intake-range">
             {t('editor.intakeRange')}: <b>{Math.round(range.exp)}</b> {t('editor.kcal')}

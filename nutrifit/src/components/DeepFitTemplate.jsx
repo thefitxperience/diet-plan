@@ -17,7 +17,7 @@ import {
   DIET_INTRO, GUIDELINES_TITLE, GUIDELINES_INTRO,
   GUIDELINES_PAGE_1, GUIDELINES_PAGE_2, ABOUT_TITLE, ABOUT_SECTIONS,
 } from './deepfitGuidelines'
-import { formatAmount } from '../lib/planModel'
+import { formatAmount, ingredientState } from '../lib/planModel'
 import './deepfit.css'
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/deep-fit/${name}`
@@ -158,13 +158,26 @@ function MealTable({ meal, title, icon, t, selectable, selection, onSelect, warn
                     {opt.ingredients.length === 0 && <li>{t.isAr ? `• ${t.ui('No ingredients')}` : t.ui('No ingredients')}</li>}
                     {opt.ingredients.map((ing, i) => {
                       const ingName = t.isAr && ing.name_ar ? ing.name_ar : ing.name_en
-                      const line = `${ingName}: ${formatAmount(ing, t.isAr ? 'ar' : 'en')}`
+                      // Say dry / raw / cooked right here for the foods where it
+                      // changes the portion materially, not only in the general notes.
+                      const st = ingredientState(ing.name_en)
+                      const shown = st ? `${ingName} (${t.ui(st)})` : ingName
+                      const line = `${shown}: ${formatAmount(ing, t.isAr ? 'ar' : 'en')}`
                       return <li key={i}>{t.isAr ? `• ${line}` : line}</li>
                     })}
                   </ul>
                 </td>
                 <td>
                   <ul>
+                    {/* This option's OWN calories, not just the meal's approximate
+                        target — the client needs to see what they are choosing. */}
+                    {opt.kcal ? (
+                      <li className="deepfit-option-kcal">
+                        {t.isAr
+                          ? `• ${arNums(`${t.ui('Calories: ')}${opt.kcal} kcal`)}`
+                          : `${t.ui('Calories: ')}${opt.kcal} kcal`}
+                      </li>
+                    ) : null}
                     {[['Protein: ', opt.macros.protein], ['Carbs: ', opt.macros.carbs], ['Fats: ', opt.macros.fats]].map(([label, val], i) => {
                       const line = `${t.ui(label)}${val ?? '-'}${val != null ? ' g' : ''}`
                       return <li key={i}>{t.isAr ? `• ${arNums(line)}` : line}</li>

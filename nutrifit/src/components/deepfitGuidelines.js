@@ -8,7 +8,7 @@ export const ABOUT_TITLE = 'ABOUT THE PLAN'
 export const ABOUT_SECTIONS = [
   {
     heading: 'Meal Flexibility & Personalization',
-    paragraphs: ['This meal plan is designed to give you flexibility while still helping you achieve your daily nutrition goals. The protein, carbohydrate, and fat content may vary between meal options, allowing you to choose meals that best suit your appetite, activity level, schedule, and personal preferences. For example, you may prefer a higher-protein breakfast after a workout or a lighter, lower-carbohydrate lunch on a less active day. What matters most is your overall daily intake rather than having identical macronutrients at every meal. Feel free to mix and match your meal choices throughout the day to create a balanced eating pattern that works for you.'],
+    paragraphs: ['This meal plan is designed to give you flexibility while still helping you achieve your daily nutrition goals. The options within each meal are matched on calories, so whichever one you choose keeps your day on track. Their protein, carbohydrate and fat split can still differ a little, which lets you pick what suits your appetite, activity and schedule — a higher-protein breakfast after a workout, or something lighter on a less active day. What matters most is your overall daily intake rather than identical macronutrients at every meal. Feel free to mix and match your choices throughout the day.'],
   },
   {
     heading: 'Non-Starchy Vegetables',
@@ -16,13 +16,13 @@ export const ABOUT_SECTIONS = [
   },
   {
     heading: 'Swapping Meals & Ingredients',
-    paragraphs: ['The options within each meal category are designed to be broadly comparable in calories and macronutrients, so you can choose whichever you prefer without changing your daily total. If an ingredient is unavailable, replace it with a similar item from the same group — for example, one lean protein for another, or one complex carbohydrate for another — in a similar portion. Unless stated otherwise, listed weights refer to cooked portions, and any oils, sauces, or dressings named in a meal are already included in its calorie total; extras you add on your own are not. To swap a whole meal, pick another option from the same category to keep your intended daily intake.'],
+    paragraphs: ['The options within each meal are matched on calories, so you can choose whichever you prefer without changing your daily total. If an ingredient is unavailable, replace it with a similar item from the same group — for example, one lean protein for another, or one complex carbohydrate for another — in a similar portion. Unless stated otherwise, listed weights refer to cooked portions, and any oils, sauces, or dressings named in a meal are already included in its calorie total; extras you add on your own are not. To swap a whole meal, pick another option from the same category to keep your intended daily intake.'],
   },
 ]
 
 export const GUIDELINES_TITLE = 'DAILY NUTRITION & LIFESTYLE GUIDELINES'
 export const GUIDELINES_INTRO =
-  'These guidelines are general nutrition education that applies to everyone, designed to support your meal plan through daily habits that improve energy, digestion, recovery, and long-term health. Any instructions specific to you appear in your dietitian’s approval note on the final page.'
+  'These guidelines are general nutrition guidance rather than instructions written for you individually, so some of it may need to be adapted to your own circumstances. They are here to support your meal plan through daily habits that improve energy, digestion, recovery, and long-term health. If anything should be different in your case, your dietitian will tell you.'
 
 export const DIET_INTRO =
   'Welcome to your personalized diet plan! This guide provides a structured approach to healthy eating, offering several options for every meal and snack so you receive a balanced intake of proteins, carbohydrates, and healthy fats. Choose the options that best fit your preferences and dietary needs.'
@@ -83,7 +83,7 @@ export const GUIDELINES_PAGE_2 = [
     columns: [
       {
         heading: 'Complex Carbohydrates',
-        paragraphs: ['Complex carbohydrates fuel the brain, support hormonal health, and aid recovery. Best consumed in the morning and post-activity.'],
+        paragraphs: ['Complex carbohydrates fuel the brain, support hormonal health, and aid recovery. Many people find them easiest to use around the most active part of their day.'],
         items: ['Rice (white, brown, black)', 'Potatoes & sweet potatoes', 'Quinoa', 'Bulgur', 'Oats', 'Pasta (moderate portions)', 'Whole-grain bread', 'Beans & lentils'],
       },
       {
