@@ -98,6 +98,15 @@
   direction: ltr;
 }
 
+.deepfit-footer-page {
+  font-size: 9px; color: #0c2b49; font-weight: 700; letter-spacing: 0.02em;
+  white-space: nowrap;
+  /* Match the 24px corner-arrow box and centre inside it, so the number lands on
+     the same line as www.mydeepfit.com rather than sitting lower. */
+  display: flex; align-items: center; height: 24px;
+}
+/* Arabic is cursive — no letter-spacing, and let the digits read RTL. */
+.deepfit-root[dir='rtl'] .deepfit-footer-page { letter-spacing: normal; direction: rtl; }
 .deepfit-footer-left { display: flex; align-items: center; gap: 4px; }
 .deepfit-footer-left-content { display: flex; align-items: center; margin-left: 10px; }
 .deepfit-footer-right { display: flex; align-items: center; gap: 6px; }
@@ -288,6 +297,15 @@
   font-style: italic;
 }
 /* Flex reverses in RTL, so the cell dividers move to the opposite edge. */
+/* Arabic is cursive: letter-spacing pulls the joins apart and reads as broken or
+   overlapping letters (dietitian review §6, first-page assessment header). Also
+   drop uppercase, which is meaningless for Arabic. */
+.deepfit-root[dir='rtl'] .deepfit-assessment-title,
+.deepfit-root[dir='rtl'] .deepfit-assessment-metric-label,
+.deepfit-root[dir='rtl'] .deepfit-signoff-label {
+  letter-spacing: normal;
+  text-transform: none;
+}
 .deepfit-root[dir='rtl'] .deepfit-assessment { text-align: right; }
 .deepfit-root[dir='rtl'] .deepfit-assessment-metric {
   border-right: 0;

@@ -76,7 +76,12 @@ function Header({ gym, t }) {
   )
 }
 
-function Footer() {
+// `page` / `total` drive "Page X of Y" (dietitian review §6) — centred between
+// the existing corner marks, so the branded footer is unchanged otherwise.
+function Footer({ t, page, total }) {
+  const label = t && page && total
+    ? t.ui('Page {n} of {total}').split('{n}').join(t.num(page)).split('{total}').join(t.num(total))
+    : ''
   return (
     <div className="deepfit-footer">
       <div className="deepfit-footer-left">
@@ -87,6 +92,7 @@ function Footer() {
           <span>mydeepfit</span>
         </div>
       </div>
+      {label && <div className="deepfit-footer-page">{label}</div>}
       <div className="deepfit-footer-right">
         <span>www.mydeepfit.com</span>
         <img src={ASSET('Arrow-foot-right.png')} className="deepfit-footer-arrow" alt="" />
@@ -397,7 +403,7 @@ export default function DeepFitTemplate({
                 )}
                 <Wave />
               </div>
-              <Footer />
+              <Footer t={t} page={idx + 1} total={pages.length} />
             </div>
           )
         }
@@ -411,7 +417,7 @@ export default function DeepFitTemplate({
                   t={t} selectable={selectable} selection={selection} onSelect={onSelect} warnings={warnings} />
                 <Wave variant="low" />
               </div>
-              <Footer />
+              <Footer t={t} page={idx + 1} total={pages.length} />
             </div>
           )
         }
@@ -449,7 +455,7 @@ export default function DeepFitTemplate({
               )}
               <Wave variant={page.type === 'guidelines1' ? 'low' : undefined} />
             </div>
-            <Footer />
+            <Footer t={t} page={idx + 1} total={pages.length} />
           </div>
         )
       })}
