@@ -1,0 +1,12 @@
+# SPA fallback for Apache: serve real files/folders directly, and route every
+# other path to index.html so clean links like /diet/<gym> work (no #).
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  # Existing files and directories are served as-is (assets, icons, etc.)
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+  # Everything else falls through to the SPA entry point.
+  RewriteRule ^ index.html [L]
+</IfModule>
