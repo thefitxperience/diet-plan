@@ -175,15 +175,6 @@ function MealTable({ meal, title, icon, t, selectable, selection, onSelect, warn
                 </td>
                 <td>
                   <ul>
-                    {/* This option's OWN calories, not just the meal's approximate
-                        target — the client needs to see what they are choosing. */}
-                    {opt.kcal ? (
-                      <li className="deepfit-option-kcal">
-                        {t.isAr
-                          ? `• ${arNums(`${t.ui('Calories: ')}${opt.kcal} kcal`)}`
-                          : `${t.ui('Calories: ')}${opt.kcal} kcal`}
-                      </li>
-                    ) : null}
                     {[['Protein: ', opt.macros.protein], ['Carbs: ', opt.macros.carbs], ['Fats: ', opt.macros.fats]].map(([label, val], i) => {
                       const line = `${t.ui(label)}${val ?? '-'}${val != null ? ' g' : ''}`
                       return <li key={i}>{t.isAr ? `• ${arNums(line)}` : line}</li>

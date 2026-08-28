@@ -312,6 +312,3 @@
   border-left: 0.8px solid #58838C;
 }
 .deepfit-root[dir='rtl'] .deepfit-assessment-metric:last-child { border-left: 0; }
-
-/* Each option's own calorie figure, first in the breakdown column. */
-.deepfit-option-kcal { font-weight: 700; color: #1B3448; }
