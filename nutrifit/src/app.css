@@ -1,21 +1,42 @@
-/* NutriFIT app shell — teal-to-navy branding from the demo, RTL-ready
-   (logical properties only; retrofitting RTL is the expensive mistake, §8). */
+/* UDRA app shell — brand blue + navy on soft linen, RTL-ready
+   (logical properties only; retrofitting RTL is the expensive mistake, §8).
+   Palette per UDRA Brand Guidelines v4.0. The diet-plan PDF template
+   (deepfit.css) is deliberately NOT wired to these vars — it keeps its own
+   colours so the delivered PDF is unaffected by app theming. */
 
 :root {
-  --teal: #5B9FA4;
-  --navy: #1B3448;
-  --navy-dark: #0c2b49;
-  --grad: linear-gradient(135deg, #5B9FA4 0%, #1B3448 100%);
-  --bg: #f1f5f9;
+  /* Brand */
+  --blue: #005EFF;          /* UDRA Blue — primary action colour */
+  --blue-deep: #0049C7;     /* pressed/hover blue (darkened, not a deck colour) */
+  --navy: #122649;          /* UDRA Navy — headings, dark surfaces */
+  --cyan: #64E0FF;          /* UDRA Cyan — tertiary accent */
+  --flame: #FF403C;         /* UDRA Flame — attention accent (nav badge) */
+  --linen: #EFECE6;         /* UDRA Soft Linen */
+  --grad: linear-gradient(150deg, #122649 0%, #0A3FA8 55%, #005EFF 100%);
+
+  /* Tints derived from UDRA Blue — hover/selected surfaces */
+  --blue-05: rgba(0, 94, 255, 0.05);
+  --blue-08: rgba(0, 94, 255, 0.08);
+  --blue-12: rgba(0, 94, 255, 0.12);
+  --blue-35: rgba(0, 94, 255, 0.35);
+
+  /* Surfaces */
+  --bg: #F5F3EE;            /* soft linen, lightened for a full-page canvas */
   --card: #ffffff;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --muted: #64748b;
+  --border: #E3DFD6;
+  --text: #15202F;
+  --muted: #626C7A;         /* cool grey, holds AA on the linen canvas */
+
+  /* Status (semantic, intentionally outside the brand palette) */
   --danger: #dc2626;
   --warn: #b45309;
   --ok: #15803d;
   --radius: 10px;
 }
+
+/* `--teal` was the old FIT accent. Aliased so any stray reference still
+   resolves to the brand colour instead of falling back to black. */
+:root { --teal: var(--blue); }
 
 * { box-sizing: border-box; }
 
@@ -27,7 +48,7 @@ body {
      public plan-share link, which is mostly opened on phones. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Sora', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   background: var(--bg);
   color: var(--text);
   font-size: 15px;
@@ -35,12 +56,25 @@ body {
 
 html[lang='ar'] body { font-family: 'Tajawal', Tahoma, Arial, sans-serif; }
 
-a { color: var(--teal); text-decoration: none; }
+/* Form controls don't inherit the page font by default, so every <button> was
+   falling back to the OS UI font — very visible next to Sora (the meal-picker
+   rows and every modal's ✕ are buttons). Inheriting is also correct inside the
+   PDF template: .deepfit-page sets font-family on itself, so its descendants
+   keep Source Sans 3. */
+button, select, optgroup { font-family: inherit; }
+
+a { color: var(--blue); text-decoration: none; }
 a:hover { text-decoration: underline; }
 
-h1 { font-size: 1.5rem; margin: 0 0 1rem; }
-h2 { font-size: 1.15rem; margin: 0 0 0.75rem; }
-h3 { font-size: 1rem; margin: 0 0 0.5rem; }
+h1 { font-size: 1.5rem; margin: 0 0 1rem; letter-spacing: -0.02em; color: var(--navy); }
+h2 { font-size: 1.15rem; margin: 0 0 0.75rem; letter-spacing: -0.015em; color: var(--navy); }
+h3 { font-size: 1rem; margin: 0 0 0.5rem; letter-spacing: -0.01em; }
+/* Sora has no Arabic cut, so Tajawal takes over — and it needs no tightening. */
+html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { letter-spacing: normal; }
+/* The diet-plan PDF template owns its own typography (it pins Source Sans 3 and
+   sets every heading explicitly) — keep app-level heading tuning out of it so the
+   delivered PDF renders exactly as it did before the rebrand. */
+.deepfit-root h1, .deepfit-root h2, .deepfit-root h3, .deepfit-root h4 { letter-spacing: normal; }
 
 /* ── layout ── */
 .shell { display: flex; min-height: 100vh; }
@@ -58,18 +92,19 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
   height: 100vh;
 }
 
-/* FIT logo is teal+navy — needs a white chip to read on the dark gradient */
+/* The UDRA lockup is navy + blue, so it needs a white chip to read on the dark
+   gradient — "navy logo on white" is one of the approved combinations. */
 .sidebar-brand {
   background: white;
-  border-radius: 10px;
-  padding: 0.6rem 0.75rem;
-  margin: 0 0.25rem 0.75rem;
+  border-radius: 12px;
+  padding: 0.85rem 0.9rem;
+  margin: 0 0.25rem 1rem;
   display: flex;
   justify-content: center;
 }
 
 .sidebar-logo {
-  height: 46px;
+  height: 30px;
   width: auto;
   display: block;
 }
@@ -109,7 +144,7 @@ h3 { font-size: 1rem; margin: 0 0 0.5rem; }
   height: 18px;
   padding: 0 5px;
   margin-inline-start: 8px;
-  background: #ff3b30; /* iOS system red (notification badge) */
+  background: var(--flame); /* UDRA Flame — attention accent */
   color: #fff;
   border-radius: 999px;
   font-size: 0.72rem;
@@ -164,7 +199,7 @@ button.btn, a.btn {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: var(--teal);
+  background: var(--blue);
   color: white;
   /* transparent border (not none) so height matches bordered selects/inputs next to it */
   border: 1px solid transparent;
@@ -176,7 +211,13 @@ button.btn, a.btn {
   text-decoration: none;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(91, 159, 164, 0.3); text-decoration: none; }
+.btn:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 94, 255, 0.28); text-decoration: none; }
+/* :not(:disabled) because these out-specify the .btn:disabled reset below, which
+   only relies on source order. */
+button.btn:hover:not(:disabled), a.btn:hover { background: var(--blue-deep); }
+.btn.secondary:hover:not(:disabled) { background: #fff; border-color: var(--blue); color: var(--blue); }
+.btn.ghost:hover:not(:disabled) { background: var(--blue-08); }
+.btn.danger:hover:not(:disabled) { background: #b91c1c; }
 .btn:disabled { opacity: 0.55; cursor: not-allowed; transform: none; box-shadow: none; }
 .btn.secondary { background: white; color: var(--navy); border: 1px solid var(--border); }
 .btn.danger { background: var(--danger); }
@@ -209,8 +250,8 @@ input[type='password'], input[type='tel'], select, textarea {
   color: var(--text);
 }
 input:focus, select:focus, textarea:focus {
-  outline: 2px solid rgba(91, 159, 164, 0.4);
-  border-color: var(--teal);
+  outline: 2px solid var(--blue-35);
+  border-color: var(--blue);
 }
 input.invalid { border-color: var(--danger); }
 
@@ -224,7 +265,7 @@ input[type='number'] { -moz-appearance: textfield; appearance: textfield; }
   border: none;
   padding: 0;
   margin-inline-end: 4px;
-  color: var(--teal);
+  color: var(--blue);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -270,7 +311,7 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
   top: 18px;
   inset-inline-start: 10px;
   height: 2px;
-  background: var(--teal);
+  background: var(--blue);
   transition: width 0.4s ease;
   z-index: 1;
 }
@@ -299,8 +340,8 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
 }
 .step-item.active .step-circle,
 .step-item.completed .step-circle {
-  border-color: var(--teal);
-  background: var(--teal);
+  border-color: var(--blue);
+  background: var(--blue);
   color: white;
 }
 .step-item .step-label {
@@ -334,8 +375,8 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
   margin: 0;
   height: 100%;
 }
-.radio-card input:checked + label { background: var(--teal); color: white; border-color: var(--teal); }
-.radio-card label:hover { border-color: var(--teal); }
+.radio-card input:checked + label { background: var(--blue); color: white; border-color: var(--blue); }
+.radio-card label:hover { border-color: var(--blue); }
 @media (max-width: 600px) { .radio-cards.cols-3 { grid-template-columns: 1fr; } }
 
 /* Body-composition inputs: fixed 3 across (matches fit-demo step 2) */
@@ -392,7 +433,7 @@ table.data th {
 table.data td { padding: 0.65rem 0.9rem; border-bottom: 1px solid var(--border); }
 table.data tr:last-child td { border-bottom: none; }
 table.data tr.clickable { cursor: pointer; }
-table.data tr.clickable:hover { background: #f8fafc; }
+table.data tr.clickable:hover { background: var(--blue-05); }
 
 .badge {
   display: inline-block;
@@ -402,19 +443,26 @@ table.data tr.clickable:hover { background: #f8fafc; }
   font-weight: 700;
   white-space: nowrap;
 }
+.badge.sm {
+  padding: 0.1rem 0.45rem;
+  font-size: 0.68rem;
+  background: var(--blue-12);
+  color: var(--blue-deep);
+  vertical-align: middle;
+}
 .badge.DRAFT { background: #e2e8f0; color: #475569; }
 .badge.GENERATED { background: #fef3c7; color: #b45309; }
-.badge.IN_REVIEW { background: #dbeafe; color: #1d4ed8; }
+.badge.IN_REVIEW { background: var(--blue-12); color: var(--blue-deep); }
 .badge.NUTRITIONIST_APPROVED { background: #dcfce7; color: #15803d; }
 .badge.CHANGES_REQUESTED { background: #fee2e2; color: #b91c1c; }
 .badge.GYM_APPROVED { background: #dcfce7; color: #15803d; }
-.badge.SENT { background: #cffafe; color: #0e7490; }
+.badge.SENT { background: rgba(100, 224, 255, 0.3); color: #0B5A73; }
 
 .alert { padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 0.9rem; font-size: 0.9rem; }
 .alert.error { background: #fee2e2; color: #b91c1c; }
 .alert.warn { background: #fef3c7; color: #92400e; }
 .alert.ok { background: #dcfce7; color: #166534; }
-.alert.info { background: #dbeafe; color: #1e40af; }
+.alert.info { background: var(--blue-08); color: var(--blue-deep); }
 
 .muted { color: var(--muted); }
 .small { font-size: 0.82rem; }
@@ -422,7 +470,7 @@ table.data tr.clickable:hover { background: #f8fafc; }
 .spinner {
   width: 22px; height: 22px;
   border: 3px solid var(--border);
-  border-top-color: var(--teal);
+  border-top-color: var(--blue);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
   display: inline-block;
@@ -442,17 +490,19 @@ table.data tr.clickable:hover { background: #f8fafc; }
   position: relative;
   overflow: hidden;
 }
-/* faint brand image over the gradient (matches fit-demo: center/cover, 15%) */
+/* UDRA logomark as an oversized watermark bleeding off the top-start corner of
+   the gradient. The asset is already white, so it only needs an opacity dial. */
 .login-bg {
   position: absolute;
   inset: 0;
-  background-position: center;
-  background-size: cover;
+  background-position: left -18vmin top -18vmin;
+  background-size: 78vmin;
   background-repeat: no-repeat;
-  opacity: 0.15;
+  opacity: 0.1;
   z-index: 0;
   pointer-events: none;
 }
+[dir='rtl'] .login-bg { background-position: right -18vmin top -18vmin; }
 .login-card {
   background: white;
   border-radius: 16px;
@@ -465,15 +515,23 @@ table.data tr.clickable:hover { background: #f8fafc; }
 }
 .login-card h1 { text-align: center; color: var(--navy); }
 
+/* UDRA lockup at the head of the sign-in / account-status cards. */
+.auth-logo {
+  display: block;
+  width: 168px;
+  max-width: 70%;
+  height: auto;
+  margin: 0 auto 1.4rem;
+}
+
 /* ── client intake (public mobile page) ── */
 /* The gradient lives on the body itself (fixed), so it bleeds edge-to-edge —
-   iOS Safari then tints the status bar from the top of the gradient (teal) and
-   the toolbar from the bottom (navy), so the bars merge into the background
-   instead of showing as separate white/flat bands. Vertical so top/bottom edges
-   are a clean single colour. */
-/* Solid background (a slightly darker teal than the brand --teal). A single
-   flat colour means the status bar and toolbar match exactly — no seams. */
-html.intake-active, body.intake-active { background: #4A878C; }
+   iOS Safari then tints the status bar from the top of the gradient and the
+   toolbar from the bottom, so the bars merge into the background instead of
+   showing as separate white/flat bands. */
+/* Solid UDRA Navy. A single flat colour means the status bar and toolbar match
+   exactly — no seams. */
+html.intake-active, body.intake-active { background: var(--navy); }
 
 .intake-page {
   position: relative;
@@ -482,7 +540,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
   display: flex;
   flex-direction: column;
   justify-content: center;          /* centers the card when it fits */
-  /* extra teal room at the bottom (+ iOS safe area) so the Safari toolbar sits
+  /* extra navy room at the bottom (+ iOS safe area) so the Safari toolbar sits
      on the background colour, not on the white card, on the taller step 2. */
   padding: 1.5rem 1rem calc(3.5rem + env(safe-area-inset-bottom, 0px));
 }
@@ -512,7 +570,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .plan-share { justify-content: flex-start; padding: 0; }
 .plan-share-bar {
   position: sticky; top: 0; z-index: 5;
-  background: #4A878C;
+  background: var(--navy);
   display: flex; align-items: center; justify-content: space-between; gap: 1rem;
   flex-wrap: wrap;
   padding: calc(0.9rem + env(safe-area-inset-top, 0px)) 1rem 0.9rem;
@@ -529,7 +587,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
 }
 .plan-share-viewer {
   flex: 1; width: 100%;
-  background: #4A878C;
+  background: var(--navy);
   display: flex; flex-direction: column; align-items: center;
   gap: 12px; padding: 14px 0 calc(48px + env(safe-area-inset-bottom, 0px));
 }
@@ -592,7 +650,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
   top: 2px;
   width: 10px; height: 10px;
   border-radius: 50%;
-  background: var(--teal);
+  background: var(--blue);
 }
 /* No line trailing off below the final (or only) item */
 .timeline li:last-child {
@@ -656,10 +714,10 @@ html.intake-active, body.intake-active { background: #4A878C; }
   height: 160px;
   flex-shrink: 0;
 }
-.editor-thumb.active { border-color: var(--teal); }
+.editor-thumb.active { border-color: var(--blue); }
 .editor-thumb .thumb-label {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(12, 43, 73, 0.85); color: white;
+  background: rgba(18, 38, 73, 0.85); color: white;
   font-size: 0.68rem; text-align: center; padding: 2px 0;
   text-transform: capitalize;
 }
@@ -677,7 +735,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
   direction: ltr;
 }
 .editor-canvas {
-  background: #e9edf2;
+  background: #E6E2D9;
   border-radius: var(--radius);
   padding: 1.25rem;
 }
@@ -708,7 +766,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .readonly-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 3px 0; border-bottom: 1px solid var(--border, #eee); font-size: 0.9rem; }
 .readonly-list li:last-child { border-bottom: none; }
 .readonly-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.readonly-macros > div { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0.4rem 0.3rem; background: var(--surface-2, #f5f7f7); border-radius: 8px; }
+.readonly-macros > div { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0.4rem 0.3rem; background: var(--surface-2, #F7F5F1); border-radius: 8px; }
 
 /* Editable ingredient rows (option inspector). */
 .ingredient-edit-list { list-style: none; margin: 0 0 0.5rem; padding: 0; }
@@ -735,13 +793,13 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .pref-chip {
   display: inline-flex; align-items: center; gap: 2px;
   padding: 4px 4px 4px 12px; border-radius: 999px;
-  background: rgba(74, 135, 140, 0.14); border: 1px solid rgba(74, 135, 140, 0.4);
+  background: var(--blue-12); border: 1px solid var(--blue-35);
   color: var(--navy); font-size: 0.85rem; font-weight: 600;
 }
 .pref-chip button {
   display: inline-flex; align-items: center; justify-content: center;
   width: 18px; height: 18px; border: 0; border-radius: 50%;
-  background: rgba(12, 43, 73, 0.1); cursor: pointer; padding: 0;
+  background: rgba(18, 38, 73, 0.1); cursor: pointer; padding: 0;
   font-size: 0.95rem; line-height: 1; color: inherit;
 }
 .pref-chip button:hover { background: var(--danger, #c0392b); color: #fff; }
@@ -757,22 +815,22 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .ingredient-dropdown {
   position: absolute; z-index: 30; top: calc(100% + 3px); inset-inline: 0;
   margin: 0; padding: 4px; list-style: none;
-  background: var(--card, #fff); border: 1px solid var(--border, #d9dee3);
-  border-radius: 8px; box-shadow: 0 10px 30px rgba(12, 43, 73, 0.14);
+  background: var(--card, #fff); border: 1px solid var(--border, #E3DFD6);
+  border-radius: 8px; box-shadow: 0 10px 30px rgba(18, 38, 73, 0.14);
   max-height: 240px; overflow-y: auto;
 }
 .ingredient-dropdown li { margin: 0; }
 .ingredient-dropdown-item {
   display: block; width: 100%; text-align: start;
   background: none; border: none; border-radius: 6px;
-  padding: 7px 9px; cursor: pointer; font-size: 0.9rem; color: var(--navy, #123);
+  padding: 7px 9px; cursor: pointer; font-size: 0.9rem; color: var(--navy, #122649);
 }
 .ingredient-dropdown-item.active,
-.ingredient-dropdown-item:hover { background: #eef5f5; }
+.ingredient-dropdown-item:hover { background: var(--blue-08); }
 
 /* Editable macros (option inspector). */
 .macro-edit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.macro-edit-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0.45rem 0.3rem; background: var(--surface-2, #f5f7f7); border-radius: 8px; }
+.macro-edit-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0.45rem 0.3rem; background: var(--surface-2, #F7F5F1); border-radius: 8px; }
 .macro-edit-input { display: flex; align-items: center; gap: 4px; }
 .macro-edit-input input { width: 56px; text-align: center; font-weight: 700; }
 
@@ -785,7 +843,7 @@ html.intake-active, body.intake-active { background: #4A878C; }
 /* Modal + meal picker */
 .modal-overlay {
   position: fixed; inset: 0; z-index: 100;
-  background: rgba(12, 43, 73, 0.45);
+  background: rgba(18, 38, 73, 0.55);
   display: flex; align-items: center; justify-content: center;
   padding: 1rem;
 }
@@ -800,18 +858,18 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .meal-picker-list { overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
 .meal-picker-item {
   text-align: start; width: 100%;
-  background: var(--bg, #f4f6f9);
+  background: var(--bg, #F5F3EE);
   border: 1px solid var(--border); border-radius: 8px;
   padding: 0.55rem 0.7rem; cursor: pointer;
 }
-.meal-picker-item:hover { border-color: var(--teal); background: #eef5f5; }
+.meal-picker-item:hover { border-color: var(--blue); background: var(--blue-08); }
 
 /* Approval / sign-off dialog. */
 .approval-modal { padding: 0; overflow: hidden; }
 .approval-head {
   display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem;
   padding: 1.1rem 1.25rem 0.85rem;
-  border-bottom: 1px solid var(--border, #e6e9ee);
+  border-bottom: 1px solid var(--border, #E3DFD6);
 }
 /* One owner for vertical rhythm: the body's flex gap. Children ship their own
    margins (.alert and label.field are both 0.9rem), which stacked on top of the
@@ -827,12 +885,12 @@ html.intake-active, body.intake-active { background: #4A878C; }
 .approval-body .grid.cols-2 { grid-template-columns: 1fr 1fr; gap: 0.9rem; }
 .approval-date-note {
   margin: 0; padding-top: 0.75rem;
-  border-top: 1px dashed var(--border, #e6e9ee);
+  border-top: 1px dashed var(--border, #E3DFD6);
 }
 .approval-foot {
   display: flex; justify-content: flex-end; gap: 0.5rem;
-  padding: 0.85rem 1.25rem; background: var(--bg, #f4f6f9);
-  border-top: 1px solid var(--border, #e6e9ee);
+  padding: 0.85rem 1.25rem; background: var(--bg, #F5F3EE);
+  border-top: 1px solid var(--border, #E3DFD6);
 }
 @media (max-width: 520px) {
   .approval-body .grid.cols-2 { grid-template-columns: 1fr; }

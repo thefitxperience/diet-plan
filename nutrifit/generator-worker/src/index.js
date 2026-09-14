@@ -8,7 +8,7 @@
 // from our curated catalog, so any site that already renders the FIT response
 // can use it as a drop-in — same JSON, realistic meals.
 //
-// Reuses the exact same generator the NutriFIT app runs (single source of truth
+// Reuses the exact same generator the UDRA app runs (single source of truth
 // for the meal catalog + scaling), imported from the app source.
 
 import { generateCatalogPlan, toFitDietPlanResponse } from '../../src/lib/catalogGenerator.js'

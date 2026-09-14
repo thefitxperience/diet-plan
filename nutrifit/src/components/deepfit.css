@@ -190,8 +190,8 @@
 
 /* editor selection affordances */
 .deepfit-row-selectable { cursor: pointer; }
-.deepfit-row-selectable:hover td { background: rgba(91, 159, 164, 0.08); }
-.deepfit-row-selected td { background: rgba(91, 159, 164, 0.16) !important; outline: 2px solid #5B9FA4; outline-offset: -2px; }
+.deepfit-row-selectable:hover td { background: rgba(0, 94, 255, 0.07); }
+.deepfit-row-selected td { background: rgba(0, 94, 255, 0.12) !important; outline: 2px solid #005EFF; outline-offset: -2px; }
 .deepfit-row-warning td:first-child { box-shadow: inset 3px 0 0 #e8a020; }
 
 .deepfit-guidelines-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #000; }

@@ -1,4 +1,4 @@
-// NutriFIT email relay
+// UDRA email relay
 // Runs on Cloudflare Workers
 
 // Frontend POSTs JSON:
@@ -62,7 +62,7 @@ export default {
       })
 
       await mailer.send({
-        from: { name: env.SMTP_FROM_NAME || 'NutriFIT', email: env.SMTP_FROM || env.SMTP_USER },
+        from: { name: env.SMTP_FROM_NAME || 'UDRA', email: env.SMTP_FROM || env.SMTP_USER },
         to: toName ? { name: toName, email: to } : to,
         subject,
         text: message || '',

@@ -9,7 +9,7 @@ compatibility_flags = ["nodejs_compat"]
 SMTP_HOST = "mail.infomaniak.com"
 SMTP_PORT = "587"
 SMTP_SECURE = "false"     # false = STARTTLS on 587; set "true" + SMTP_PORT=465 for implicit TLS
-SMTP_FROM_NAME = "NutriFIT"
+SMTP_FROM_NAME = "UDRA"
 # SMTP_USER / SMTP_FROM can live here (not secret) or be set as secrets too:
 # SMTP_USER = "you@yourdomain.com"
 # SMTP_FROM = "you@yourdomain.com"

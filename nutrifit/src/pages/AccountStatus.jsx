@@ -9,9 +9,13 @@ export default function AccountStatus({ status }) {
 
   return (
     <div className="login-wrap">
-      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/background.png)` }} />
+      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/udra-logomark-white.png)` }} />
       <div className="login-card" style={{ textAlign: 'center' }}>
-        <h1>{t('app.name')}</h1>
+        <img
+          src={`${import.meta.env.BASE_URL}assets/udra-logo.png`}
+          alt={t('app.name')}
+          className="auth-logo"
+        />
         <div style={{ fontSize: '2.5rem', margin: '0.5rem 0' }}>{rejected ? '⛔' : '⏳'}</div>
         <h2>{rejected ? t('pending.rejectedTitle') : t('pending.title')}</h2>
         <p className="muted">

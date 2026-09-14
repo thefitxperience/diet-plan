@@ -7,7 +7,7 @@ import { supabaseConfigured } from '../lib/supabase'
 const DEMO_ACCOUNTS = [
   { key: 'nutritionist', email: 'nutritionist@demo.thefitxperience.com' },
   { key: 'gym_admin', email: 'gymadmin@demo.thefitxperience.com' },
-  { key: 'fit_admin', label: 'FIT Admin', email: 'fitadmin@demo.thefitxperience.com' },
+  { key: 'fit_admin', label: 'UDRA Admin', email: 'fitadmin@demo.thefitxperience.com' },
 ]
 const DEMO_PASSWORD = 'FITdemo2026!'
 // Temporarily hidden — flip to true to bring the demo-login buttons back.
@@ -61,9 +61,13 @@ export default function Login() {
 
   return (
     <div className="login-wrap">
-      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/background.png)` }} />
+      <div className="login-bg" style={{ backgroundImage: `url(${import.meta.env.BASE_URL}assets/udra-logomark-white.png)` }} />
       <div className="login-card">
-        <h1>{t('app.name')}</h1>
+        <img
+          src={`${import.meta.env.BASE_URL}assets/udra-logo.png`}
+          alt={t('app.name')}
+          className="auth-logo"
+        />
         {!supabaseConfigured && (
           <Alert kind="error">
             Supabase is not configured — copy <code>.env.example</code> to <code>.env.local</code> and
