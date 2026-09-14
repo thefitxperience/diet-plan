@@ -1,4 +1,4 @@
-// deepFIT plan template (plan §5, ported from the demo). Renders the
+// UDRA plan template (plan §5). Renders the
 // structured plan model at true page proportions — this single component
 // powers the editor canvas, approval preview, and PDF export.
 //
@@ -68,7 +68,7 @@ function Header({ gym, t }) {
     <div className="deepfit-header">
       <div className="deepfit-header-title">{t.ui('DIET PLAN')}</div>
       <img src={ASSET('Arrow.png')} className="deepfit-header-arrow" alt="" />
-      <img src={ASSET('deep-fit-logo.png')} className="deepfit-header-logo" alt="DEEP FIT" />
+      <img src={ASSET('udra-logo-white.png')} className="deepfit-header-logo" alt="UDRA" />
       {gym?.logo_url && (
         <img src={gym.logo_url} className="deepfit-header-gym-logo" alt={gym.name || 'Gym'} crossOrigin="anonymous" />
       )}
@@ -89,12 +89,12 @@ function Footer({ t, page, total }) {
         <div className="deepfit-footer-left-content">
           <img src={ASSET('Icon-instagram.png')} className="deepfit-footer-icon" alt="Instagram" />
           <img src={ASSET('Logo-Facebook.png')} className="deepfit-footer-icon" alt="Facebook" />
-          <span>mydeepfit</span>
+          <span>udratech</span>
         </div>
       </div>
       {label && <div className="deepfit-footer-page">{label}</div>}
       <div className="deepfit-footer-right">
-        <span>www.mydeepfit.com</span>
+        <span>www.udratech.com</span>
         <img src={ASSET('Arrow-foot-right.png')} className="deepfit-footer-arrow" alt="" />
       </div>
     </div>

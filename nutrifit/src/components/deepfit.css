@@ -1,5 +1,18 @@
-/* deepFIT plan template — ported from fit-demo index.html, incl. RTL overrides.
-   True page proportions: 595×842 px (A4 at 72dpi). */
+/* UDRA plan template (was deepFIT) — incl. RTL overrides.
+   True page proportions: 595×842 px (A4 at 72dpi).
+
+   Tokens are --df-* and deliberately separate from app.css: this document is
+   delivered to clients as a PDF, so it must never inherit app theming. */
+
+:root {
+  --df-navy:  #122649;   /* UDRA Navy — header bar, figures, headings */
+  --df-blue:  #005EFF;   /* UDRA Blue — accents only (kcal, arrow motif) */
+  /* Structural rule + small-caps labels. UDRA Navy at 65% on white: same visual
+     weight as the FIT teal it replaces, but 4.86:1 instead of 4.17:1, so the
+     8-9px labels now clear AA. */
+  --df-rule:  #657289;
+  --df-wash:  rgba(18, 38, 73, 0.06);   /* assessment header fill */
+}
 
 .deepfit-page {
   /* The plan is a fixed 595px-wide block. On a phone that is wider than the
@@ -22,7 +35,7 @@
 }
 
 .deepfit-header {
-  background: #0c2b49;
+  background: var(--df-navy);
   height: 70px;
   display: flex;
   align-items: center;
@@ -50,12 +63,14 @@
 }
 
 .deepfit-header-logo {
-  height: 63px;
+  height: 32px;
   margin-left: auto;
 }
 
+/* Matched to the 32px UDRA lockup so the co-brand sits beside it as an equal
+   rather than towering over it (it was 44px against the old 63px square mark). */
 .deepfit-header-gym-logo {
-  height: 44px;
+  height: 32px;
   max-width: 90px;
   object-fit: contain;
   margin-left: 12px;
@@ -92,17 +107,17 @@
   align-items: flex-end;
   padding: 0;
   font-size: 10px;
-  color: #1B3448;
+  color: var(--df-navy);
   /* Footer stays identical in Arabic — arrows in the same corners,
-     mydeepfit + icons on the left, website link on the right. */
+     udratech + icons on the left, website link on the right. */
   direction: ltr;
 }
 
 .deepfit-footer-page {
-  font-size: 9px; color: #0c2b49; font-weight: 700; letter-spacing: 0.02em;
+  font-size: 9px; color: var(--df-navy); font-weight: 700; letter-spacing: 0.02em;
   white-space: nowrap;
   /* Match the 24px corner-arrow box and centre inside it, so the number lands on
-     the same line as www.mydeepfit.com rather than sitting lower. */
+     the same line as www.udratech.com rather than sitting lower. */
   display: flex; align-items: center; height: 24px;
 }
 /* Arabic is cursive — no letter-spacing, and let the digits read RTL. */
@@ -165,20 +180,20 @@
   border-collapse: collapse;
   font-size: 10px;
   margin-bottom: 20px;
-  border: 0.8px solid #58838C;
+  border: 0.8px solid var(--df-rule);
 }
 .deepfit-table th {
   background: transparent;
   padding: 8px;
   text-align: left;
   font-weight: 700;
-  border: 0.8px solid #58838C;
+  border: 0.8px solid var(--df-rule);
   font-size: 12px;
 }
-.deepfit-table th .deepfit-kcal { color: #58838C; }
+.deepfit-table th .deepfit-kcal { color: var(--df-blue); }
 .deepfit-table td {
   padding: 10px 8px 6px 8px;
-  border: 0.8px solid #58838C;
+  border: 0.8px solid var(--df-rule);
   vertical-align: middle;
   line-height: 1.15;
 }
@@ -232,41 +247,41 @@
 .deepfit-signoff {
   margin-top: 18px;
   padding: 10px 12px;
-  border: 0.8px solid #58838C;
+  border: 0.8px solid var(--df-rule);
 }
-.deepfit-signoff-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: #58838C; font-weight: 700; }
-.deepfit-signoff-name { font-size: 14px; font-weight: 700; margin-top: 2px; color: #1B3448; }
+.deepfit-signoff-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--df-rule); font-weight: 700; }
+.deepfit-signoff-name { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--df-navy); }
 .deepfit-signoff-date { font-size: 12px; color: #555; margin-top: 2px; }
 .deepfit-signoff-note { font-size: 12px; color: #333; margin-top: 6px; font-style: italic; }
 .deepfit-root[dir='rtl'] .deepfit-signoff { text-align: right; }
 
 /* Client assessment summary (cover page, §4.4). Built from the same vocabulary
-   as the meal tables — 0.8px #58838C rules, square corners, navy figures — so
+   as the meal tables — 0.8px --df-rule lines, square corners, navy figures — so
    it reads as part of the document rather than a card pasted onto it. */
 .deepfit-assessment {
   margin-bottom: 12px;
-  border: 0.8px solid #58838C;
+  border: 0.8px solid var(--df-rule);
 }
 .deepfit-assessment-title {
   font-size: 9px;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #0c2b49;
-  background: rgba(88, 131, 140, 0.08);
-  border-bottom: 0.8px solid #58838C;
+  color: var(--df-navy);
+  background: var(--df-wash);
+  border-bottom: 0.8px solid var(--df-rule);
   padding: 4px 8px;
 }
 /* Divided strip of figures, mirroring a table row. */
 .deepfit-assessment-metrics {
   display: flex;
-  border-bottom: 0.8px solid #58838C;
+  border-bottom: 0.8px solid var(--df-rule);
 }
 .deepfit-assessment-metric {
   flex: 1;
   padding: 5px 8px;
   text-align: center;
-  border-right: 0.8px solid #58838C;
+  border-right: 0.8px solid var(--df-rule);
 }
 .deepfit-assessment-metric:last-child { border-right: 0; }
 .deepfit-assessment-metric-label {
@@ -274,14 +289,14 @@
   font-size: 8px;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #58838C;
+  color: var(--df-rule);
   margin-bottom: 1px;
 }
 .deepfit-assessment-metric-value {
   display: block;
   font-size: 12px;
   font-weight: 700;
-  color: #1B3448;
+  color: var(--df-navy);
 }
 .deepfit-assessment-body { padding: 6px 8px; }
 .deepfit-assessment p {
@@ -293,7 +308,7 @@
 }
 .deepfit-assessment-note {
   margin-top: 4px !important;
-  color: #1B3448;
+  color: var(--df-navy);
   font-style: italic;
 }
 /* Flex reverses in RTL, so the cell dividers move to the opposite edge. */
@@ -309,6 +324,6 @@
 .deepfit-root[dir='rtl'] .deepfit-assessment { text-align: right; }
 .deepfit-root[dir='rtl'] .deepfit-assessment-metric {
   border-right: 0;
-  border-left: 0.8px solid #58838C;
+  border-left: 0.8px solid var(--df-rule);
 }
 .deepfit-root[dir='rtl'] .deepfit-assessment-metric:last-child { border-left: 0; }
