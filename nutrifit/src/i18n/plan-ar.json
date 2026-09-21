@@ -1,5 +1,5 @@
 {
-  "_notes": "Arabic translations for the deepFIT PDF. Add meal dish names under 'food' and ingredient names under 'ingredients'. Leave '_note' entries as-is.",
+  "_notes": "Arabic translations for the deepFIT PDF. Add meal dish names under 'food' and ingredient names under 'ingredients'. Leave '_note' entries as-is. Entries added for the UDRA six-page redesign are machine-derived from the vocabulary already in this file and need a native-speaker review.",
   "ui": {
     "DIET PLAN": "خطة غذائية",
     "Name:": "الاسم:",
@@ -68,7 +68,24 @@
     "dry": "جاف",
     "raw": "نيء",
     "cooked": "مطهو",
-    "Page {n} of {total}": "صفحة {n} من {total}"
+    "Page {n} of {total}": "صفحة {n} من {total}",
+    "PERSONALIZED NUTRITION PROGRAM": "برنامج تغذية شخصي",
+    "HOW TO USE YOUR PLAN": "كيف تستخدم خطتك",
+    "FOOD GROUPS & RECOVERY": "المجموعات الغذائية والتعافي",
+    "CLIENT": "الاسم",
+    "AGE": "العمر",
+    "ISSUED": "التاريخ",
+    "NEXT CHECK-UP": "الموعد القادم",
+    "DIET TYPE": "نوع الحمية",
+    "DAILY TARGET": "السعرات اليومية",
+    "Food groups to build from": "المجموعات الغذائية",
+    "your daily range": "نطاقك اليومي",
+    "{shift} kcal below maintenance": "أقل بـ {shift} كيلو سعرة من مستوى الحفاظ على الوزن",
+    "{shift} kcal above maintenance": "أعلى بـ {shift} كيلو سعرة من مستوى الحفاظ على الوزن",
+    "in line with maintenance": "يوافق مستوى الحفاظ على الوزن",
+    "Two snacks a day sit inside your {kcal} kcal target, so spread them between meals rather than after dinner.": "وجبتان خفيفتان يومياً تدخلان ضمن هدفك البالغ {kcal} كيلو سعرة، لذا وزّعهما بين الوجبات بدلاً من بعد العشاء.",
+    "EACH": "لكل واحدة",
+    "sleep_hours_unit": "ساعات"
   },
   "food": {
     "Mujaddara": "مجدرة",
@@ -841,7 +858,10 @@
     "Aim for 7–9 hours of sleep per night. Consistent sleep and wake times support appetite regulation, recovery, and overall well-being.": "استهدف 7-9 ساعات من النوم يومياً. انتظام أوقات النوم والاستيقاظ يدعم تنظيم الشهية والتعافي والرفاهية العامة.",
     "This meal plan is designed to give you flexibility while still helping you achieve your daily nutrition goals. The options within each meal are matched on calories, so whichever one you choose keeps your day on track. Their protein, carbohydrate and fat split can still differ a little, which lets you pick what suits your appetite, activity and schedule — a higher-protein breakfast after a workout, or something lighter on a less active day. What matters most is your overall daily intake rather than identical macronutrients at every meal. Feel free to mix and match your choices throughout the day.": "صُممت خطة الوجبات هذه لتمنحك المرونة مع مساعدتك على تحقيق أهدافك الغذائية اليومية. خيارات كل وجبة متقاربة في السعرات، لذا أي خيار تختاره يحافظ على مسار يومك. أما توزيع البروتين والكربوهيدرات والدهون فقد يختلف قليلاً، وهذا يتيح لك اختيار ما يناسب شهيتك ونشاطك وجدولك — فطور غني بالبروتين بعد التمرين، أو شيء أخف في يوم أقل نشاطاً. الأهم هو إجمالي كميتك اليومية وليس تطابق العناصر الغذائية في كل وجبة. لا تتردد في المزج بين خياراتك على مدار اليوم.",
     "The options within each meal are matched on calories, so you can choose whichever you prefer without changing your daily total. If an ingredient is unavailable, replace it with a similar item from the same group — for example, one lean protein for another, or one complex carbohydrate for another — in a similar portion. Unless stated otherwise, listed weights refer to cooked portions, and any oils, sauces, or dressings named in a meal are already included in its calorie total; extras you add on your own are not. To swap a whole meal, pick another option from the same category to keep your intended daily intake.": "خيارات كل وجبة متقاربة في السعرات، لذا يمكنك اختيار ما تفضّله دون تغيير إجماليك اليومي. إذا لم يتوفر أحد المكونات، استبدله بعنصر مماثل من المجموعة نفسها — مثلاً بروتين قليل الدهون بآخر، أو كربوهيدرات معقدة بأخرى — وبكمية مماثلة. ما لم يُذكر خلاف ذلك، تشير الأوزان المدرجة إلى حصص مطهوة، وأي زيوت أو صلصات مذكورة في الوجبة محتسبة أصلاً ضمن سعراتها؛ أما ما تضيفه بنفسك فغير محتسب. لاستبدال وجبة كاملة، اختر خياراً آخر من الفئة نفسها للحفاظ على كميتك اليومية المقصودة.",
-    "Complex carbohydrates fuel the brain, support hormonal health, and aid recovery. Many people find them easiest to use around the most active part of their day.": "الكربوهيدرات المعقدة تغذي الدماغ، وتدعم الصحة الهرمونية، وتساعد في التعافي. يجد كثيرون أن أسهل وقت لتناولها هو حول أكثر أوقات يومهم نشاطاً."
+    "Complex carbohydrates fuel the brain, support hormonal health, and aid recovery. Many people find them easiest to use around the most active part of their day.": "الكربوهيدرات المعقدة تغذي الدماغ، وتدعم الصحة الهرمونية، وتساعد في التعافي. يجد كثيرون أن أسهل وقت لتناولها هو حول أكثر أوقات يومهم نشاطاً.",
+    "Every meal below carries several calorie-matched options: choose whichever suits your appetite and schedule.": "تحتوي كل وجبة أدناه على عدة خيارات متساوية في السعرات: اختر ما يناسب شهيتك وجدولك.",
+    "Include a clear protein source at every main meal.": "احرص على وجود مصدر بروتين واضح في كل وجبة رئيسية.",
+    "Useful for meat-free days and for adding fiber.": "مفيدة في الأيام الخالية من اللحوم ولإضافة الألياف."
   },
   "listItems": {
     "Upon waking: 1 glass of water.": "عند الاستيقاظ: كوب واحد من الماء.",

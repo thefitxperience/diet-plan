@@ -155,6 +155,64 @@ export function mealTargetsFor(meals, dailyKcal) {
   return out
 }
 
+// ── Per-meal share of the daily target ───────────────────────────────────────
+// A meal's targetKcal is PER OPTION. Snacks are eaten twice, so a 120 kcal
+// snack takes 240 kcal out of the day — which is why a share is the per-option
+// target multiplied by the servings eaten.
+export const mealServings = (id) => (String(id || '').includes('snack') ? 2 : 1)
+
+// No meal may be squeezed below this, so redistribution can never scale a
+// meal's options to nothing.
+export const MIN_MEAL_SHARE = 0.05
+
+/** Current share of the daily total per meal, as fractions that sum to ~1. */
+export function mealShares(meals, dailyKcal) {
+  const out = {}
+  if (!dailyKcal || !meals?.length) return out
+  for (const m of meals) out[m.id] = ((m.targetKcal || 0) * mealServings(m.id)) / dailyKcal
+  return out
+}
+
+/**
+ * Set one meal's share and re-split the remainder across the others in
+ * proportion to what they hold now, so the shares always total 100%.
+ *
+ * @returns {{[mealId: string]: number}} the new PER-OPTION targetKcal per meal.
+ */
+export function setMealShare(meals, dailyKcal, mealId, fraction) {
+  const out = {}
+  if (!dailyKcal || !meals?.length) return out
+
+  const n = meals.length
+  if (n === 1) {
+    const only = meals[0]
+    out[only.id] = Math.round(dailyKcal / mealServings(only.id))
+    return out
+  }
+
+  // Clamp so this meal keeps at least the minimum and leaves the minimum for
+  // every other meal.
+  const max = 1 - MIN_MEAL_SHARE * (n - 1)
+  const target = Math.min(Math.max(fraction, MIN_MEAL_SHARE), max)
+
+  const cur = mealShares(meals, dailyKcal)
+  const others = meals.filter((m) => m.id !== mealId)
+  const heldByOthers = others.reduce((s, m) => s + (cur[m.id] || 0), 0)
+  const remainder = 1 - target
+
+  for (const m of meals) {
+    const share = m.id === mealId
+      ? target
+      // If the others hold nothing yet (a fresh plan), split the remainder
+      // evenly rather than dividing by zero.
+      : heldByOthers > 0
+        ? ((cur[m.id] || 0) / heldByOthers) * remainder
+        : remainder / others.length
+    out[m.id] = Math.round((dailyKcal * share) / mealServings(m.id))
+  }
+  return out
+}
+
 // ── Rule-based calorie scaling ("meal generation engine") ────────────────────
 // Linear proportional scaling makes unrealistic plates at high/low calories
 // (8 eggs, 400 g spinach). Instead we redistribute the calorie change by role:

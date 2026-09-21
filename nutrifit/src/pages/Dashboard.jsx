@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { describeEvent } from '../lib/planEvents'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { useQuery } from '../lib/useQuery'
@@ -111,17 +112,18 @@ export default function Dashboard() {
           {data.events.map((ev) => {
             const c = ev.plans?.clients
             const clientName = c ? `${c.first_name} ${c.last_name}` : null
-            // Self-service intake events have no actor — phrase them around the client.
-            const isIntake = !ev.actor && ev.action === 'generated'
+            // Events with no actor are the system: a self-service intake, or an
+            // automatic release. Both are phrased so no person is implied.
+            const d = describeEvent(ev, { t, profileId: profile?.id })
             return (
-              <li key={ev.id}>
-                {isIntake ? (
-                  <><b>{clientName || t('event.newClient')}</b> {t('event.intake')}</>
+              <li key={ev.id} className={d.auto ? 'is-auto' : undefined}>
+                {d.kind === 'intake' ? (
+                  <><b>{clientName || t('event.newClient')}</b> {d.what}</>
                 ) : (
                   <>
-                    <b>{ev.actor === profile?.id ? t('event.you') : (ev.profiles?.full_name || '—')}</b>{' '}
-                    {t(`${ev.actor === profile?.id ? 'eventYou' : 'event'}.${ev.action}`)}
+                    <b>{d.who}</b> {d.what}
                     {clientName ? ` ${t('event.for', { name: clientName })}` : ''}
+                    {d.auto && <span className="auto-badge">{t('event.autoBadge')}</span>}
                   </>
                 )}
                 {role === 'platform_admin' && ev.gyms?.name ? <span className="muted"> ({ev.gyms.name})</span> : ''}

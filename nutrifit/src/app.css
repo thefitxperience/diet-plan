@@ -60,7 +60,7 @@ html[lang='ar'] body { font-family: 'Tajawal', Tahoma, Arial, sans-serif; }
    falling back to the OS UI font — very visible next to Sora (the meal-picker
    rows and every modal's ✕ are buttons). Inheriting is also correct inside the
    PDF template: .deepfit-page sets font-family on itself, so its descendants
-   keep Source Sans 3. */
+   keep the font that template chose. */
 button, select, optgroup { font-family: inherit; }
 
 a { color: var(--blue); text-decoration: none; }
@@ -71,9 +71,9 @@ h2 { font-size: 1.15rem; margin: 0 0 0.75rem; letter-spacing: -0.015em; color: v
 h3 { font-size: 1rem; margin: 0 0 0.5rem; letter-spacing: -0.01em; }
 /* Sora has no Arabic cut, so Tajawal takes over — and it needs no tightening. */
 html[lang='ar'] h1, html[lang='ar'] h2, html[lang='ar'] h3 { letter-spacing: normal; }
-/* The diet-plan PDF template owns its own typography (it pins Source Sans 3 and
-   sets every heading explicitly) — keep app-level heading tuning out of it so the
-   delivered PDF renders exactly as it did before the rebrand. */
+/* The diet-plan PDF template owns its own typography (it sets its font and every
+   heading explicitly, to measured values) — keep app-level heading tuning out of
+   it so the delivered PDF matches the approved design exactly. */
 .deepfit-root h1, .deepfit-root h2, .deepfit-root h3, .deepfit-root h4 { letter-spacing: normal; }
 
 /* ── layout ── */
@@ -458,6 +458,44 @@ table.data tr.clickable:hover { background: var(--blue-05); }
 .badge.GYM_APPROVED { background: #dcfce7; color: #15803d; }
 .badge.SENT { background: rgba(100, 224, 255, 0.3); color: #0B5A73; }
 
+/* Marks a timeline entry the system produced, not a person — an automatic
+   release has no sign-off behind it, so it should not look like one. */
+.auto-badge {
+  display: inline-block;
+  margin-inline-start: 6px;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: var(--blue-12);
+  color: var(--blue-deep);
+  font-size: 0.64rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  vertical-align: middle;
+}
+.timeline li.is-auto::before { background: var(--blue-deep); }
+
+/* On/off switch (platform admin gym settings). */
+.switch {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--muted);
+}
+.switch-track {
+  position: relative; width: 34px; height: 19px; flex-shrink: 0;
+  background: #cbd2dc; border-radius: 999px; transition: background 0.15s;
+}
+.switch-thumb {
+  position: absolute; top: 2px; inset-inline-start: 2px;
+  width: 15px; height: 15px; border-radius: 50%; background: #fff;
+  box-shadow: 0 1px 2px rgba(18, 38, 73, 0.3);
+  transition: transform 0.15s;
+}
+.switch.on .switch-track { background: var(--blue); }
+.switch.on .switch-thumb { transform: translateX(15px); }
+[dir='rtl'] .switch.on .switch-thumb { transform: translateX(-15px); }
+.switch.on .switch-label { color: var(--blue-deep); }
+.switch:hover .switch-track { filter: brightness(0.95); }
+
 .alert { padding: 0.7rem 1rem; border-radius: 8px; margin-bottom: 0.9rem; font-size: 0.9rem; }
 .alert.error { background: #fee2e2; color: #b91c1c; }
 .alert.warn { background: #fef3c7; color: #92400e; }
@@ -667,9 +705,271 @@ html.intake-active, body.intake-active { background: var(--navy); }
   gap: 0.5rem;
 }
 
+/* ── editor header ──────────────────────────────────────────────────────────
+   Two tiers: who/what on top, actions below. The old single row mixed the
+   plan's identity with eight same-weight buttons, so nothing read as primary
+   and you could not tell whose plan you had open. */
+/* Single row: identity + save state, then every action. It was two tiers only
+   because the pane toggles needed somewhere to live. */
+.editor-head {
+  display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+  margin-bottom: 0.85rem;
+}
+.editor-head h1 { margin: 0; font-size: 1.3rem; line-height: 1.2; min-width: 0; }
+
+.save-state { font-size: 0.78rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; }
+.save-state::before {
+  content: ''; width: 7px; height: 7px; border-radius: 50%; background: currentColor;
+}
+.save-state.is-clean { color: var(--ok); }
+.save-state.is-dirty { color: var(--warn); }
+.save-state.is-saving { color: var(--muted); }
+
+.editor-head-actions { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
+.editor-head-spacer { flex: 1; min-width: 0.5rem; }
+/* Separates the view control (preview language) from the document actions. */
+.editor-head-divider {
+  width: 1px; height: 18px; background: var(--border); margin-inline: 0.25rem;
+}
+.btn.secondary.is-destructive { color: var(--danger); border-color: rgba(220, 38, 38, 0.35); }
+.btn.secondary.is-destructive:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.06); border-color: var(--danger); color: var(--danger);
+}
+
+/* ── review panel (pinned above the inspector tabs) ─────────────────────── */
+.review-panel {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-inline-start: 3px solid var(--warn);
+  border-radius: var(--radius);
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+.review-panel.is-clear { border-inline-start-color: var(--ok); }
+.review-head {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%;
+  padding: 0.7rem 0.85rem; text-align: start;
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+}
+.review-panel.is-clear .review-head { cursor: default; }
+.review-head b { font-size: 0.9rem; line-height: 1.3; }
+.review-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--warn); flex-shrink: 0; }
+.review-panel.is-clear .review-dot { background: var(--ok); }
+.review-chevron { margin-inline-start: auto; opacity: 0.6; transform: rotate(-90deg); transition: transform 0.15s; }
+.review-chevron.open { transform: rotate(0deg); }
+
+.review-group { padding: 0 0.85rem 0.6rem; }
+.review-group-label {
+  display: block; font-size: 0.68rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted);
+  margin-bottom: 3px;
+}
+.review-item {
+  display: flex; align-items: flex-start; gap: 0.5rem;
+  font-size: 0.85rem; line-height: 1.4; padding: 3px 0;
+  border-inline-start: 2px solid transparent; padding-inline-start: 8px;
+}
+.review-group.is-safety .review-item { border-inline-start-color: var(--danger); }
+.review-group.is-calories .review-item { border-inline-start-color: var(--warn); }
+.review-group.is-checks .review-item { border-inline-start-color: var(--border); }
+.review-go {
+  margin-inline-start: auto; flex-shrink: 0;
+  background: none; border: 0; padding: 0; cursor: pointer;
+  font: inherit; font-size: 0.78rem; font-weight: 700; color: var(--blue);
+}
+.review-go:hover { text-decoration: underline; }
+
+/* ── inspector: one tabbed pane, not four stacked cards ─────────────────── */
+.insp {
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.insp-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--bg); }
+.insp-tab {
+  flex: 1; min-width: 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 5px;
+  padding: 0.6rem 0.4rem;
+  background: none; border: 0; border-bottom: 2px solid transparent;
+  font: inherit; font-size: 0.85rem; font-weight: 600; color: var(--muted);
+  cursor: pointer;
+}
+.insp-tab:hover { color: var(--navy); }
+.insp-tab.on { color: var(--blue); border-bottom-color: var(--blue); background: #fff; }
+/* "Something is selected" — a quiet marker, not an alert. */
+.insp-tab-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--muted); flex-shrink: 0;
+}
+.insp-tab.on .insp-tab-dot { background: var(--blue); }
+
+.insp-body { padding: 0.85rem; }
+
+/* ── inspector content system ───────────────────────────────────────────────
+   One label style, one section rhythm, one attention treatment. Between them
+   the three tabs previously used five different "pay attention" colours
+   (#fdf3e7 client flags, a --warn resync box, .alert.warn, a red danger box,
+   the review list), three label styles, and a phantom --surface-2 variable
+   that resolved to a warm grey appearing nowhere else. */
+
+/* Type scale. The pane previously ran ten sizes between 0.68 and 1.05rem, with
+   four of them doing the same job, which is what made the text look accidental.
+   Five steps, each with a distinct role:
+       0.68  tracked micro-label      (section + field labels)
+       0.78  meta                     (hints, counts, secondary notes)
+       0.85  body                     (everything you read, AND every input)
+       0.90  emphasis                 (item and option names, weight 600)
+       1.00  pane title
+   The one exception is .insp-stat, the single figure the Plan tab reports. */
+.insp-body,
+.insp-body .note,
+.insp-body .insp-row { font-size: 0.85rem; }
+.insp-body .small,
+.insp-body .muted.small { font-size: 0.78rem; }
+/* Inputs default to 0.92rem app-wide, which sat noticeably larger than the text
+   around them in a 340px pane. */
+.insp-body input[type='text'],
+.insp-body input[type='number'],
+.insp-body input[type='date'],
+.insp-body input[type='email'],
+.insp-body input[type='tel'],
+.insp-body select,
+.insp-body textarea { font-size: 0.85rem; min-height: 2.15rem; }
+.insp-body textarea { min-height: auto; }
+
+/* Section: a tracked micro-label, optionally with one action beside it. */
+.insp-section + .insp-section {
+  margin-top: 1.05rem; padding-top: 1.05rem; border-top: 1px solid var(--border);
+}
+.insp-section-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 0.5rem; margin-bottom: 0.6rem; min-height: 1.4rem;
+}
+.insp-label {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+html[lang='ar'] .insp-label { letter-spacing: normal; text-transform: none; }
+
+/* Field labels inside the inspector adopt the same micro-label, instead of the
+   app-wide navy 0.88rem used on full-page forms. */
+.insp-body label.field { margin-bottom: 0.75rem; }
+/* :not(.hint) — the hint is also a direct <span> child, and it is a sentence,
+   not a label. */
+.insp-body label.field > span:not(.hint) {
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.25rem;
+}
+html[lang='ar'] .insp-body label.field > span:not(.hint) { letter-spacing: normal; text-transform: none; }
+.insp-body label.field .hint {
+  font-size: 0.78rem; font-weight: 400; text-transform: none;
+  letter-spacing: normal; color: var(--muted);
+}
+
+/* Label / value rows — scannable, and long values wrap without breaking the row. */
+.insp-rows { margin: 0; }
+.insp-row {
+  display: flex; gap: 0.75rem; align-items: baseline;
+  padding: 0.35rem 0;
+}
+.insp-row + .insp-row { border-top: 1px solid var(--border); }
+.insp-row > dt { flex: 0 0 42%; min-width: 0; color: var(--muted); }
+.insp-row > dd {
+  margin: 0; flex: 1; min-width: 0; color: var(--navy);
+  font-weight: 500; overflow-wrap: anywhere;
+}
+
+/* The single attention box. Severity swaps two custom properties, nothing else. */
+.note {
+  --note: var(--warn);
+  --note-bg: rgba(180, 83, 9, 0.07);
+  border-inline-start: 3px solid var(--note);
+  background: var(--note-bg);
+  border-radius: 6px;
+  padding: 0.55rem 0.7rem;
+  line-height: 1.45;
+}
+.note.is-safety { --note: var(--danger); --note-bg: rgba(220, 38, 38, 0.06); }
+.note.is-ok     { --note: var(--ok);     --note-bg: rgba(21, 128, 61, 0.06); }
+.note.is-info   { --note: var(--blue);   --note-bg: var(--blue-05); }
+.note + .note { margin-top: 0.4rem; }
+.note .note-title { display: block; font-weight: 700; color: var(--note); margin-bottom: 2px; }
+
+/* A figure that belongs to the section above it, not a boxed-out widget. */
+.insp-stat { display: flex; align-items: baseline; gap: 0.45rem; flex-wrap: wrap; }
+.insp-stat b { font-size: 1.05rem; color: var(--navy); }
+/* A secondary action that should read as actionable, not as a heading. */
+.btn.ghost.link-btn { padding-inline: 0; color: var(--blue); }
+.btn.ghost.link-btn:hover:not(:disabled) { background: none; text-decoration: underline; }
+.ok-mark { font-size: 0.78rem; font-weight: 600; color: var(--ok); }
+.ok-mark::before { content: '✓ '; }
+
+/* Footer actions: routine action on the left, destructive on the right as a
+   text button. A solid red block beside a secondary button read as the
+   dominant action on the pane, which removing an option is not. */
+.insp-actions { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; }
+.btn.ghost.is-danger { color: var(--danger); }
+.btn.ghost.is-danger:hover:not(:disabled) { background: rgba(220, 38, 38, 0.08); }
+
+/* "No nutrition data" marker — a labelled chip, not a bare ⚠︎ glued to the name. */
+.ing-warn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 14px; height: 14px; margin-inline-start: 5px;
+  border-radius: 50%; background: var(--warn); color: #fff;
+  font-size: 0.6rem; font-weight: 700; line-height: 1; vertical-align: middle;
+}
+
+.insp-empty {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: 0.5rem; padding: 2rem 1rem; color: var(--muted);
+}
+.insp-empty b { color: var(--navy); font-size: 0.9rem; }
+.insp-empty p { margin: 0; max-width: 26ch; }
+
+.insp-advanced > summary {
+  cursor: pointer; list-style: none;
+  font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.08em; color: var(--muted);
+}
+.insp-advanced > summary::-webkit-details-marker { display: none; }
+.insp-advanced > summary::before { content: '▸ '; }
+.insp-advanced[open] > summary::before { content: '▾ '; }
+html[lang='ar'] .insp-advanced > summary { letter-spacing: normal; text-transform: none; }
+
+/* ── meals list: navigation + state, not a form ─────────────────────────── */
+.meal-item { border-top: 1px solid var(--border); padding: 0.55rem 0 0.6rem; }
+.meal-item:first-of-type { border-top: 0; padding-top: 0; }
+.meal-item-head {
+  display: flex; align-items: baseline; gap: 0.5rem; width: 100%;
+  padding: 0 0 4px; text-align: start;
+  background: none; border: 0; cursor: pointer; font: inherit; color: inherit;
+}
+.meal-item-head:hover .meal-item-name { color: var(--blue); }
+.meal-item-name {
+  font-weight: 600; font-size: 0.9rem; color: var(--navy);
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; min-width: 0;
+}
+.meal-item-name .small { font-weight: 400; }
+.meal-item-count { margin-inline-start: auto; font-size: 0.78rem; color: var(--muted); white-space: nowrap; }
+.meal-item-count.is-empty { color: var(--warn); font-weight: 600; }
+.meal-item-controls { display: flex; align-items: center; gap: 0.35rem; flex-wrap: nowrap; }
+.meal-item-controls .btn { white-space: nowrap; }
+.meal-item-spacer { flex: 1; min-width: 0; }
+/* Share of the daily target, with the calories it works out to beside it —
+   the dietitian sets the split, the figure confirms what it means. */
+.meal-item-share { display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+.meal-item-share input {
+  width: 52px; min-height: 2rem; padding: 0.25rem 0.35rem;
+  font-size: 0.85rem; text-align: center; font-weight: 600;
+}
+.meal-item-share input:disabled { opacity: 0.5; }
+.meal-item-kcal-note { margin-inline-start: 4px; white-space: nowrap; }
+
+
 .editor-shell {
   display: grid;
-  grid-template-columns: 117px 1fr 340px;
+  grid-template-columns: minmax(0, 1fr) 340px;
   gap: 1rem;
   align-items: start;
 }
@@ -688,63 +988,56 @@ html.intake-active, body.intake-active { background: var(--navy); }
     min-height: 0;
     align-items: stretch;
   }
-  .editor-page .editor-thumbs,
-  .editor-page .editor-canvas,
-  .editor-page .editor-inspector {
+  .editor-page .editor-canvas {
     position: static;
     height: 100%;
     max-height: none;
     overflow-y: auto;
   }
-}
-.editor-thumbs {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  position: sticky;
-  top: 1rem;
-}
-.editor-thumb {
-  border: 2px solid var(--border);
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
-  overflow: hidden;
-  position: relative;
-  height: 160px;
-  flex-shrink: 0;
-}
-.editor-thumb.active { border-color: var(--blue); }
-.editor-thumb .thumb-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(18, 38, 73, 0.85); color: white;
-  font-size: 0.68rem; text-align: center; padding: 2px 0;
-  text-transform: capitalize;
-}
-.editor-thumb .thumb-scale {
-  transform: scale(0.19);
-  transform-origin: top left;
-  width: 595px;
-  pointer-events: none;
-  /* Anchor the scaled page to the top-left even when the site is RTL —
-     otherwise the 595px-wide page is placed from the right edge and the
-     visible portion is clipped away, leaving the thumbnail blank. */
-  position: absolute;
-  top: 0;
-  left: 0;
-  direction: ltr;
+  .editor-page .editor-inspector {
+    position: static;
+    height: 100%;
+    max-height: none;
+    overflow: hidden;
+  }
 }
 .editor-canvas {
   background: #E6E2D9;
   border-radius: var(--radius);
   padding: 1.25rem;
+  /* The plan page is a fixed 794px box (A4 at 96dpi). The editor scales it to
+     fit, but the approval preview renders it 1:1 — so contain the overflow here
+     rather than let it push the whole page sideways on a narrow window. */
+  overflow-x: auto;
 }
 .editor-inspector {
   position: sticky;
   top: 1rem;
+  /* Column: the review panel and the tab strip hold their place, only the tab
+     body scrolls — so a warning and the tabs are never scrolled out of reach. */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
+.editor-inspector .insp { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.editor-inspector .insp-tabs { flex-shrink: 0; }
+.editor-inspector .insp-body { flex: 1; min-height: 0; overflow-y: auto; }
 .inspector-bilingual { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
 .inspector-bilingual .ar-missing input, input.ar-missing { border-color: var(--warn); background: #fffbeb; }
+/* Meal name in the editor's Meals panel — read-only for the four standard
+   slots, so it reads as a label and lines up with the kcal field beside it. */
+.meal-row-name {
+  flex: 1; min-width: 0;
+  display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap;
+  /* Match the number input beside it, and centre the line inside that height —
+     align-items handles the baseline within the line, align-content the line
+     within the box. */
+  min-height: 2.4rem;
+  align-content: center;
+  font-weight: 600; font-size: 0.88rem; color: var(--navy);
+}
+.meal-row-name .small { font-weight: 400; }
+
 .ingredient-row { display: grid; grid-template-columns: 1fr 1fr 64px 28px; gap: 4px; margin-bottom: 4px; align-items: center; }
 .ingredient-row.two { grid-template-columns: 1fr 64px 28px; }
 
@@ -766,11 +1059,11 @@ html.intake-active, body.intake-active { background: var(--navy); }
 .readonly-list li { display: flex; justify-content: space-between; gap: 1rem; padding: 3px 0; border-bottom: 1px solid var(--border, #eee); font-size: 0.9rem; }
 .readonly-list li:last-child { border-bottom: none; }
 .readonly-macros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.readonly-macros > div { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0.4rem 0.3rem; background: var(--surface-2, #F7F5F1); border-radius: 8px; }
+.readonly-macros > div { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 0.4rem 0.3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
 
 /* Editable ingredient rows (option inspector). */
 .ingredient-edit-list { list-style: none; margin: 0 0 0.5rem; padding: 0; }
-.ingredient-edit-list li { padding: 4px 0; border-bottom: 1px solid var(--border, #eee); font-size: 0.9rem; }
+.ingredient-edit-list li { padding: 5px 0; border-bottom: 1px solid var(--border, #eee); font-size: 0.85rem; }
 .ingredient-edit-list li:last-child { border-bottom: none; }
 .ingredient-edit-list .ing-name { flex: 1; min-width: 0; overflow-wrap: anywhere; }
 .ingredient-edit-list input[type='number'] { text-align: center; }
@@ -778,15 +1071,6 @@ html.intake-active, body.intake-active { background: var(--navy); }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; }
 .icon-btn svg { display: block; }
 
-/* Client questionnaire + conditions/allergies highlight (editor). */
-.client-flags { display: flex; flex-direction: column; gap: 3px; font-size: 0.9rem; }
-.client-flags.has-flags { padding: 8px 10px; border-radius: 8px; background: #fdf3e7; border: 1px solid #e7b980; }
-.client-details { margin-top: 8px; }
-.client-details > summary { cursor: pointer; font-weight: 600; font-size: 0.88rem; color: var(--navy); }
-.client-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 8px; }
-.client-grid > div { display: flex; flex-direction: column; }
-.client-grid > div > span:last-child { font-size: 0.9rem; }
-.intake-range { margin: 8px 0 0; }
 
 /* Selected food dislikes — removable chips under the search box. */
 .pref-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
@@ -830,14 +1114,13 @@ html.intake-active, body.intake-active { background: var(--navy); }
 
 /* Editable macros (option inspector). */
 .macro-edit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.macro-edit-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0.45rem 0.3rem; background: var(--surface-2, #F7F5F1); border-radius: 8px; }
+.macro-edit-item { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 0.5rem 0.3rem; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
 .macro-edit-input { display: flex; align-items: center; gap: 4px; }
-.macro-edit-input input { width: 56px; text-align: center; font-weight: 700; }
+.macro-edit-input input { width: 54px; text-align: center; font-weight: 700; }
 
 @media (max-width: 1100px) {
   .editor-shell { grid-template-columns: 1fr; }
-  .editor-thumbs { flex-direction: row; position: static; max-height: none; }
-  .editor-inspector { position: static; max-height: none; }
+  .editor-inspector { position: static; max-height: none; overflow: visible; }
 }
 
 /* Modal + meal picker */
@@ -911,9 +1194,7 @@ html.intake-active, body.intake-active { background: var(--navy); }
   /* Stacked, because the inspector is only 340px wide: the explanation takes the
      full width and the two buttons then share one line without wrapping. */
   display: flex; flex-direction: column; gap: 8px;
-  margin-top: 8px; padding: 8px 10px;
-  border: 1px solid var(--warn, #b45309); border-radius: 8px;
-  background: rgba(180, 83, 9, 0.07);
+  margin-top: 8px;
 }
 .target-resync .row { flex-wrap: nowrap; gap: 8px; }
 .target-resync .btn { white-space: nowrap; flex: 1 1 auto; justify-content: center; }
@@ -933,20 +1214,13 @@ html.intake-active, body.intake-active { background: var(--navy); }
    is what produced three competing scrollbars and forced horizontal scrolling
    of the preview. The side panes stick so they stay usable while scrolling. */
 .editor-pages { transform-origin: top center; }
-.editor-thumbs, .editor-inspector {
-  /* top: 1rem is set on each above — don't override it here. */
+.editor-inspector {
   align-self: start;
-  max-height: calc(100vh - 2rem); overflow-y: auto;
+  max-height: calc(100vh - 2rem);
+  /* Scrolls inside .insp-body, not here — a second scroller would let the tab
+     strip slide away. */
+  overflow: hidden;
 }
-.editor-view-controls { display: inline-flex; align-items: center; gap: 4px; margin-inline-end: 4px; }
-.editor-view-controls .btn.ghost {
-  border: 1px solid var(--border); background: #fff; font-weight: 600;
-}
-.editor-view-controls .btn.ghost.on {
-  background: var(--navy); color: #fff; border-color: var(--navy);
-}
-.editor-view-controls select { min-height: 2rem; padding: 0.2rem 0.4rem; font-size: 0.8rem; }
-
 /* Collapsible header for the review panel. */
 .notice-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
 .notice-toggle {

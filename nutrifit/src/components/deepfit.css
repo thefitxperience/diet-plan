@@ -1,329 +1,505 @@
-/* UDRA plan template (was deepFIT) — incl. RTL overrides.
-   True page proportions: 595×842 px (A4 at 72dpi).
+/* UDRA diet plan — client-facing PDF template.
+   Implements design_handoff_udra_diet_plan at full fidelity.
+
+   Page box: 794 × 1123 px = A4 portrait at 96 dpi. Pages are FIXED boxes with
+   overflow hidden, so anything too tall is silently clipped — see the density
+   ladder in DeepFitTemplate.jsx, which steps a page down rather than let it
+   spill. Content is never stretched to fill: a short page ends with honest
+   bottom margin.
 
    Tokens are --df-* and deliberately separate from app.css: this document is
-   delivered to clients as a PDF, so it must never inherit app theming. */
+   delivered to clients as a PDF and must never inherit app theming. */
 
-:root {
-  --df-navy:  #122649;   /* UDRA Navy — header bar, figures, headings */
-  --df-blue:  #005EFF;   /* UDRA Blue — accents only (kcal, arrow motif) */
-  /* Structural rule + small-caps labels. UDRA Navy at 65% on white: same visual
-     weight as the FIT teal it replaces, but 4.86:1 instead of 4.17:1, so the
-     8-9px labels now clear AA. */
-  --df-rule:  #657289;
-  --df-wash:  rgba(18, 38, 73, 0.06);   /* assessment header fill */
+.deepfit-root {
+  --df-navy:  #122649;
+  --df-blue:  #005EFF;
+  --df-cyan:  #64E0FF;
+  --df-lime:  #CDFF20;
+  --df-linen: #EFECE6;
+  --df-white: #FFFFFF;
+  /* Hairlines: the first sits inside white panels, the second between table
+     rows and cells, the third inside navy panels. */
+  --df-hair:  rgba(18, 38, 73, .12);
+  --df-hair-t: rgba(18, 38, 73, .1);
+  --df-hair-w: rgba(255, 255, 255, .2);
 }
 
 .deepfit-page {
-  /* The plan is a fixed 595px-wide block. On a phone that is wider than the
-     viewport, Chrome/Safari "font boosting" inflates text inside wide blocks
-     (prose paragraphs) while leaving narrow ones (table cells) alone — and
-     because the delivery PDF is rasterised in whichever browser sends it, that
-     inflation gets baked into the client's PDF. Pinning this disables it. */
+  /* The page is a fixed-width block wider than a phone viewport, where
+     Chrome/Safari "font boosting" inflates text inside wide blocks while
+     leaving narrow ones alone. Because the delivery PDF is rasterised in
+     whichever browser sends it, that inflation would bake into the client's
+     PDF. Pinning this disables it. */
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
-  width: 595px;
-  min-height: 842px;
-  background: white var(--deepfit-bg, none) no-repeat center bottom;
-  background-size: 105%;
-  position: relative;
-  overflow: visible;
-  page-break-after: always;
-  font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+
+  width: 794px;
+  /* min-height, not height: a page is exactly A4 whenever its content fits, and
+     grows instead of clipping when it does not. The cover carries the identity
+     row, target panels, assessment summary AND the first meal table, so it is
+     the one that overruns with real data — and silently losing a client's meal
+     options off the bottom of the page is worse than a slightly taller page.
+     The exporter already sizes each PDF page to its captured height, so a taller
+     page yields a taller page rather than a scaled-down one. */
+  min-height: 1123px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  page-break-after: always;
+
+  background: var(--df-linen);
+  position: relative;
+  /* Clips the watermark's bleed only. Page CONTENT still grows the box, because
+     the height is a min- and the box is auto-sized to its content. */
+  overflow: hidden;
+
+  font-family: 'Sora', -apple-system, BlinkMacSystemFont, sans-serif;
+  color: var(--df-navy);
+  /* Screen-only desk effect; it falls outside the element box, so html2canvas
+     does not capture it into the PDF. */
+  box-shadow: 0 4px 10px rgba(18, 38, 73, .12);
 }
 
-.deepfit-header {
+/* The watermark is a PNG pre-flattened at 9% — NOT a CSS opacity on a live
+   element. That keeps print engines from re-compositing it and guarantees
+   identical density on every page, which is what the design requires.
+   It is an <img> rather than a background because the bleed needs four-value
+   background-position (`right -260px bottom -300px`), and html2canvas 1.4.1 —
+   which rasterises the delivered PDF — cannot parse that form and throws
+   mid-export. An absolutely positioned image also tracks the bottom of a page
+   that has grown past A4, which a fixed background offset could not. */
+.deepfit-watermark {
+  position: absolute;
+  inset-inline-end: -260px;
+  bottom: -300px;
+  width: 760px;
+  height: auto;
+  z-index: 0;
+  pointer-events: none;
+}
+/* Content sits above the watermark; white panels stay fully opaque over it. */
+.deepfit-masthead, .deepfit-body, .deepfit-footer { position: relative; z-index: 1; }
+
+/* Numbers, weights, dates, page numbers and the two large figures. Arabic
+   renders Arabic-Indic digits, which JetBrains Mono has no glyphs for — so RTL
+   falls back to the page font (see the RTL block at the foot of this file). */
+.deepfit-mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* ── Masthead ─────────────────────────────────────────────────────────────── */
+
+.deepfit-masthead {
   background: var(--df-navy);
-  height: 70px;
+  padding: 19px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 40px;
-  position: relative;
-  overflow: visible;
+  gap: 20px;
+  flex-shrink: 0;
 }
-
-.deepfit-header-title {
-  color: white;
-  font-size: 25px;
-  font-weight: 700;
-  letter-spacing: 0;
-  position: relative;
+.deepfit-masthead-text { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.deepfit-masthead-title {
+  font-size: 24px; font-weight: 700; letter-spacing: -.01em;
+  color: var(--df-white); line-height: 1;
 }
-
-.deepfit-header-arrow {
-  position: absolute;
-  left: 33.25px;
-  top: -153px;
-  width: 409px;
-  height: 409px;
-  pointer-events: none;
+.deepfit-masthead-kicker {
+  font-size: 8.5px; font-weight: 700; letter-spacing: .2em; color: var(--df-cyan);
 }
-
-.deepfit-header-logo {
-  height: 32px;
-  margin-left: auto;
+.deepfit-masthead-marks { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+/* Explicit width AND height: the logo sits in a flex row whose default stretch
+   would distort an `auto` dimension. */
+.deepfit-masthead-logo { width: 84px; height: 27px; object-fit: contain; display: block; }
+/* Gym co-branding, kept from the previous template. Sized to sit beside the
+   UDRA wordmark as an equal, on the white chip a coloured logo needs to read
+   against navy. */
+.deepfit-masthead-gym {
+  height: 27px; max-width: 74px; object-fit: contain; display: block;
+  background: var(--df-white); padding: 3px; border-radius: 2px;
 }
+.deepfit-masthead-rule { width: 1px; align-self: stretch; background: var(--df-hair-w); }
 
-/* Matched to the 32px UDRA lockup so the co-brand sits beside it as an equal
-   rather than towering over it (it was 44px against the old 63px square mark). */
-.deepfit-header-gym-logo {
-  height: 32px;
-  max-width: 90px;
-  object-fit: contain;
-  margin-left: 12px;
-  background: white;
-  border-radius: 4px;
-  padding: 2px;
+/* ── Body ─────────────────────────────────────────────────────────────────── */
+
+.deepfit-body {
+  flex: 1; min-height: 0;
+  display: flex; flex-direction: column;
+  padding: 24px 32px 0;
+  gap: 12px;
 }
+.deepfit-body.is-cover { padding-top: 20px; }
+.deepfit-body.is-wide { gap: 14px; }
 
-.deepfit-content {
-  padding: 2px 40px 30px 40px;
-  position: relative;
-  min-height: 712px;
-}
-
-.deepfit-meal-page { padding-top: 8px; }
-
-.deepfit-wave {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 400px;
-  opacity: 0.15;
-  pointer-events: none;
-}
+/* ── Footer ───────────────────────────────────────────────────────────────── */
 
 .deepfit-footer {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 0;
-  font-size: 10px;
-  color: var(--df-navy);
-  /* Footer stays identical in Arabic — arrows in the same corners,
-     udratech + icons on the left, website link on the right. */
-  direction: ltr;
+  flex-shrink: 0;
+  padding: 11px 32px 14px;
+  display: flex; align-items: center; justify-content: space-between; gap: 14px;
+}
+.deepfit-footer-social { display: flex; align-items: center; gap: 5px; }
+.deepfit-footer-icon { width: 13px; height: 13px; object-fit: contain; display: block; opacity: .85; }
+.deepfit-footer-handle { font-size: 10px; font-weight: 600; color: var(--df-navy); }
+.deepfit-footer-page { font-size: 9.5px; color: var(--df-navy); opacity: .7; white-space: nowrap; }
+.deepfit-footer-site { font-size: 10px; color: var(--df-navy); opacity: .8; }
+
+/* ── Section rule (pages 5–6) ─────────────────────────────────────────────── */
+
+.deepfit-section-title {
+  font-size: 18px; font-weight: 700; letter-spacing: -.015em; color: var(--df-navy);
+  border-bottom: 1.5px solid var(--df-navy); padding-bottom: 7px;
 }
 
-.deepfit-footer-page {
-  font-size: 9px; color: var(--df-navy); font-weight: 700; letter-spacing: 0.02em;
-  white-space: nowrap;
-  /* Match the 24px corner-arrow box and centre inside it, so the number lands on
-     the same line as www.udratech.com rather than sitting lower. */
-  display: flex; align-items: center; height: 24px;
-}
-/* Arabic is cursive — no letter-spacing, and let the digits read RTL. */
-.deepfit-root[dir='rtl'] .deepfit-footer-page { letter-spacing: normal; direction: rtl; }
-.deepfit-footer-left { display: flex; align-items: center; gap: 4px; }
-.deepfit-footer-left-content { display: flex; align-items: center; margin-left: 10px; }
-.deepfit-footer-right { display: flex; align-items: center; gap: 6px; }
-.deepfit-footer-icon { height: 14px; width: 14px; }
-.deepfit-footer-right span { margin-right: 10px; }
-.deepfit-footer-arrow { height: 24px; display: block; }
+/* ── Page 1: identity row ─────────────────────────────────────────────────── */
 
-.deepfit-info-row {
-  display: flex;
-  gap: 100px;
-  margin-bottom: 15px;
-  font-size: 12px;
-  color: #000;
+.deepfit-identity {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr 1fr 1.2fr;
+  gap: 0 18px;
+  border-bottom: 1.5px solid var(--df-navy);
+  padding-bottom: 11px;
 }
-.deepfit-info-left { flex: 1; line-height: 1.187; }
-.deepfit-info-right { flex: 1; line-height: 1.187; padding-top: 3px; }
-.deepfit-info-label { font-weight: 700; display: inline; }
+.deepfit-field { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.deepfit-field-label {
+  font-size: 8px; font-weight: 700; letter-spacing: .16em;
+  color: var(--df-navy); opacity: .6;
+}
+.deepfit-field-value { font-size: 14px; font-weight: 600; color: var(--df-navy); }
+.deepfit-field-value.is-mono { font-size: 13px; font-weight: 400; }
 
-.deepfit-diet-type {
-  font-size: 12px;
-  color: #000;
-  margin-bottom: 2px;
-  margin-top: 8px;
-  line-height: 1.187;
-}
+/* ── Page 1: diet type + daily target ─────────────────────────────────────── */
 
-.deepfit-diet-intro {
-  font-size: 10px;
-  line-height: 1.125;
-  color: #333;
-  margin-bottom: 8px;
+.deepfit-target-row { display: flex; gap: 12px; align-items: stretch; }
+.deepfit-diet-panel {
+  flex: 1; min-width: 0;
+  background: var(--df-white);
+  padding: 12px 15px;
+  display: flex; flex-direction: column; gap: 5px;
 }
+.deepfit-panel-label {
+  font-size: 8.5px; font-weight: 700; letter-spacing: .16em;
+  color: var(--df-navy); opacity: .6;
+}
+.deepfit-diet-name {
+  font-size: 19px; font-weight: 600; color: var(--df-navy);
+  letter-spacing: -.015em; line-height: 1;
+}
+.deepfit-diet-note {
+  font-size: 10px; line-height: 1.5; color: var(--df-navy); opacity: .75;
+  text-wrap: pretty;
+}
+.deepfit-kcal-panel {
+  width: 192px; flex-shrink: 0;
+  background: var(--df-navy);
+  padding: 12px 15px;
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+}
+.deepfit-kcal-panel .deepfit-panel-label { color: var(--df-cyan); opacity: 1; }
+.deepfit-kcal-figure-row { display: flex; align-items: baseline; gap: 6px; }
+.deepfit-kcal-figure {
+  font-size: 33px; font-weight: 800; color: var(--df-lime);
+  letter-spacing: -.03em; line-height: 1;
+}
+.deepfit-kcal-unit { font-size: 11px; font-weight: 600; color: var(--df-white); opacity: .85; }
+.deepfit-kcal-note { font-size: 9px; color: var(--df-white); opacity: .7; }
 
-.deepfit-meal-header { position: relative; margin: 0; }
-.deepfit-meal-icon {
-  position: absolute;
-  left: -38px;
-  top: -2px;
-  height: 36px;
-  width: 36px;
-}
-.deepfit-meal-header-content { width: 100%; position: relative; padding-bottom: 8px; }
-.deepfit-meal-title-row { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
-.deepfit-meal-title { font-size: 18px; font-weight: 700; color: #000; }
-.deepfit-meal-title small { font-weight: 700; font-size: 12px; }
-.deepfit-meal-underline {
-  position: absolute;
-  top: -146px;
-  width: 265px;
-  height: 343px;
-  pointer-events: none;
-}
+/* ── Page 1: assessment summary ───────────────────────────────────────────── */
 
-.deepfit-table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 10px;
-  margin-bottom: 20px;
-  border: 0.8px solid var(--df-rule);
-}
-.deepfit-table th {
-  background: transparent;
-  padding: 8px;
-  text-align: left;
-  font-weight: 700;
-  border: 0.8px solid var(--df-rule);
-  font-size: 12px;
-}
-.deepfit-table th .deepfit-kcal { color: var(--df-blue); }
-.deepfit-table td {
-  padding: 10px 8px 6px 8px;
-  border: 0.8px solid var(--df-rule);
-  vertical-align: middle;
-  line-height: 1.15;
-}
-.deepfit-table ul { margin: 0; padding-left: 15px; list-style: disc; }
-.deepfit-table li { margin-bottom: 3px; line-height: 1.15; }
-
-.deepfit-option-name { font-weight: 700; display: block; margin-bottom: 3px; line-height: 1.15; }
-.deepfit-option-desc { font-size: 9px; color: #555; line-height: 1.15; display: block; }
-
-/* editor selection affordances */
-.deepfit-row-selectable { cursor: pointer; }
-.deepfit-row-selectable:hover td { background: rgba(0, 94, 255, 0.07); }
-.deepfit-row-selected td { background: rgba(0, 94, 255, 0.12) !important; outline: 2px solid #005EFF; outline-offset: -2px; }
-.deepfit-row-warning td:first-child { box-shadow: inset 3px 0 0 #e8a020; }
-
-.deepfit-guidelines-title { font-size: 18px; font-weight: 700; margin-bottom: 8px; color: #000; }
-.deepfit-guidelines-section { margin-bottom: 10px; }
-.deepfit-guidelines-section h3 { font-size: 12px; font-weight: 700; margin-top: 0; margin-bottom: 3px; color: #000; }
-.deepfit-guidelines-section p {
-  font-size: 12px;
-  line-height: 1.2;
-  margin-top: 0;
-  margin-bottom: 4px;
-  color: #333;
-  text-align: justify;
-}
-.deepfit-guidelines-section ul { margin: 0; padding-left: 0; list-style: none; font-size: 12px; line-height: 1.2; }
-.deepfit-guidelines-section ol { margin: 0; padding-left: 18px; font-size: 12px; line-height: 1.2; }
-.deepfit-two-column { display: flex; gap: 30px; margin-top: 5px; }
-.deepfit-column { flex: 1; }
-.deepfit-column h4 { font-size: 12px; font-weight: 700; margin-top: 0; margin-bottom: 3px; }
-.deepfit-column ul { margin: 0; padding-left: 0; list-style: none; font-size: 12px; line-height: 1.2; }
-
-/* ── Arabic / RTL overrides (ported; html2canvas-safe: bullets and ordinals
-      are inlined as text by the component when lang=ar) ─────────────── */
-.deepfit-root[dir='rtl'] { font-family: Tahoma, Arial, sans-serif; }
-.deepfit-root[dir='rtl'] .deepfit-header-logo { margin-left: 0; margin-right: auto; }
-.deepfit-root[dir='rtl'] .deepfit-header-gym-logo { margin-left: 0; margin-right: 12px; }
-.deepfit-root[dir='rtl'] .deepfit-header-arrow { left: auto; right: 33.25px; transform: scaleX(-1); }
-.deepfit-root[dir='rtl'] .deepfit-meal-icon { left: auto; right: -38px; }
-.deepfit-root[dir='rtl'] .deepfit-meal-underline { transform: scaleX(-1); }
-.deepfit-root[dir='rtl'] .deepfit-table th,
-.deepfit-root[dir='rtl'] .deepfit-table td { text-align: right; }
-.deepfit-root[dir='rtl'] .deepfit-two-column { direction: rtl; }
-.deepfit-root[dir='rtl'] .deepfit-guidelines-section > ol,
-.deepfit-root[dir='rtl'] .deepfit-guidelines-section > ul { padding-left: 0; padding-right: 0; list-style: none; }
-.deepfit-root[dir='rtl'] .deepfit-diet-intro { text-align: right; }
-.deepfit-root[dir='rtl'] .deepfit-table ul { padding: 0; margin: 0; list-style: none; }
-
-/* Dietitian sign-off block (last guidelines page). */
-.deepfit-signoff {
-  margin-top: 18px;
-  padding: 10px 12px;
-  border: 0.8px solid var(--df-rule);
-}
-.deepfit-signoff-label { font-size: 9px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--df-rule); font-weight: 700; }
-.deepfit-signoff-name { font-size: 14px; font-weight: 700; margin-top: 2px; color: var(--df-navy); }
-.deepfit-signoff-date { font-size: 12px; color: #555; margin-top: 2px; }
-.deepfit-signoff-note { font-size: 12px; color: #333; margin-top: 6px; font-style: italic; }
-.deepfit-root[dir='rtl'] .deepfit-signoff { text-align: right; }
-
-/* Client assessment summary (cover page, §4.4). Built from the same vocabulary
-   as the meal tables — 0.8px --df-rule lines, square corners, navy figures — so
-   it reads as part of the document rather than a card pasted onto it. */
-.deepfit-assessment {
-  margin-bottom: 12px;
-  border: 0.8px solid var(--df-rule);
-}
+.deepfit-assessment { background: var(--df-white); display: flex; flex-direction: column; }
 .deepfit-assessment-title {
-  font-size: 9px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--df-navy);
-  background: var(--df-wash);
-  border-bottom: 0.8px solid var(--df-rule);
-  padding: 4px 8px;
+  padding: 8px 15px;
+  border-bottom: 1px solid var(--df-hair);
+  font-size: 8.5px; font-weight: 700; letter-spacing: .16em; color: var(--df-navy);
 }
-/* Divided strip of figures, mirroring a table row. */
-.deepfit-assessment-metrics {
-  display: flex;
-  border-bottom: 0.8px solid var(--df-rule);
-}
+.deepfit-assessment-metrics { display: grid; grid-template-columns: repeat(4, 1fr); }
 .deepfit-assessment-metric {
-  flex: 1;
-  padding: 5px 8px;
-  text-align: center;
-  border-right: 0.8px solid var(--df-rule);
+  padding: 10px 15px;
+  border-inline-end: 1px solid var(--df-hair);
+  display: flex; flex-direction: column; gap: 4px;
+  min-width: 0;
 }
-.deepfit-assessment-metric:last-child { border-right: 0; }
+.deepfit-assessment-metric:last-child { border-inline-end: 0; }
 .deepfit-assessment-metric-label {
-  display: block;
-  font-size: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--df-rule);
-  margin-bottom: 1px;
+  font-size: 8px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+  color: var(--df-navy); opacity: .6;
 }
 .deepfit-assessment-metric-value {
-  display: block;
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--df-navy);
+  font-size: 17px; font-weight: 700; color: var(--df-navy);
+  letter-spacing: -.02em; line-height: 1;
 }
-.deepfit-assessment-body { padding: 6px 8px; }
-.deepfit-assessment p {
-  margin: 0;
-  font-size: 10px;
-  line-height: 1.25;
-  color: #333;
-  text-align: justify;
+.deepfit-assessment-body {
+  padding: 10px 15px;
+  border-top: 1px solid var(--df-hair);
+  font-size: 9.5px; line-height: 1.5; color: var(--df-navy); opacity: .82;
+  text-wrap: pretty;
 }
-.deepfit-assessment-note {
-  margin-top: 4px !important;
-  color: var(--df-navy);
-  font-style: italic;
+.deepfit-assessment-body p { margin: 0; }
+.deepfit-assessment-body p + p { margin-top: 4px; font-style: italic; }
+
+/* ── Meal header ──────────────────────────────────────────────────────────── */
+
+.deepfit-meal-header {
+  display: flex; align-items: center; gap: 11px;
+  border-bottom: 1.5px solid var(--df-navy);
+  padding-bottom: 8px;
 }
-/* Flex reverses in RTL, so the cell dividers move to the opposite edge. */
-/* Arabic is cursive: letter-spacing pulls the joins apart and reads as broken or
-   overlapping letters (dietitian review §6, first-page assessment header). Also
-   drop uppercase, which is meaningless for Arabic. */
+.deepfit-meal-header.is-cover { padding-bottom: 7px; }
+/* All four meal icons are normalised so their artwork fills 80% of a square
+   canvas — same box, same optical weight. */
+.deepfit-meal-icon { width: 34px; height: 34px; object-fit: contain; display: block; flex-shrink: 0; }
+.deepfit-meal-titles { display: flex; align-items: baseline; gap: 8px; flex: 1; min-width: 0; }
+.deepfit-meal-title {
+  font-size: 18px; font-weight: 700; color: var(--df-navy); letter-spacing: -.015em;
+}
+.deepfit-meal-header.is-cover .deepfit-meal-title { font-size: 16px; }
+.deepfit-meal-pick { font-size: 10px; color: var(--df-navy); opacity: .7; }
+.deepfit-meal-kcal {
+  font-size: 10px; color: var(--df-white); background: var(--df-blue);
+  padding: 4px 9px; flex-shrink: 0; white-space: nowrap;
+}
+
+/* ── Meal table ───────────────────────────────────────────────────────────── */
+
+/* Density tunes ONLY row padding and type size. Page 1 runs one step tighter
+   than 2–4 because its table shares the page with the identity row, the target
+   panels and the assessment summary. Rows are never given `flex: 1` to close a
+   gap — stretched rows read as a layout bug. */
+.deepfit-table {
+  --head-pad: 8px 16px;
+  --head-size: 9.5px;
+  --cell-pad: 16px 15px;
+  --cell-pad-macro: 16px 15px;
+  --name-size: 12px;
+  --desc-size: 10px;
+  --ing-size: 10.5px;
+  --macro-label-size: 10px;
+  --macro-value-size: 10.5px;
+  --macro-gap: 4px;
+
+  background: var(--df-white);
+  display: flex; flex-direction: column;
+}
+.deepfit-table.is-compact {
+  --head-pad: 7px 14px;
+  --head-size: 9px;
+  --cell-pad: 9px 14px;
+  --cell-pad-macro: 9px 14px;
+  --name-size: 11.5px;
+  --desc-size: 9.5px;
+  --ing-size: 10px;
+  --macro-label-size: 9.5px;
+  --macro-value-size: 10px;
+  --macro-gap: 3px;
+}
+/* Snack options list 2 ingredients against 4–5 for the meals, so their rows
+   carry extra padding to reach the same page fill. The macros cell keeps normal
+   padding — its three rows are already the tallest content in a snack row. */
+.deepfit-table.is-airy { --cell-pad: 29px 15px; }
+
+.deepfit-row, .deepfit-thead {
+  display: grid;
+  grid-template-columns: 1.25fr 1.35fr .8fr;
+}
+.deepfit-thead { background: var(--df-navy); }
+.deepfit-th {
+  padding: var(--head-pad);
+  font-size: var(--head-size); font-weight: 700; letter-spacing: .14em;
+  color: var(--df-white);
+}
+.deepfit-th.is-macros { color: var(--df-cyan); }
+
+.deepfit-row { border-bottom: 1px solid var(--df-hair-t); }
+.deepfit-cell {
+  padding: var(--cell-pad);
+  display: flex; flex-direction: column;
+  justify-content: center;          /* rows can be taller than their text */
+  min-width: 0;
+}
+.deepfit-cell + .deepfit-cell { border-inline-start: 1px solid var(--df-hair-t); }
+.deepfit-cell.is-option { gap: 3px; }
+.deepfit-cell.is-ingredients { gap: 2px; }
+.deepfit-cell.is-macros { gap: var(--macro-gap); padding: var(--cell-pad-macro); }
+
+.deepfit-option-name {
+  font-size: var(--name-size); font-weight: 600; color: var(--df-navy); line-height: 1.25;
+}
+.deepfit-option-desc {
+  font-size: var(--desc-size); line-height: 1.45; color: var(--df-navy);
+  opacity: .68; text-wrap: pretty;
+}
+.deepfit-ingredient { font-size: var(--ing-size); line-height: 1.45; color: var(--df-navy); opacity: .88; }
+.deepfit-macro { display: flex; justify-content: space-between; gap: 8px; }
+.deepfit-macro-label { font-size: var(--macro-label-size); color: var(--df-navy); opacity: .72; }
+.deepfit-macro-value { font-size: var(--macro-value-size); font-weight: 500; color: var(--df-navy); }
+
+.deepfit-table-empty {
+  padding: var(--cell-pad); font-size: var(--name-size);
+  color: var(--df-navy); opacity: .7; text-align: center;
+}
+
+/* Note bar under a meal table (snacks). */
+.deepfit-note-bar {
+  padding: 12px 16px;
+  display: flex; align-items: center; gap: 10px;
+  background: var(--df-navy);
+}
+.deepfit-note-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--df-lime); flex-shrink: 0; }
+.deepfit-note-text { font-size: 10.5px; color: var(--df-white); opacity: .9; line-height: 1.45; }
+
+/* ── Editor-only affordances (never present in the exported PDF) ──────────── */
+
+.deepfit-row-selectable { cursor: pointer; }
+.deepfit-row-selectable:hover { background: rgba(0, 94, 255, .06); }
+.deepfit-row-selected { background: rgba(0, 94, 255, .1); outline: 2px solid var(--df-blue); outline-offset: -2px; }
+.deepfit-row-warning { box-shadow: inset 3px 0 0 #e8a020; }
+
+/* ── Page 5 ───────────────────────────────────────────────────────────────── */
+
+.deepfit-about-panel {
+  background: var(--df-white);
+  padding: 23px 24px;
+  display: flex; flex-direction: column; gap: 21px;
+}
+.deepfit-about-block { display: flex; flex-direction: column; gap: 5px; }
+.deepfit-divider { height: 1px; background: var(--df-hair); }
+.deepfit-block-title {
+  font-size: 12px; font-weight: 700; letter-spacing: .04em; color: var(--df-blue);
+}
+.deepfit-about-body {
+  font-size: 11px; line-height: 1.7; color: var(--df-navy); opacity: .85; text-wrap: pretty;
+}
+/* The three About blocks sit near the panel's limit at 1.7 leading. When the
+   copy runs long the design calls for losing the leading before the type size,
+   so the template adds this rather than shrinking text. */
+.deepfit-about-panel.is-tight .deepfit-about-body { line-height: 1.5; }
+.deepfit-about-panel.is-tight { gap: 16px; padding: 18px 24px; }
+
+.deepfit-guidelines-intro {
+  font-size: 10.5px; line-height: 1.6; color: var(--df-navy); opacity: .8; text-wrap: pretty;
+}
+.deepfit-duo { display: flex; gap: 12px; align-items: stretch; }
+.deepfit-hydration {
+  flex: 1.15; min-width: 0;
+  background: var(--df-white);
+  padding: 21px 22px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.deepfit-panel-note { font-size: 10.5px; line-height: 1.55; color: var(--df-navy); opacity: .8; }
+.deepfit-steps { display: flex; flex-direction: column; gap: 9px; }
+.deepfit-step { display: flex; gap: 9px; align-items: baseline; }
+.deepfit-step-index { font-size: 10px; color: var(--df-blue); flex-shrink: 0; }
+.deepfit-step-text { font-size: 10.5px; line-height: 1.5; color: var(--df-navy); opacity: .88; }
+
+.deepfit-protein {
+  flex: 1; min-width: 0;
+  background: var(--df-navy);
+  padding: 21px 22px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.deepfit-protein .deepfit-block-title { color: var(--df-lime); }
+.deepfit-protein-note {
+  font-size: 10.5px; line-height: 1.6; color: var(--df-white); opacity: .88; text-wrap: pretty;
+}
+/* Pinned to the bottom of the panel. */
+.deepfit-protein-figure {
+  margin-top: auto;
+  display: flex; align-items: baseline; gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--df-hair-w);
+}
+.deepfit-figure-value { font-size: 20px; color: var(--df-cyan); }
+.deepfit-figure-caption { font-size: 10px; color: var(--df-white); opacity: .75; }
+
+/* ── Page 6 ───────────────────────────────────────────────────────────────── */
+
+.deepfit-group-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.deepfit-card {
+  background: var(--df-white);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+/* More items than the tested counts: reduce the card padding first. */
+.deepfit-card.is-tight { padding: 14px 17px; }
+.deepfit-card-title {
+  font-size: 12.5px; font-weight: 700; letter-spacing: .04em; color: var(--df-blue);
+}
+.deepfit-card-note {
+  font-size: 10.5px; line-height: 1.55; color: var(--df-navy); opacity: .75; text-wrap: pretty;
+}
+.deepfit-item-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5px 12px; }
+.deepfit-item { font-size: 11px; line-height: 1.5; color: var(--df-navy); opacity: .9; }
+
+.deepfit-vegfruit-note { font-size: 10.5px; line-height: 1.6; color: var(--df-navy); opacity: .8; text-wrap: pretty; }
+.deepfit-sublists { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 18px; padding-top: 4px; }
+.deepfit-sublist { display: flex; flex-direction: column; gap: 4px; }
+.deepfit-sublist-label {
+  font-size: 9px; font-weight: 700; letter-spacing: .14em; color: var(--df-navy); opacity: .6;
+}
+
+.deepfit-sleep {
+  background: var(--df-navy);
+  padding: 15px 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.deepfit-sleep-text { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.deepfit-sleep .deepfit-block-title { color: var(--df-lime); }
+.deepfit-sleep-note {
+  font-size: 10.5px; line-height: 1.6; color: var(--df-white); opacity: .88; text-wrap: pretty;
+}
+.deepfit-sleep-figure { font-size: 20px; color: var(--df-cyan); flex-shrink: 0; }
+
+/* Sign-off, pinned to the bottom of page 6. */
+.deepfit-signoff {
+  margin-top: auto;
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  border-top: 1.5px solid var(--df-navy);
+  padding-top: 12px;
+}
+.deepfit-signoff-text { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.deepfit-signoff-label {
+  font-size: 8.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--df-navy); opacity: .6;
+}
+.deepfit-signoff-name {
+  font-size: 15px; font-weight: 600; color: var(--df-navy); letter-spacing: -.01em;
+}
+.deepfit-signoff-date { font-size: 9.5px; color: var(--df-navy); opacity: .7; }
+.deepfit-signoff-note { font-size: 9.5px; color: var(--df-navy); opacity: .7; font-style: italic; }
+.deepfit-signoff-mark { width: 34px; height: 34px; object-fit: contain; display: block; opacity: .9; flex-shrink: 0; }
+
+/* ── Arabic / RTL ─────────────────────────────────────────────────────────── */
+/* Layout mirrors through logical properties above; these handle what cannot be
+   expressed logically. Bullets and ordinals are inlined as text by the
+   component when lang=ar, because html2canvas does not rasterise list markers
+   reliably. */
+
+.deepfit-root[dir='rtl'] .deepfit-page {
+  font-family: 'Tajawal', Tahoma, Arial, sans-serif;
+}
+/* Arabic-Indic digits have no glyphs in JetBrains Mono — fall back to the page
+   font so figures don't render as tofu. */
+.deepfit-root[dir='rtl'] .deepfit-mono { font-family: inherit; }
+/* Cursive script: tracking pulls the joins apart and reads as broken letters,
+   and uppercasing is meaningless. */
+.deepfit-root[dir='rtl'] .deepfit-masthead-kicker,
+.deepfit-root[dir='rtl'] .deepfit-field-label,
+.deepfit-root[dir='rtl'] .deepfit-panel-label,
 .deepfit-root[dir='rtl'] .deepfit-assessment-title,
 .deepfit-root[dir='rtl'] .deepfit-assessment-metric-label,
+.deepfit-root[dir='rtl'] .deepfit-th,
+.deepfit-root[dir='rtl'] .deepfit-block-title,
+.deepfit-root[dir='rtl'] .deepfit-card-title,
+.deepfit-root[dir='rtl'] .deepfit-sublist-label,
 .deepfit-root[dir='rtl'] .deepfit-signoff-label {
   letter-spacing: normal;
   text-transform: none;
 }
-.deepfit-root[dir='rtl'] .deepfit-assessment { text-align: right; }
-.deepfit-root[dir='rtl'] .deepfit-assessment-metric {
-  border-right: 0;
-  border-left: 0.8px solid var(--df-rule);
+/* Negative display tracking is a latin-type refinement. */
+.deepfit-root[dir='rtl'] .deepfit-masthead-title,
+.deepfit-root[dir='rtl'] .deepfit-section-title,
+.deepfit-root[dir='rtl'] .deepfit-meal-title,
+.deepfit-root[dir='rtl'] .deepfit-diet-name,
+.deepfit-root[dir='rtl'] .deepfit-kcal-figure,
+.deepfit-root[dir='rtl'] .deepfit-assessment-metric-value,
+.deepfit-root[dir='rtl'] .deepfit-signoff-name {
+  letter-spacing: normal;
 }
-.deepfit-root[dir='rtl'] .deepfit-assessment-metric:last-child { border-left: 0; }
+.deepfit-root[dir='rtl'] .deepfit-row-warning { box-shadow: inset -3px 0 0 #e8a020; }

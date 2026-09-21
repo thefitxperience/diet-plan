@@ -4,6 +4,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { describeEvent } from '../lib/planEvents'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Alert, Loading, Spinner, StatusBadge, BackButton, fmtDateTime } from '../components/ui'
@@ -27,13 +28,19 @@ export function EventLog({ planId, refresh }) {
       <h2>{t('dashboard.recentActivity')}</h2>
       <ul className="timeline">
         {events.map((ev) => {
-          const isIntake = !ev.actor && ev.action === 'generated'
+          const d = describeEvent(ev, { t, profileId: profile?.id })
           return (
-            <li key={ev.id}>
-              {isIntake
+            <li key={ev.id} className={d.auto ? 'is-auto' : undefined}>
+              {d.kind === 'intake'
                 ? <b>{t('event.intakeShort')}</b>
-                : <><b>{ev.actor === profile?.id ? t('event.you') : (ev.profiles?.full_name || '—')}</b> {t(`${ev.actor === profile?.id ? 'eventYou' : 'event'}.${ev.action}`)}</>}
-              {ev.comment && !isIntake && <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>}
+                : <>
+                    <b>{d.who}</b> {d.what}
+                    {d.auto && <span className="auto-badge">{t('event.autoBadge')}</span>}
+                  </>}
+              {d.auto && <div className="small muted">{t('event.autoApprovedNote')}</div>}
+              {ev.comment && d.kind !== 'intake' && !d.auto && (
+                <div className="small" style={{ fontStyle: 'italic' }}>“{ev.comment}”</div>
+              )}
               <div className="muted small">{fmtDateTime(ev.created_at, lang)}</div>
             </li>
           )

@@ -7,13 +7,13 @@ import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../components/ui'
-import DeepFitTemplate, { planPageList, MEAL_PRESENTATION } from '../components/DeepFitTemplate'
+import DeepFitTemplate, { planPageList, MEAL_PRESENTATION, PAGE_WIDTH, displayTitle } from '../components/DeepFitTemplate'
 import {
   blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
   optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
   goalAdjustedKcal, recomputeOptionNutrition, ingredientHasMeta, KNOWN_INGREDIENTS,
   mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT, planCalorieWarnings, MIN_SAFE_KCAL,
-  stampPlanChecks,
+  stampPlanChecks, mealShares, setMealShare, mealServings,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import { GOAL_LABELS, activityDisplayName } from '../lib/fitApi'
@@ -52,6 +52,15 @@ export default function PlanEditor() {
   const [savedIds, setSavedIds] = useState(() => new Set()) // options saved this session
   const [approving, setApproving] = useState(false) // sign-off dialog open
   const [noticesOpen, setNoticesOpen] = useState(true) // review panel collapsed?
+  // The inspector is one pane with three tabs rather than four stacked cards:
+  // 'client' (who it's for), 'plan' (targets + meals), 'option' (what you're
+  // editing right now). Selecting an option in the preview switches to 'option'
+  // automatically — that link was the least discoverable thing in the old UI.
+  const [inspTab, setInspTab] = useState('plan')
+  // "Keep as is" on the target-changed prompt used to be wired to a no-op, so
+  // the prompt stayed on screen however you answered it. Dismissing is now
+  // real, and a further change to the target brings the choice back.
+  const [resyncDismissed, setResyncDismissed] = useState(false)
   const [approval, setApproval] = useState({ name: '', title: '', registration: '', note: '' })
   // Practitioner's own minimum target (dietitian review item 11). NULL on the
   // profile means fall back to the application default.
@@ -67,20 +76,14 @@ export default function PlanEditor() {
     await supabase.from('profiles').update({ min_kcal: clamped }).eq('id', profile.id)
   }
   // ── Preview scale and pane visibility (dietitian review §3) ──────────────
-  // The preview used to render a 595px A4 page inside a ~500px column, so it
-  // needed horizontal scrolling; and all three panes had their own overflow,
-  // giving three competing scrollbars. Now: fit-to-width by default, one
-  // document scroll, and both side panes collapsible (choice remembered).
-  const PREVIEW_SCALE = 1.25
-  const pref = (k, d) => {
-    try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v) } catch { return d }
-  }
-  const [showThumbs, setShowThumbs] = useState(() => pref('nf.editor.thumbs', false))
-  const [showInspector, setShowInspector] = useState(() => pref('nf.editor.inspector', true))
+  // The preview used to need horizontal scrolling, and all three panes had
+  // their own overflow, giving three competing scrollbars. Now: fit-to-width by
+  // default, one document scroll, and both side panes collapsible (remembered).
+  // 100%, not the old 125%: the page box is 794px at 96dpi, already a third
+  // wider than the 595px one that needed magnifying to stay legible.
+  const PREVIEW_SCALE = 1
   const [fitScale, setFitScale] = useState(1)
   const [exporting, setExporting] = useState(false)
-  useEffect(() => { try { localStorage.setItem('nf.editor.thumbs', JSON.stringify(showThumbs)) } catch {} }, [showThumbs])
-  useEffect(() => { try { localStorage.setItem('nf.editor.inspector', JSON.stringify(showInspector)) } catch {} }, [showInspector])
 
   // Measure the preview column so "Fit width" tracks pane collapse and resizing.
   const canvasRef = useRef()
@@ -92,11 +95,11 @@ export default function PlanEditor() {
       // "fit width" overshoots by 40px and reintroduces horizontal scrolling.
       const cs = getComputedStyle(el)
       const w = el.clientWidth - parseFloat(cs.paddingLeft || 0) - parseFloat(cs.paddingRight || 0)
-      if (w > 0) setFitScale(Math.min(1.5, Math.max(0.5, w / 595)))
+      if (w > 0) setFitScale(Math.min(1.5, Math.max(0.4, w / PAGE_WIDTH)))
     })
     ro.observe(el)
     return () => ro.disconnect()
-  }, [showThumbs, showInspector])
+  }, [])
   // Fixed 125% preview. Capped by the measured width so a narrower window can't
   // push the page wider than the column and bring back horizontal scrolling.
   // Never scale during export — html2canvas would capture the rendered size.
@@ -158,6 +161,8 @@ export default function PlanEditor() {
 
   const belowFloor = calorieWarnings.some((w) => w.code === 'belowFloor')
 
+  useEffect(() => { if (selection) setInspTab('option') }, [selection?.mealId, selection?.optionId])
+
   // Bring the selected meal's page into view only when it isn't already — with
   // block:'nearest' this is a no-op if visible, so the preview never jumps.
   useEffect(() => {
@@ -174,9 +179,15 @@ export default function PlanEditor() {
     ...warnings.allergen.map((w) => ({
       group: 'safety',
       text: t('editor.allergenWarning', { ingredient: w.ingredient, allergy: w.allergy }),
+      go: { mealId: w.mealId, optionId: w.optionId },
     })),
-    ...calorieWarnings.map((w) => ({ group: 'calories', text: t(`wizard.warn.${w.code}`, w) })),
-    ...validation.map((v) => ({ group: 'checks', text: t(`editor.check.${v.code}`, v) })),
+    ...calorieWarnings.map((w) => ({
+      group: 'calories', text: t(`wizard.warn.${w.code}`, w), go: { tab: 'plan' },
+    })),
+    ...validation.map((v) => ({
+      group: 'checks', text: t(`editor.check.${v.code}`, v),
+      go: v.meal ? { mealId: v.meal } : { tab: 'plan' },
+    })),
   ]
 
   // If a new problem appears while the panel is collapsed, open it again — a
@@ -258,6 +269,7 @@ export default function PlanEditor() {
   // target is changed we stash what the system originally recommended, so the
   // plan always carries both figures plus who changed it and when.
   function setDailyTarget(val) {
+    setResyncDismissed(false)
     mutate((p) => {
       const before = p.header.dailyKcal || 0
       if (val === before) return
@@ -269,6 +281,24 @@ export default function PlanEditor() {
         note: p.calorieAudit?.note || '',
       }
       p.header.dailyKcal = val
+    })
+  }
+
+  // Set one meal's share of the daily total. The other meals absorb the
+  // difference, and every meal's options are rescaled to their new target —
+  // previously this field only rewrote the calorie chip printed on the PDF,
+  // leaving the options themselves untouched.
+  function applyMealShare(mealId, pct) {
+    mutate((p) => {
+      const daily = p.header.dailyKcal || 0
+      if (!daily) return
+      const targets = setMealShare(p.meals, daily, mealId, pct / 100)
+      for (const m of p.meals) {
+        const tgt = targets[m.id]
+        if (!tgt) continue
+        m.targetKcal = tgt
+        m.options = m.options.map((o) => scaleOptionToKcal(o, tgt))
+      }
     })
   }
 
@@ -462,27 +492,46 @@ export default function PlanEditor() {
 
   const pages = planPageList(plan)
 
+  // Jump to whatever a review item refers to: select the offending option (which
+  // scrolls its page in and opens the Editing tab) or fall back to the meal page.
+  function goTo(go) {
+    if (!go) return
+    if (go.optionId) { setSelection({ mealId: go.mealId, optionId: go.optionId }); return }
+    if (go.mealId) {
+      const idx = pages.findIndex((pg) => pg.mealId === go.mealId)
+      if (idx >= 0) pageEls.current[idx]?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      setInspTab('plan')
+      return
+    }
+    if (go.tab) setInspTab(go.tab)
+  }
+
+  const saveState = busy === 'save' ? 'saving' : dirty ? 'dirty' : 'clean'
+
   return (
     <div className="editor-page">
-      <div className="editor-toolbar row between">
-        <div className="row">
-          <BackButton />
-          <h1 style={{ margin: 0 }}>{t('editor.title')}</h1>
-          <StatusBadge status={row.status} />
-          {dirty && <span className="muted small">●</span>}
-        </div>
-        <div className="row">
-          {/* View controls: pane toggles + preview scale. */}
-          <div className="editor-view-controls">
-            <button className={`btn ghost sm${showThumbs ? ' on' : ''}`} onClick={() => setShowThumbs(!showThumbs)}
-              title={t('editor.togglePages')}>{t('editor.pagesShort')}</button>
-            <button className={`btn ghost sm${showInspector ? ' on' : ''}`} onClick={() => setShowInspector(!showInspector)}
-              title={t('editor.toggleEditor')}>{t('editor.editorShort')}</button>
-          </div>
+      {/* Identity first: the old header said "Plan editor" and nothing else, so
+          you could not tell whose plan you had open. */}
+      {/* One row now that the pane toggles are gone: identity and save state on
+          the left, every action on the right. */}
+      <div className="editor-head">
+        <BackButton />
+        <h1>{t('editor.title')}</h1>
+        <span className={`save-state is-${saveState}`}>
+          {saveState === 'saving' ? t('editor.savingNow')
+            : saveState === 'dirty' ? t('editor.unsaved') : t('editor.allSaved')}
+        </span>
+
+        <span className="editor-head-spacer" />
+
+        <div className="editor-head-actions">
           <button className="btn secondary sm" onClick={() => setPreviewLang(previewLang === 'en' ? 'ar' : 'en')}>
             {previewLang === 'en' ? t('editor.arabic') : t('editor.english')}
           </button>
-          <button className="btn secondary sm" onClick={regenerate} disabled={!!busy}>
+          <span className="editor-head-divider" aria-hidden="true" />
+          {/* Still confirms before running — it discards every manual edit. */}
+          <button className="btn secondary sm is-destructive" onClick={regenerate} disabled={!!busy}
+            title={t('editor.rebuildHint')}>
             {busy === 'regen' ? <Spinner /> : t('editor.regenerate')}
           </button>
           <button className="btn secondary sm" onClick={previewPdf} disabled={!!busy}>
@@ -499,58 +548,8 @@ export default function PlanEditor() {
 
       <Alert kind="error">{error}</Alert>
       <Alert kind="ok">{notice}</Alert>
-      {notices.length > 0 && (
-        <Alert kind="warn">
-          <div className="notice-head">
-            <b>{t('editor.noticesTitle', { count: notices.length })}</b>
-            <button type="button" className={`notice-toggle${noticesOpen ? ' open' : ''}`}
-              onClick={() => setNoticesOpen(!noticesOpen)}
-              aria-expanded={noticesOpen}
-              title={t(noticesOpen ? 'editor.hideNotices' : 'editor.showNotices')}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <polyline points="6 9 12 15 18 9" />
-              </svg>
-            </button>
-          </div>
-          {noticesOpen && ['safety', 'calories', 'checks'].map((g) => {
-            const items = notices.filter((n) => n.group === g)
-            if (!items.length) return null
-            const shown = items.slice(0, 6)
-            return (
-              <div className="notice-group" key={g}>
-                <span className="notice-group-label">{t(`editor.noticeGroup.${g}`)}</span>
-                <ul>
-                  {shown.map((n, i) => <li key={i}>{n.text}</li>)}
-                  {items.length > shown.length && (
-                    <li className="muted">{t('editor.checkMore', { n: items.length - shown.length })}</li>
-                  )}
-                </ul>
-              </div>
-            )
-          })}
-        </Alert>
-      )}
 
-
-      <div className="editor-shell" style={{
-        gridTemplateColumns: `${showThumbs ? '117px ' : ''}minmax(0, 1fr)${showInspector ? ' 340px' : ''}`,
-      }}>
-        {/* thumbnails — collapsed by default; the pages scroll continuously so
-            this is an optional navigation aid, not the primary way to move. */}
-        {showThumbs && (
-        <div className="editor-thumbs">
-          {pages.map((p, idx) => (
-            <div key={idx} className="editor-thumb" onClick={() => pageEls.current[idx]?.scrollIntoView({ behavior: 'smooth' })}>
-              <div className="thumb-scale">
-                <ThumbPage plan={plan} pageIndex={idx} lang={previewLang} gym={gym} />
-              </div>
-              <div className="thumb-label">{p.label}</div>
-            </div>
-          ))}
-        </div>
-        )}
-
+      <div className="editor-shell">
         {/* canvas — no scroll container of its own: the page scrolls as one */}
         <div className="editor-canvas" ref={canvasRef}>
           <div className="editor-pages" style={{ zoom: scale }}>
@@ -567,36 +566,71 @@ export default function PlanEditor() {
           </div>
         </div>
 
-        {/* inspector */}
-        {showInspector && (
+        {/* inspector — review panel pinned on top, then one tabbed pane */}
         <div className="editor-inspector">
-          <ClientCard t={t} q={row.questionnaire || {}} />
-          <PlanSettings
-            t={t} plan={plan} setHeader={setHeader} applyDistribution={applyDistribution}
-            addMeal={addMeal} removeMeal={removeMeal} renameMeal={renameMeal}
-            setDailyTarget={setDailyTarget} floorKcal={floorKcal} saveFloor={saveFloor}
-            targetOutOfSync={targetOutOfSync}
-            mutate={mutate} setPicker={setPicker}
-          />
+          <ReviewPanel t={t} notices={notices} open={noticesOpen}
+            setOpen={setNoticesOpen} onGo={goTo} />
 
-          {!selOption ? (
-            <div className="card muted small">{t('editor.clickToEdit')}</div>
-          ) : (
-            <OptionInspector
-              t={t}
-              lang={previewLang}
-              meal={selMeal}
-              option={selOption}
-              kcalWarn={kcalWarning(selOption)}
-              updateOption={updateOption}
-              mutate={mutate}
-              setSelection={setSelection}
-              onSaveCustom={saveCustom}
-              saved={savedIds.has(selOption.id)}
-            />
-          )}
+          <div className="insp">
+            <div className="insp-tabs" role="tablist">
+              {[
+                // Only Editing carries a marker, and it is a quiet dot meaning
+                // "something is selected" — never an alert.
+                ['client', t('editor.tabClient'), false],
+                ['plan', t('editor.tabPlan'), false],
+                ['option', t('editor.tabEditing'), !!selOption],
+              ].map(([key, label, dot]) => (
+                <button key={key} role="tab" aria-selected={inspTab === key}
+                  className={`insp-tab${inspTab === key ? ' on' : ''}`}
+                  onClick={() => setInspTab(key)}>
+                  {label}
+                  {dot && <span className="insp-tab-dot" aria-hidden="true" />}
+                </button>
+              ))}
+            </div>
+
+            <div className="insp-body">
+              {inspTab === 'client' && <ClientCard t={t} q={row.questionnaire || {}} plan={plan} />}
+
+              {inspTab === 'plan' && (
+                <PlanSettings
+                  t={t} plan={plan} setHeader={setHeader} applyDistribution={applyDistribution}
+                  addMeal={addMeal} removeMeal={removeMeal} renameMeal={renameMeal}
+                  setDailyTarget={setDailyTarget} floorKcal={floorKcal} saveFloor={saveFloor}
+                  targetOutOfSync={targetOutOfSync && !resyncDismissed} lang={previewLang}
+                  onKeepManual={() => setResyncDismissed(true)}
+                  mutate={mutate} setPicker={setPicker}
+                  onGoToMeal={(mealId) => goTo({ mealId })}
+                  applyMealShare={applyMealShare}
+                />
+              )}
+
+              {inspTab === 'option' && (selOption ? (
+                <OptionInspector
+                  t={t}
+                  lang={previewLang}
+                  meal={selMeal}
+                  option={selOption}
+                  kcalWarn={kcalWarning(selOption)}
+                  updateOption={updateOption}
+                  mutate={mutate}
+                  setSelection={setSelection}
+                  onSaveCustom={saveCustom}
+                  saved={savedIds.has(selOption.id)}
+                />
+              ) : (
+                <div className="insp-empty">
+                  <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                    strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 5h18v14H3z" /><path d="M3 10h18" /><path d="M9 10v9" />
+                  </svg>
+                  <b>{t('editor.nothingSelected')}</b>
+                  <p className="muted small">{t('editor.nothingSelectedBody')}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
-        )}
       </div>
 
       {picker && (
@@ -676,7 +710,62 @@ export default function PlanEditor() {
 
 // Client questionnaire + a prominent conditions/allergies highlight so the
 // dietitian can verify the inputs the plan was generated from (review §4.1, §5).
-function ClientCard({ t, q }) {
+// Everything needing attention, pinned above the inspector tabs so it is never
+// scrolled away. Grouped most serious first, and every row jumps to what it is
+// about — the old panel listed problems but gave you no way to reach them.
+const NOTICE_GROUPS = ['safety', 'calories', 'checks']
+
+function ReviewPanel({ t, notices, open, setOpen, onGo }) {
+  if (!notices.length) {
+    return (
+      <div className="review-panel is-clear">
+        <div className="review-head">
+          <span className="review-dot" aria-hidden="true" />
+          <div>
+            <b>{t('editor.readyTitle')}</b>
+            <div className="muted small">{t('editor.readyBody')}</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+  return (
+    <div className="review-panel">
+      <button type="button" className="review-head" onClick={() => setOpen(!open)} aria-expanded={open}>
+        <span className="review-dot" aria-hidden="true" />
+        <b>{t('editor.noticesTitle', { count: notices.length })}</b>
+        <svg className={`review-chevron${open ? ' open' : ''}`} width="14" height="14" viewBox="0 0 24 24"
+          fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+          aria-hidden="true"><polyline points="6 9 12 15 18 9" /></svg>
+      </button>
+      {open && NOTICE_GROUPS.map((g) => {
+        const items = notices.filter((n) => n.group === g)
+        if (!items.length) return null
+        const shown = items.slice(0, 6)
+        return (
+          <div className={`review-group is-${g}`} key={g}>
+            <span className="review-group-label">{t(`editor.noticeGroup.${g}`)}</span>
+            {shown.map((n, i) => (
+              <div className="review-item" key={i}>
+                <span>{n.text}</span>
+                {n.go && (
+                  <button type="button" className="review-go" onClick={() => onGo(n.go)}>
+                    {t('editor.fixIt')}
+                  </button>
+                )}
+              </div>
+            ))}
+            {items.length > shown.length && (
+              <div className="review-item muted">{t('editor.checkMore', { n: items.length - shown.length })}</div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function ClientCard({ t, q, plan }) {
   const { lang } = useI18n()
   const conditions = q.conditionNames || []
   const allergies = q.allergyNames || []
@@ -695,31 +784,120 @@ function ClientCard({ t, q }) {
     const words = pretty(q.activityLevelTypeEnumId)
     return words ? activityDisplayName(words, lang) : ''
   }
-  const rows = [
-    ['qGoal', GOAL_LABELS[q.goal] || pretty(q.goal)],
-    ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
-    ['qActivity', activity()],
-    ['qAgeGender', [q.age, pretty(q.gender)].filter((v) => v || v === 0).join(' · ')],
-    ['qDislikes', (q.dislikes || []).join(' · ')],
-    ['qBmr', q.bmr ? `${q.bmr} kcal` : ''],
-    ['qTdee', q.kilocalorieNeeded ? `${q.kilocalorieNeeded} kcal` : ''],
+  const h = plan?.header || {}
+  const a = plan?.assessment || {}
+  const kcal = (n) => (n ? `${Math.round(n).toLocaleString('en-US')} ${t('editor.kcal')}` : '')
+  const fmt = (iso) => {
+    if (!iso) return ''
+    const d = new Date(iso)
+    return isNaN(d) ? iso : d.toLocaleDateString('en-GB')
+  }
+  const age = (() => {
+    if (q.age) return `${q.age} ${t('editor.years')}`
+    if (!h.dob) return ''
+    const b = new Date(h.dob)
+    if (isNaN(b)) return ''
+    const now = new Date()
+    let n = now.getFullYear() - b.getFullYear()
+    const m = now.getMonth() - b.getMonth()
+    if (m < 0 || (m === 0 && now.getDate() < b.getDate())) n--
+    return `${n} ${t('editor.years')}`
+  })()
+  // Derived here rather than stored: the two inputs it needs are both on the
+  // assessment, and a dietitian reads BMI alongside them.
+  const bmi = a.weight && a.height
+    ? (a.weight / ((a.height / 100) ** 2)).toFixed(1)
+    : ''
+
+  const identity = [
+    ['qName', h.fullName],
+    ['qAge', age],
+    ['qGender', pretty(q.gender)],
+    ['qIssued', fmt(h.testDate)],
+    ['qNextCheckup', fmt(h.nextCheckup)],
   ].filter(([, v]) => v)
 
-  return (
-    <div className="card client-card">
-      <div className={`client-flags${flagged ? ' has-flags' : ''}`}>
-        <div><span className="muted small">{t('editor.reportedConditions')}: </span>{conditions.length ? conditions.join(', ') : t('editor.noneReported')}</div>
-        <div><span className="muted small">{t('editor.reportedAllergies')}: </span>{allergies.length ? allergies.join(', ') : t('editor.noneReported')}</div>
-      </div>
-      <details className="client-details">
-        <summary>{t('editor.questionnaire')}</summary>
-        <div className="client-grid">
-          {rows.map(([k, v]) => (
-            <div key={k}><span className="muted small">{t(`editor.${k}`)}</span><span>{v}</span></div>
-          ))}
+  const body = [
+    ['qWeight', a.weight ? `${a.weight} kg` : ''],
+    ['qHeight', a.height ? `${a.height} cm` : ''],
+    ['qBmi', bmi],
+    ['qBodyFat', a.bodyFatPct ? `${a.bodyFatPct}%` : ''],
+    ['qFatMass', a.fatMass ? `${a.fatMass} kg` : ''],
+    ['qMuscle', a.muscleMass ? `${a.muscleMass} kg` : ''],
+  ].filter(([, v]) => v)
+
+  const energy = [
+    ['qBmr', kcal(a.bmr || q.bmr)],
+    ['qMaintenance', kcal(a.maintenanceKcal || q.kilocalorieNeeded)],
+    ['qGoal', GOAL_LABELS[q.goal || a.goal] || pretty(q.goal || a.goal)],
+    ['qPlanTarget', kcal(h.dailyKcal)],
+  ].filter(([, v]) => v)
+
+  const prefs = [
+    ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
+    ['qActivity', activity()],
+    ['qDislikes', (q.dislikes || []).join(' · ')],
+  ].filter(([, v]) => v)
+
+  const list = (items) => (
+    <dl className="insp-rows">
+      {items.map(([k, v]) => (
+        <div className="insp-row" key={k}>
+          <dt>{t(`editor.${k}`)}</dt>
+          <dd>{v}</dd>
         </div>
-      </details>
-    </div>
+      ))}
+    </dl>
+  )
+
+  return (
+    <>
+      {identity.length > 0 && (
+        <div className="insp-section">
+          <div className="insp-section-head">
+            <span className="insp-label">{t('editor.secClient')}</span>
+          </div>
+          {list(identity)}
+        </div>
+      )}
+
+      {/* Only an attention box when there is something to be careful about —
+          an empty one drew the eye for nothing. */}
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secSafety')}</span>
+        </div>
+        {flagged ? (
+          <div className="note is-safety">
+            <dl className="insp-rows">
+              <div className="insp-row">
+                <dt>{t('editor.reportedAllergies')}</dt>
+                <dd>{allergies.length ? allergies.join(', ') : t('editor.noAllergies')}</dd>
+              </div>
+              <div className="insp-row">
+                <dt>{t('editor.reportedConditions')}</dt>
+                <dd>{conditions.length ? conditions.join(', ') : t('editor.noConditions')}</dd>
+              </div>
+            </dl>
+          </div>
+        ) : (
+          <p className="muted small" style={{ margin: 0 }}>{t('editor.noneReported')}</p>
+        )}
+      </div>
+
+      {[
+        ['editor.secBody', body],
+        ['editor.secEnergy', energy],
+        ['editor.secPrefs', prefs],
+      ].map(([label, items]) => items.length > 0 && (
+        <div className="insp-section" key={label}>
+          <div className="insp-section-head">
+            <span className="insp-label">{t(label)}</span>
+          </div>
+          {list(items)}
+        </div>
+      ))}
+    </>
   )
 }
 
@@ -767,9 +945,40 @@ function AddIngredient({ t, onAdd }) {
   )
 }
 
+// One meal's share of the daily target. Commits on blur/Enter rather than per
+// keystroke, because committing rescales that meal's options.
+function MealShare({ t, lang, pct, kcal, servings, disabled, onCommit }) {
+  const [draft, setDraft] = useState(String(pct))
+  useEffect(() => { setDraft(String(pct)) }, [pct])
+  const commit = () => {
+    const n = parseInt(draft, 10)
+    if (!Number.isFinite(n) || n <= 0) { setDraft(String(pct)); return }
+    if (n !== pct) onCommit(n)
+  }
+  return (
+    <span className="meal-item-share" title={t('editor.shareHint')}>
+      <input type="number" min="1" max="100" value={draft} disabled={disabled}
+        aria-label={t('editor.share')}
+        onChange={(e) => setDraft(e.target.value.replace(/[^0-9]/g, ''))}
+        onBlur={commit}
+        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); e.target.blur() } }} />
+      <span className="muted small">%</span>
+      {kcal > 0 && (
+        <span className="muted small meal-item-kcal-note">
+          {arDigits(kcal, lang)} {t('editor.kcal')}{servings > 1 ? ` ×${arDigits(servings, lang)}` : ''}
+        </span>
+      )}
+    </span>
+  )
+}
+
 // Plan-level controls: daily target + redistribution, follow-up date, and meal
 // management (rename / target / add option / remove / add meal).
-function PlanSettings({ t, plan, setHeader, setDailyTarget, applyDistribution, addMeal, removeMeal, renameMeal, mutate, setPicker, floorKcal, saveFloor, targetOutOfSync }) {
+function PlanSettings({
+  t, plan, setHeader, setDailyTarget, applyDistribution, addMeal, removeMeal, renameMeal,
+  mutate, setPicker, floorKcal, saveFloor, targetOutOfSync, lang, onGoToMeal, onKeepManual,
+  applyMealShare,
+}) {
   const daily = plan.header.dailyKcal || 0
 
   // Both calorie boxes keep a local draft while typing. Committing on blur (not
@@ -806,90 +1015,154 @@ function PlanSettings({ t, plan, setHeader, setDailyTarget, applyDistribution, a
     acc.max += Math.max(...kcals) * mult
     return acc
   }, { exp: 0, min: 0, max: 0 })
+  // Same figure targetOutOfSync thresholds on, so the readout and the warning
+  // can never disagree about which way the plan is off.
+  const diff = Math.round(range.exp - daily)
+  const shares = mealShares(plan.meals, daily)
 
   return (
     <>
-      <div className="card">
-        <h3 style={{ marginTop: 0 }}>{t('editor.planSettings')}</h3>
-        <div className="row" style={{ gap: 16, flexWrap: 'wrap', alignItems: 'flex-end' }}>
-          <Field label={t('editor.dailyTarget')}>
-            <input type="text" inputMode="numeric" style={{ width: 120 }} value={dailyDraft}
-              onChange={(e) => setDailyDraft(digits(e.target.value))}
-              onBlur={commitDaily}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitDaily() } }} />
-          </Field>
-          <Field label={t('editor.myMinimum')}>
-            <input type="text" inputMode="numeric" style={{ width: 110 }} value={floorDraft}
-              onChange={(e) => setFloorDraft(digits(e.target.value))}
-              onBlur={commitFloor}
-              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitFloor() } }} />
-          </Field>
-          <Field label={t('editor.nextCheckup')}>
-            <input type="date" value={plan.header.nextCheckup || ''}
-              onChange={(e) => setHeader('nextCheckup', e.target.value)} />
-          </Field>
+      {/* Target and follow-up are both "settings for this plan" and are one
+          field each, so they share a section rather than each taking a header
+          and a rule. */}
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secTarget')}</span>
         </div>
-        {/* Item 12 — an explicit choice once the target no longer matches the meals. */}
-        {targetOutOfSync ? (
-          <div className="target-resync">
-            <span className="small">{t('editor.targetChanged')}</span>
-            <div className="row" style={{ gap: 8 }}>
-              <button className="btn sm" onClick={applyDistribution}>{t('editor.rebalanceAll')}</button>
-              <button className="btn secondary sm" onClick={() => {}} title={t('editor.keepManualHint')}>
-                {t('editor.keepManual')}
-              </button>
+        <div className="row" style={{ gap: 14, alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div>
+            <div className="row" style={{ gap: 6, alignItems: 'baseline' }}>
+              <input type="text" inputMode="numeric" style={{ width: 88 }} value={dailyDraft}
+                onChange={(e) => setDailyDraft(digits(e.target.value))}
+                onBlur={commitDaily}
+                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitDaily() } }} />
+              <span className="muted small">{t('editor.kcalPerDay')}</span>
             </div>
           </div>
-        ) : (
-          <div className="row" style={{ gap: 10, alignItems: 'center', marginTop: 8 }}>
-            <button className="btn secondary sm" onClick={applyDistribution}>{t('editor.applyDistribution')}</button>
-            <span className="muted small">{t('editor.applyDistributionHint')}</span>
-          </div>
-        )}
-        {/* Item 13 — show both figures once the target has been changed. */}
+          <label className="field" style={{ margin: 0 }}>
+            <span>{t('editor.secFollowUp')}</span>
+            <input type="date" style={{ maxWidth: 170 }} value={plan.header.nextCheckup || ''}
+              onChange={(e) => setHeader('nextCheckup', e.target.value)} />
+          </label>
+        </div>
+
+        {/* The audit is a record, not something to act on — a muted line, not
+            a boxed notice competing with the readout below. */}
         {plan.calorieAudit && plan.calorieAudit.recommended !== plan.calorieAudit.approved && (
           <p className="muted small" style={{ margin: '8px 0 0' }}>
-            {t('editor.calorieAudit', {
-              recommended: plan.calorieAudit.recommended,
-              approved: plan.calorieAudit.approved,
+            {t('editor.auditLine', {
+              recommended: arDigits(plan.calorieAudit.recommended, lang),
+              approved: arDigits(plan.calorieAudit.approved, lang),
               who: plan.calorieAudit.changedBy || '—',
               when: plan.calorieAudit.changedAt || '—',
             })}
           </p>
         )}
-        {range.exp > 0 && (
-          <p className="muted small intake-range">
-            {t('editor.intakeRange')}: <b>{Math.round(range.exp)}</b> {t('editor.kcal')}
-            {range.min !== range.max && <> · {t('editor.intakeSpread', { min: Math.round(range.min), max: Math.round(range.max) })}</>}
-          </p>
-        )}
       </div>
 
-      <div className="card">
-        <div className="row between" style={{ marginBottom: 6 }}>
-          <h3 style={{ margin: 0 }}>{t('editor.meals')}</h3>
+      {/* One answer to "do the meals add up?". This used to be three separate
+          widgets — a "projected intake" stat, an always-on rebalance button,
+          and a drift warning — two of which were computing the same sum. */}
+      {range.exp > 0 && (
+        <div className="insp-section">
+          <div className="insp-section-head">
+            <span className="insp-label">{t('editor.mealsVsTarget')}</span>
+          </div>
+
+          {targetOutOfSync ? (
+            <div className="note">
+              <span className="note-title">
+                {t(diff > 0 ? 'editor.overTarget' : 'editor.underTarget', {
+                  n: arDigits(Math.abs(diff), lang),
+                })}
+              </span>
+              <div className="insp-stat" style={{ marginTop: 2 }}>
+                <span className="muted small">{t('editor.mealsTotal')}</span>
+                <b>{arDigits(Math.round(range.exp), lang)} {t('editor.kcal')}</b>
+              </div>
+              <div className="row" style={{ gap: 8, marginTop: 8 }}>
+                <button className="btn sm" onClick={applyDistribution}>{t('editor.rebalanceAll')}</button>
+                <button className="btn secondary sm" onClick={onKeepManual} title={t('editor.keepManualHint')}>
+                  {t('editor.keepManual')}
+                </button>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="insp-stat">
+                <span className="muted small">{t('editor.mealsTotal')}</span>
+                <b>{arDigits(Math.round(range.exp), lang)} {t('editor.kcal')}</b>
+                <span className="ok-mark">{t('editor.matchesTarget')}</span>
+              </div>
+              {/* Still reachable when the drift is under the warning threshold. */}
+              <button className="btn ghost sm link-btn" style={{ marginTop: 4 }}
+                onClick={applyDistribution} title={t('editor.applyDistributionHint')}>
+                {t('editor.distributeShort')}
+              </button>
+            </>
+          )}
+
+          {range.min !== range.max && (
+            <p className="muted small" style={{ margin: '6px 0 0' }}>
+              {t('editor.dependingChoices', {
+                min: arDigits(Math.round(range.min), lang),
+                max: arDigits(Math.round(range.max), lang),
+              })}
+            </p>
+          )}
+        </div>
+      )}
+
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secMeals')}</span>
           <button className="btn ghost sm" onClick={addMeal}>＋ {t('editor.addMeal')}</button>
         </div>
+        {!daily && <p className="muted small" style={{ margin: '-2px 0 10px' }}>{t('editor.shareNoTarget')}</p>}
+
         {plan.meals.map((meal) => {
-          // Prefill from the current override, else the template's default title
-          // for this slot (e.g. "MEAL 1: BREAKFAST" / "(Choose One)") so the boxes
-          // show what actually prints.
+          // The four standard slots take their title from the template, and the
+          // plan design parses it ("MEAL 1: BREAKFAST" -> "MEAL 1 · Breakfast",
+          // "(Choose One)" -> "choose one"). Free text broke that parse and the
+          // Arabic lookup, which is keyed on the exact English string — so these
+          // are shown, not edited. A custom meal has no preset to fall back on,
+          // so it stays editable or it could never be named.
           const preset = MEAL_PRESENTATION[plan.isIF ? 'if' : 'regular'][meal.id]?.title || {}
           const mainVal = meal.title?.main ?? preset.main ?? t(`meal.${meal.id}`)
           const subVal = meal.title?.sub ?? preset.sub ?? ''
           const isCustom = String(meal.id).startsWith('custom_')
+          const count = meal.options.length
+          const full = count >= MAX_OPTIONS_PER_MEAL
           return (
-            <div key={meal.id} className="meal-row" style={{ marginBottom: 8, borderBottom: '1px solid var(--border, #eee)', paddingBottom: 6 }}>
-              <div className="row between" style={{ gap: 6 }}>
-                <input type="text" style={{ flex: 1, fontWeight: 600 }} value={mainVal}
-                  onChange={(e) => renameMeal(meal.id, 'main', e.target.value)} />
-                <input type="number" style={{ width: 80 }} value={meal.targetKcal ?? ''} placeholder={t('editor.mealTargetKcal')}
-                  onChange={(e) => mutate((p) => { p.meals.find((m) => m.id === meal.id).targetKcal = parseInt(e.target.value, 10) || null })} />
-              </div>
-              <div className="row between" style={{ gap: 6, marginTop: 4 }}>
-                <input type="text" className="small" style={{ flex: 1 }} value={subVal}
-                  placeholder={t('editor.subtitle')} onChange={(e) => renameMeal(meal.id, 'sub', e.target.value)} />
-                <button className="btn ghost sm" disabled={meal.options.length >= MAX_OPTIONS_PER_MEAL}
+            <div key={meal.id} className="meal-item">
+              <button type="button" className="meal-item-head" onClick={() => onGoToMeal(meal.id)}
+                title={t('editor.goToMeal')}>
+                <span className="meal-item-name">
+                  {isCustom ? mainVal : displayTitle(mainVal)}
+                </span>
+                <span className={`meal-item-count${count ? '' : ' is-empty'}`}>
+                  {count ? t('editor.optionsCount', { n: arDigits(count, lang) }) : t('editor.noOptionsYet')}
+                </span>
+              </button>
+
+              {isCustom && (
+                <div className="row" style={{ gap: 6, marginBottom: 6 }}>
+                  <input type="text" style={{ flex: 1, fontWeight: 600 }} value={mainVal}
+                    onChange={(e) => renameMeal(meal.id, 'main', e.target.value)} />
+                  <input type="text" className="small" style={{ flex: 1 }} value={subVal}
+                    placeholder={t('editor.subtitle')} onChange={(e) => renameMeal(meal.id, 'sub', e.target.value)} />
+                </div>
+              )}
+
+              <div className="meal-item-controls">
+                <MealShare t={t} lang={lang} disabled={!daily}
+                  pct={Math.round((shares[meal.id] || 0) * 100)}
+                  kcal={meal.targetKcal || 0}
+                  servings={mealServings(meal.id)}
+                  onCommit={(v) => applyMealShare(meal.id, v)} />
+                <span className="meal-item-spacer" />
+                <button className="btn ghost sm" disabled={full}
+                  title={full ? t('editor.optionsCount', { n: MAX_OPTIONS_PER_MEAL }) : ''}
                   onClick={() => setPicker(meal.id)}>＋ {t('editor.addOption')}</button>
                 <button className="btn ghost sm icon-btn" title={t('editor.removeMeal')} onClick={() => removeMeal(meal.id)}>
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -899,11 +1172,25 @@ function PlanSettings({ t, plan, setHeader, setDailyTarget, applyDistribution, a
                   </svg>
                 </button>
               </div>
-              {isCustom && <span className="badge sm">{t('editor.customMealBadge')}</span>}
             </div>
           )
         })}
       </div>
+
+      {/* Practitioner preference and the one destructive action, kept out of the
+          way: Regenerate used to sit in the toolbar looking exactly like
+          "Preview PDF", one click from discarding every manual edit. */}
+      <details className="insp-section insp-advanced">
+        <summary>{t('editor.advanced')}</summary>
+        <div style={{ marginTop: '0.8rem' }}>
+          <Field label={t('editor.myMinimum')} hint={t('editor.myMinimumHint')}>
+            <input type="text" inputMode="numeric" style={{ width: 110 }} value={floorDraft}
+              onChange={(e) => setFloorDraft(digits(e.target.value))}
+              onBlur={commitFloor}
+              onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); commitFloor() } }} />
+          </Field>
+        </div>
+      </details>
     </>
   )
 }
@@ -988,12 +1275,6 @@ function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, con
   )
 }
 
-// Single-page render for thumbnails: the template renders only the requested
-// page (pages can exceed 842px, so margin-based slicing was unreliable).
-function ThumbPage({ plan, pageIndex, lang, gym }) {
-  return <DeepFitTemplate plan={plan} lang={lang} gym={gym} only={pageIndex} />
-}
-
 function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate, setSelection, onSaveCustom, saved }) {
   const idx = meal.options.findIndex((o) => o.id === option.id)
   // Edit the currently-previewed language's text; the other language is kept.
@@ -1047,82 +1328,109 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
   }
 
   return (
-    <div className="card">
-      <div className="row between">
-        {/* Added/renamed meals carry their own title; the slot key only exists
-            for the four standard meals, so fall back to it last. */}
-        <h3>{meal.title?.main || t(`meal.${meal.id}`)} · {t('editor.option')} {idx + 1}</h3>
-        <div className="row">
-          <button className="btn ghost sm" title={t('editor.moveUp')} onClick={() => move(-1)}>↑</button>
-          <button className="btn ghost sm" title={t('editor.moveDown')} onClick={() => move(1)}>↓</button>
+    <>
+      <div className="insp-section">
+        <div className="row between" style={{ alignItems: 'flex-start', gap: 8 }}>
+          {/* Added/renamed meals carry their own title; the slot key only exists
+              for the four standard meals, so fall back to it last. */}
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <h3 style={{ margin: 0, fontSize: '1rem' }}>
+              {option[ar ? 'name_ar' : 'name_en'] || t('editor.option')}
+            </h3>
+            <div className="muted small">
+              {displayTitle(meal.title?.main || t(`meal.${meal.id}`))}
+              {' · '}
+              {t('editor.selectedOption', { n: idx + 1, total: meal.options.length })}
+            </div>
+          </div>
+          <div className="row" style={{ flexShrink: 0, flexWrap: 'nowrap' }}>
+            <button className="btn ghost sm" title={t('editor.moveUp')} onClick={() => move(-1)}>↑</button>
+            <button className="btn ghost sm" title={t('editor.moveDown')} onClick={() => move(1)}>↓</button>
+          </div>
+        </div>
+
+        {kcalWarn && (
+          <div className="note" style={{ marginTop: 10 }}>
+            {t('editor.kcalWarning', { est: kcalWarn.estimated, stated: kcalWarn.stated })}
+          </div>
+        )}
+      </div>
+
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secOption')}</span>
+        </div>
+        <Field label={t('editor.optionName')}>
+          <input type="text" dir={dir} value={option[nameKey] || ''}
+            onChange={(e) => updateOption((o) => { o[nameKey] = e.target.value })} />
+        </Field>
+        <Field label={t('editor.optionDesc')}>
+          <textarea rows={2} dir={dir} value={option[descKey] || ''}
+            onChange={(e) => updateOption((o) => { o[descKey] = e.target.value })} />
+        </Field>
+        {/* Type a target calorie value; the engine re-portions the whole plate
+            to it, clamped to realistic servings. */}
+        <Field label={t('editor.portion')} hint={t('editor.portionHint')}>
+          <div className="row" style={{ gap: 6, alignItems: 'center' }}>
+            <input type="number" style={{ width: 96 }} min="50" step="10"
+              key={option.kcal} defaultValue={option.kcal || ''}
+              onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}
+              onBlur={(e) => { const v = parseInt(e.target.value, 10); if (v && v !== option.kcal) rescaleTo(v) }} />
+            <span className="muted small">{t('editor.kcal')}</span>
+          </div>
+        </Field>
+      </div>
+
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secIngredients')}</span>
+        </div>
+        <ul className="ingredient-edit-list" dir={dir}>
+          {option.ingredients.map((ing, i) => {
+            const noMeta = !ingredientHasMeta(ing)
+            return (
+              <li key={i} className="row between" style={{ gap: 6 }}>
+                <span className="ing-name" title={noMeta ? t('editor.noNutrition') : ''}>
+                  {ing[ingKey] || ing.name_en}
+                  {noMeta && <span className="ing-warn" aria-label={t('editor.noNutrition')}>!</span>}
+                </span>
+                <span className="row" style={{ gap: 4, flexWrap: 'nowrap' }}>
+                  <input type="number" min="0" step="5" style={{ width: 66 }} placeholder="0"
+                    value={ing.grams ? ing.grams : ''} onChange={(e) => setGrams(i, e.target.value)} />
+                  <button className="btn ghost sm" title={t('editor.removeIngredient')}
+                    onClick={() => removeIng(i)}>✕</button>
+                </span>
+              </li>
+            )
+          })}
+        </ul>
+        <AddIngredient t={t} onAdd={addIng} />
+      </div>
+
+      <div className="insp-section">
+        <div className="insp-section-head">
+          <span className="insp-label">{t('editor.secMacros')}</span>
+        </div>
+        <div className="macro-edit">
+          {[['protein', 'editor.protein'], ['carbs', 'editor.carbs'], ['fats', 'editor.fats']].map(([k, lk]) => (
+            <label key={k} className="macro-edit-item">
+              <span className="muted small">{t(lk)}</span>
+              <span className="macro-edit-input">
+                <input type="number" min="0" step="1" placeholder="0"
+                  value={option.macros[k] ? option.macros[k] : ''}
+                  onChange={(e) => setMacro(k, e.target.value)} />
+                <span className="muted small">{t('editor.grams')}</span>
+              </span>
+            </label>
+          ))}
         </div>
       </div>
 
-      {kcalWarn && (
-        <Alert kind="warn">{t('editor.kcalWarning', { est: kcalWarn.estimated, stated: kcalWarn.stated })}</Alert>
-      )}
-
-      <Field label={t('editor.optionName')}>
-        <input type="text" dir={dir} value={option[nameKey] || ''}
-          onChange={(e) => updateOption((o) => { o[nameKey] = e.target.value })} />
-      </Field>
-      <Field label={t('editor.optionDesc')}>
-        <textarea rows={2} dir={dir} value={option[descKey] || ''}
-          onChange={(e) => updateOption((o) => { o[descKey] = e.target.value })} />
-      </Field>
-
-      {/* Portion: type a target calorie value; the engine re-portions the whole
-          plate to it (clamped to realistic servings). */}
-      <Field label={t('editor.portion')} hint={t('editor.portionHint')}>
-        <div className="row" style={{ gap: 6, alignItems: 'center' }}>
-          <input type="number" style={{ width: 100 }} min="50" step="10"
-            key={option.kcal} defaultValue={option.kcal || ''}
-            onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur() }}
-            onBlur={(e) => { const v = parseInt(e.target.value, 10); if (v && v !== option.kcal) rescaleTo(v) }} />
-          <span className="muted small">{t('editor.kcal')}</span>
-        </div>
-      </Field>
-
-      {/* Editable ingredients — grams drive the recomputed macros/kcal above. */}
-      <h3 style={{ marginTop: '0.9rem' }}>{t('editor.ingredients')}</h3>
-      <ul className="ingredient-edit-list" dir={dir}>
-        {option.ingredients.map((ing, i) => {
-          const noMeta = !ingredientHasMeta(ing)
-          return (
-            <li key={i} className="row between" style={{ gap: 6 }}>
-              <span className="ing-name" title={noMeta ? t('editor.noNutrition') : ''}>
-                {ing[ingKey] || ing.name_en}{noMeta ? ' ⚠︎' : ''}
-              </span>
-              <span className="row" style={{ gap: 4 }}>
-                <input type="number" min="0" step="5" style={{ width: 70 }} placeholder="0" value={ing.grams ? ing.grams : ''}
-                  onChange={(e) => setGrams(i, e.target.value)} />
-                <button className="btn ghost sm" title={t('editor.removeIngredient')} onClick={() => removeIng(i)}>✕</button>
-              </span>
-            </li>
-          )
-        })}
-      </ul>
-      <AddIngredient t={t} onAdd={addIng} />
-
-      <h3 style={{ marginTop: '0.9rem' }}>{t('editor.macros')}</h3>
-      <div className="macro-edit">
-        {[['protein', 'editor.protein'], ['carbs', 'editor.carbs'], ['fats', 'editor.fats']].map(([k, lk]) => (
-          <label key={k} className="macro-edit-item">
-            <span className="muted small">{t(lk)}</span>
-            <span className="macro-edit-input">
-              <input type="number" min="0" step="1" placeholder="0" value={option.macros[k] ? option.macros[k] : ''}
-                onChange={(e) => setMacro(k, e.target.value)} />
-              <span className="muted small">{t('editor.grams')}</span>
-            </span>
-          </label>
-        ))}
-      </div>
-
-      <div className="row between" style={{ marginTop: '1rem' }}>
+      <div className="insp-section insp-actions">
         <button className="btn secondary sm" disabled={saved} onClick={() => onSaveCustom(option, meal.id)}>
           {saved ? t('editor.savedMeal') : t('editor.saveMeal')}
         </button>
-        <button className="btn danger sm" onClick={() => {
+        <button className="btn ghost sm is-danger" onClick={() => {
           mutate((p) => {
             const m = p.meals.find((x) => x.id === meal.id)
             m.options = m.options.filter((o) => o.id !== option.id)
@@ -1132,6 +1440,6 @@ function OptionInspector({ t, lang, meal, option, kcalWarn, updateOption, mutate
           {t('editor.removeOption')}
         </button>
       </div>
-    </div>
+    </>
   )
 }

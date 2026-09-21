@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link, useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
+import { describeEvent } from '../lib/planEvents'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Loading, StatusBadge, BackButton, fmtDate, fmtDateTime } from '../components/ui'
@@ -144,18 +145,23 @@ export default function ClientProfile() {
               </div>
             ) : (
               <div>
-                {(!item.row.actor && item.row.action === 'generated') ? (
-                  <><b>{client.first_name} {client.last_name}</b> {t('event.intake')}</>
-                ) : (
-                  <>
-                    <b>{item.row.actor === profile?.id ? t('event.you') : (item.row.profiles?.full_name || '—')}</b>{' '}
-                    {t(`${item.row.actor === profile?.id ? 'eventYou' : 'event'}.${item.row.action}`)}
-                    {item.row.action === 'sent' ? ` ${t('event.toClient')}` : ''}
-                    {item.row.comment && (
-                      <div className="small" style={{ fontStyle: 'italic' }}>“{item.row.comment}”</div>
-                    )}
-                  </>
-                )}
+                {(() => {
+                  const d = describeEvent(item.row, { t, profileId: profile?.id })
+                  if (d.kind === 'intake') {
+                    return <><b>{client.first_name} {client.last_name}</b> {d.what}</>
+                  }
+                  return (
+                    <>
+                      <b>{d.who}</b> {d.what}
+                      {item.row.action === 'sent' ? ` ${t('event.toClient')}` : ''}
+                      {d.auto && <span className="auto-badge">{t('event.autoBadge')}</span>}
+                      {d.auto && <div className="small muted">{t('event.autoApprovedNote')}</div>}
+                      {item.row.comment && !d.auto && (
+                        <div className="small" style={{ fontStyle: 'italic' }}>“{item.row.comment}”</div>
+                      )}
+                    </>
+                  )
+                })()}
                 <div className="muted small">
                   <Link to={`/plans/${item.row.plan_id}`}>{t('plans.title')} v{arDigits(item.row.plans?.version, lang)}</Link>
                   {' · '}{fmtDateTime(item.at, lang)}
