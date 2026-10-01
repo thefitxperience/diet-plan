@@ -5,7 +5,7 @@
 // Level 2) where the device supports it. This is the short link we put in the
 // WhatsApp message instead of a giant signed URL.
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
@@ -19,6 +19,22 @@ export default function PlanShare() {
   const [fallback, setFallback] = useState(false) // blob fetch failed → iframe
   const [rendering, setRendering] = useState(true)
   const viewerRef = useRef(null)
+  const shareRef = useRef(null)
+  const barObserver = useRef(null)
+
+  // The page size depends on how much screen is left under the sticky header
+  // (see .plan-share-page), so publish the header's live height as a CSS var.
+  // A callback ref: the header only exists once the plan has loaded.
+  const attachBar = useCallback((el) => {
+    barObserver.current?.disconnect()
+    barObserver.current = null
+    if (!el || typeof ResizeObserver === 'undefined') return
+    const ro = new ResizeObserver(() => {
+      shareRef.current?.style.setProperty('--share-bar', `${Math.round(el.getBoundingClientRect().height)}px`)
+    })
+    ro.observe(el)
+    barObserver.current = ro
+  }, [])
 
   useEffect(() => {
     document.body.classList.add('intake-active')
@@ -122,8 +138,8 @@ export default function PlanShare() {
   }
 
   return (
-    <div className="intake-page plan-share">
-      <div className="plan-share-bar">
+    <div className="intake-page plan-share" ref={shareRef}>
+      <div className="plan-share-bar" ref={attachBar}>
         <div>
           {row.gym_logo && <img src={row.gym_logo} alt={row.gym_name || ''} className="plan-share-logo" crossOrigin="anonymous" />}
           <div className="plan-share-title">{t('share.title')}</div>
