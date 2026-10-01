@@ -87,7 +87,7 @@
     "EACH": "لكل واحدة",
     "sleep_hours_unit": "ساعات",
     "Body Recomposition": "إعادة تكوين الجسم",
-    "Your goal is to lose fat and build muscle, so your daily target is {target} kcal — about {shift} kcal below that level. Track progress with your next InBody, not the scale.": "هدفك هو خسارة الدهون وبناء العضلات، لذا يبلغ هدفك اليومي {target} كيلو سعرة — أي أقل بنحو {shift} كيلو سعرة من ذلك المستوى. تابع تقدّمك بتحليل InBody القادم لا بالميزان."
+    "Your goal is to lose fat while building muscle, so your daily target works out to {target} kcal — about {shift} kcal below that level, a small gap that lets muscle grow while body fat comes down. Your weight may barely move, so judge progress by your next InBody.": "هدفك هو خسارة الدهون مع بناء العضلات، لذا يبلغ هدفك اليومي {target} كيلو سعرة — أي أقل بنحو {shift} كيلو سعرة من ذلك المستوى، وهو فارق بسيط يسمح بنمو العضلات مع انخفاض دهون الجسم. قد لا يتغير وزنك كثيراً، لذا قِس تقدّمك بتحليل InBody القادم."
   },
   "food": {
     "Mujaddara": "مجدرة",
