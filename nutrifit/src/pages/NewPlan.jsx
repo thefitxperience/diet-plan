@@ -7,7 +7,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
-import { Field, Alert, Loading, Spinner, BackButton } from '../components/ui'
+import { Field, Alert, Loading, Spinner, BackButton, StepProgress } from '../components/ui'
 import {
   fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
@@ -16,7 +16,6 @@ import {
 import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal, planCalorieWarnings, stampPlanChecks } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
-import { arDigits } from '../lib/digits'
 import { DislikePicker } from '../components/PreferenceFields'
 
 export default function NewPlan() {
@@ -211,15 +210,7 @@ export default function NewPlan() {
       </div>
       <Alert kind="error">{error}</Alert>
 
-      <div className="step-progress">
-        <div className="step-progress-line" style={{ width: `${((step - 1) / 2) * 100}%` }} />
-        {[1, 2, 3].map((n) => (
-          <div key={n} className={`step-item ${step === n ? 'active' : ''} ${step > n ? 'completed' : ''}`}>
-            <div className="step-circle">{arDigits(n, lang)}</div>
-            <div className="step-label">{t(`wizard.step${n}`)}</div>
-          </div>
-        ))}
-      </div>
+      <StepProgress step={step} labels={[1, 2, 3].map((n) => t(`wizard.step${n}`))} />
 
       {step === 1 && (
         <div className="card">

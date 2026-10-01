@@ -5,23 +5,23 @@
 // to the submit_intake RPC, which creates the client + a GENERATED plan that
 // lands in the nutritionist's approval queue. No auth involved.
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
-import { Field, Alert, Spinner } from '../components/ui'
+import { Field, Alert, Spinner, StepProgress, fmtDate } from '../components/ui'
 import { extractInBody, parseInBodyText } from '../lib/inbodyParser'
 import {
-  fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
-  dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
+  fetchLookups, activityInfo, sortActivities, activityMultiplier,
+  dietaryInfo, sortDietaryTypes, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
   GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal, stampPlanChecks } from '../lib/planModel'
 import { restrictionLabel } from '../lib/restrictionNames'
-import { arDigits } from '../lib/digits'
 import PhoneField from '../components/PhoneField'
 import { DislikePicker } from '../components/PreferenceFields'
+import DescribedSelect from '../components/DescribedSelect'
 
 // Mifflin–St Jeor fallback when the InBody sheet has no BMR.
 function estimateBmr({ weight, height, age, gender }) {
@@ -29,6 +29,17 @@ function estimateBmr({ weight, height, age, gender }) {
   if (!w || !h) return 0
   const base = 10 * w + 6.25 * h - 5 * a
   return Math.round(gender === 'F' ? base - 161 : base + 5)
+}
+
+// Labelled DescribedSelect for the intake's step 3 (goal / activity / diet).
+function PickerField({ label, ...props }) {
+  const labelId = useId()
+  return (
+    <div className="field picker-field">
+      <span className="picker-label" id={labelId}>{label} *</span>
+      <DescribedSelect labelledBy={labelId} title={label} {...props} />
+    </div>
+  )
 }
 
 // Temporary vanity slugs for the soft launch: map a friendly slug to a gym's
@@ -66,7 +77,7 @@ export default function Intake({ slug }) {
   // Details + questionnaire
   const [form, setForm] = useState({
     firstName: '', lastName: '', dob: '', gender: '', phone: '', email: '', consent: false,
-    goal: 'maintain', planStyle: 'normal', activityId: '', dietaryTypeId: '',
+    goal: '', planStyle: 'normal', activityId: '', dietaryTypeId: '',
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
     // §4.2 preferences: language persists on the client, dislikes are a per-plan
     // answer. Language mirrors whatever they're reading the form in until they
@@ -105,7 +116,12 @@ export default function Intake({ slug }) {
     fetchLookups().then(setLookups).catch(() => setLookups(null))
   }, [token])
 
+  // Each step is its own screen — start it at the top, not wherever the last one
+  // was scrolled to.
+  useEffect(() => { window.scrollTo(0, 0) }, [step])
+
   const activities = lookups ? sortActivities(lookups.activities) : []
+  const dietaryTypes = lookups ? sortDietaryTypes(lookups.dietaryTypes) : []
   const conditions = (lookups?.conditions || []).filter((c) => !EXCLUDED_CONDITIONS.includes(c.conditionName))
   const allergies = (lookups?.allergies || []).filter((a) => !EXCLUDED_ALLERGIES.includes(a.allergyName))
 
@@ -133,8 +149,10 @@ export default function Intake({ slug }) {
     } finally { setParsing(false) }
   }
 
+  // Keep the current InBody until a replacement reads successfully — cancelling
+  // the file picker must not lose it.
   function reupload() {
-    setValues(null); setExtracted(null); setError(null)
+    setError(null)
     inputRef.current?.click()
   }
 
@@ -144,8 +162,12 @@ export default function Intake({ slug }) {
     setForm({ ...form, [k]: list, [noneKey]: false })
   }
 
-  const step2Valid = form.firstName && form.lastName && form.dob && form.gender &&
-    (form.phone || '').replace(/\D/g, '').length >= 8 && form.activityId && form.dietaryTypeId && form.consent
+  const stepValid = {
+    2: form.firstName && form.lastName && form.dob && form.gender &&
+      (form.phone || '').replace(/\D/g, '').length >= 8,
+    3: form.goal && form.activityId && form.dietaryTypeId,
+    4: form.consent,
+  }
 
   async function submit() {
     setSubmitting(true); setError(null)
@@ -250,8 +272,12 @@ export default function Intake({ slug }) {
         </div>
 
         {done ? (
-          <div className="intake-body" style={{ textAlign: 'center', padding: '1rem 0' }}>
-            <div style={{ fontSize: '2.5rem' }}>🎉</div>
+          <div className="intake-body intake-done">
+            <div className="intake-done-mark" aria-hidden="true">
+              <svg viewBox="0 0 52 52" width="29" height="29">
+                <path d="M14 27l8 8 16-18" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </div>
             <h2>{t('intake.doneTitle')}</h2>
             <p className="muted">{t('intake.doneBody')}</p>
           </div>
@@ -260,15 +286,7 @@ export default function Intake({ slug }) {
             <h1>{t('intake.title')}</h1>
             <p className="muted small">{t('intake.subtitle')}</p>
 
-            <div className="step-progress">
-              <div className="step-progress-line" style={{ width: `${((step - 1) / 1) * 100}%` }} />
-              {[1, 2].map((n) => (
-                <div key={n} className={`step-item ${step === n ? 'active' : ''} ${step > n ? 'completed' : ''}`}>
-                  <div className="step-circle">{arDigits(n, lang)}</div>
-                  <div className="step-label">{t(`intake.step${n}`)}</div>
-                </div>
-              ))}
-            </div>
+            <StepProgress step={step} labels={[1, 2, 3, 4].map((n) => t(`intake.step${n}`))} />
 
             <Alert kind="error">{error}</Alert>
 
@@ -285,10 +303,36 @@ export default function Intake({ slug }) {
                   </div>
                 ) : inbodyDone ? (
                   <>
-                    <div className="card center" style={{ minHeight: 160 }}>
-                      <div style={{ fontSize: '2rem' }}>✅</div>
-                      <div><b>{t('intake.inbodyReceived')}</b></div>
-                      <button className="btn ghost sm" onClick={reupload}>{t('intake.reupload')}</button>
+                    <div className="inbody-received">
+                      <div className="inbody-received-main">
+                        <div className="inbody-received-icon" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+                            <path d="M14 3v5h5" />
+                            <path d="M8.5 13h2l1.2-2.5 1.8 5 1.2-2.5h1.8" />
+                          </svg>
+                          <span className="inbody-received-badge">
+                            <svg viewBox="0 0 16 16" width="12" height="12"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </span>
+                        </div>
+                        <div className="inbody-received-text">
+                          <div className="inbody-received-title">{t('intake.inbodyReceived')}</div>
+                          <div className="inbody-received-meta">
+                            {[
+                              model && model !== 'unknown' ? model.replace(/^InBody\s*/i, 'InBody ') : '',
+                              testDate ? t('intake.testDate', { date: fmtDate(testDate, lang, { day: 'numeric', month: 'short', year: 'numeric' }) }) : '',
+                            ].filter(Boolean).map((part, i) => <span key={i}>{i > 0 && ' · '}<span className="nowrap">{part}</span></span>)}
+                            {!(model && model !== 'unknown') && !testDate && t('intake.inbodyReady')}
+                          </div>
+                        </div>
+                      </div>
+                      <button type="button" className="inbody-received-replace" onClick={reupload}>
+                        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                          <path d="M4 12a8 8 0 0 1 13.7-5.7L20 8.5" /><path d="M20 4v4.5h-4.5" />
+                          <path d="M20 12a8 8 0 0 1-13.7 5.7L4 15.5" /><path d="M4 20v-4.5h4.5" />
+                        </svg>
+                        {t('intake.reupload')}
+                      </button>
                     </div>
                     <div className="row end" style={{ marginTop: '1rem' }}>
                       <button className="btn" onClick={() => setStep(2)}>{t('common.next')}</button>
@@ -307,7 +351,7 @@ export default function Intake({ slug }) {
 
             {step === 2 && (
               <div>
-                <p className="muted small">{t('intake.detailsIntro')}</p>
+                <p className="muted small">{t('intake.aboutIntro')}</p>
                 <div className="grid cols-2">
                   <Field label={t('clients.firstName')} required>
                     <input type="text" value={form.firstName} onChange={set('firstName')} />
@@ -331,18 +375,6 @@ export default function Intake({ slug }) {
                   <Field label={t('clients.email')}>
                     <input type="email" value={form.email} onChange={set('email')} />
                   </Field>
-                  <Field label={t('wizard.activity')} required>
-                    <select value={form.activityId} onChange={set('activityId')}>
-                      <option value="">{t('wizard.selectActivity')}</option>
-                      {activities.map((a) => <option key={a.enumId} value={a.enumId}>{activityDisplayName(a.description, lang)}</option>)}
-                    </select>
-                  </Field>
-                  <Field label={t('wizard.dietaryType')} required>
-                    <select value={form.dietaryTypeId} onChange={set('dietaryTypeId')}>
-                      <option value="">{t('wizard.selectDietary')}</option>
-                      {(lookups?.dietaryTypes || []).map((d) => <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName, lang)}</option>)}
-                    </select>
-                  </Field>
                   <Field label={t('pref.language')}>
                     <select value={form.language}
                       onChange={(e) => setForm({ ...form, language: e.target.value, languageTouched: true })}>
@@ -352,18 +384,44 @@ export default function Intake({ slug }) {
                   </Field>
                 </div>
 
-                <label className="field">
-                  <span>{t('wizard.goal')} *</span>
-                  <div className="radio-cards cols-3">
-                    {['maintain', 'lose', 'gain'].map((g) => (
-                      <div className="radio-card" key={g}>
-                        <input type="radio" id={`goal-${g}`} name="goal" checked={form.goal === g} onChange={() => setForm({ ...form, goal: g })} />
-                        <label htmlFor={`goal-${g}`}>{t(`wizard.goal.${g}`)}</label>
-                      </div>
-                    ))}
-                  </div>
-                </label>
+                <div className="row between" style={{ marginTop: '1rem' }}>
+                  <button className="btn secondary" onClick={() => setStep(1)}>{t('common.previous')}</button>
+                  <button className="btn" disabled={!stepValid[2]} onClick={() => setStep(3)}>{t('common.next')}</button>
+                </div>
+              </div>
+            )}
 
+            {step === 3 && (
+              <div>
+                <p className="muted small">{t('intake.goalsIntro')}</p>
+
+                <PickerField label={t('wizard.goal')} value={form.goal}
+                  placeholder={t('intake.selectGoal')}
+                  onChange={(v) => setForm({ ...form, goal: v })}
+                  options={['maintain', 'lose', 'gain'].map((g) => ({
+                    id: g, label: t(`wizard.goal.${g}`), desc: t(`intake.goalDesc.${g}`),
+                  }))} />
+
+                <PickerField label={t('wizard.activity')} value={form.activityId}
+                  placeholder={t('wizard.selectActivity')}
+                  onChange={(v) => setForm({ ...form, activityId: v })}
+                  options={activities.map((a) => ({ id: a.enumId, ...activityInfo(a.description, lang) }))} />
+
+                <PickerField label={t('wizard.dietaryType')} value={form.dietaryTypeId}
+                  placeholder={t('wizard.selectDietary')}
+                  onChange={(v) => setForm({ ...form, dietaryTypeId: v })}
+                  options={dietaryTypes.map((d) => ({ id: d.dietaryTypeId, ...dietaryInfo(d.dietaryTypeName, lang) }))} />
+
+                <div className="row between" style={{ marginTop: '1rem' }}>
+                  <button className="btn secondary" onClick={() => setStep(2)}>{t('common.previous')}</button>
+                  <button className="btn" disabled={!stepValid[3]} onClick={() => setStep(4)}>{t('common.next')}</button>
+                </div>
+              </div>
+            )}
+
+            {step === 4 && (
+              <div>
+                <p className="muted small">{t('intake.healthIntro')}</p>
                 <div className="grid cols-2">
                   <Field label={t('wizard.conditions')}>
                     <div className="checkbox-list one-col">
@@ -411,8 +469,8 @@ export default function Intake({ slug }) {
                 </label>
 
                 <div className="row between" style={{ marginTop: '1rem' }}>
-                  <button className="btn secondary" onClick={() => setStep(1)}>{t('common.previous')}</button>
-                  <button className="btn" disabled={submitting || !step2Valid} onClick={submit}>
+                  <button className="btn secondary" onClick={() => setStep(3)}>{t('common.previous')}</button>
+                  <button className="btn" disabled={submitting || !stepValid[4]} onClick={submit}>
                     {submitting ? <>{t('intake.submitting')} <Spinner /></> : t('intake.submit')}
                   </button>
                 </div>

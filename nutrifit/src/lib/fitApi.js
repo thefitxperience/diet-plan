@@ -95,6 +95,14 @@ export function activityDisplayName(description, lang) {
   return description
 }
 
+// Splits "Peak Performance (Hard exercise …)" into { label, desc } for the
+// intake's chip picker; desc is '' when the label has no bracketed detail.
+export function activityInfo(description, lang) {
+  const full = activityDisplayName(description, lang) || ''
+  const m = full.match(/^(.*?)\s*\((.*)\)$/)
+  return m ? { label: m[1], desc: m[2] } : { label: full, desc: '' }
+}
+
 export function sortActivities(activities) {
   const idx = (d) => {
     const i = ACTIVITY_ORDER.findIndex((k) => (d || '').toLowerCase().includes(k))
@@ -111,32 +119,59 @@ export function activityMultiplier(activity) {
   return null
 }
 
-const DIETARY_DISPLAY = {
-  halal: 'Halal-friendly',
-  keto: 'Low-carb high-fat',
-  kosher: 'Kosher-friendly',
-  omnivore: 'Balanced diet',
-  pescatarian: 'Fish-based vegetarian',
-  vegan: 'Strict plant-based',
-  vegetarian: 'Plant-based with dairy & eggs',
+// Matched by keyword against the API's dietaryTypeName. Order here is the order
+// the intake shows them in. `desc` is the one-liner shown to clients under the name.
+const DIETARY_DISPLAY = [
+  ['halal', {
+    en: { label: 'Halal', desc: 'Meat and poultry prepared to Islamic guidelines. No pork or alcohol.' },
+    ar: { label: 'حلال', desc: 'لحوم ودواجن مذبوحة وفق الشريعة الإسلامية، بدون لحم الخنزير أو الكحول.' },
+  }],
+  ['keto', {
+    en: { label: 'Keto', desc: 'Very low in carbs, high in healthy fats, with moderate protein.' },
+    ar: { label: 'كيتو', desc: 'منخفض جداً بالكربوهيدرات، غني بالدهون الصحية، مع كمية معتدلة من البروتين.' },
+  }],
+  ['kosher', {
+    en: { label: 'Kosher', desc: 'Follows Jewish dietary laws. No pork or shellfish; meat and dairy kept apart.' },
+    ar: { label: 'كوشير', desc: 'يتبع قواعد الطعام اليهودية، بدون لحم الخنزير أو القشريات، مع فصل اللحوم عن الألبان.' },
+  }],
+  ['omnivore', {
+    en: { label: 'Omnivore', desc: 'Eats everything: meat, fish, dairy, eggs and plant foods.' },
+    ar: { label: 'نظام شامل', desc: 'يشمل جميع الأطعمة: اللحوم والأسماك والألبان والبيض والأطعمة النباتية.' },
+  }],
+  ['pescatarian', {
+    en: { label: 'Pescatarian', desc: 'Vegetarian plus fish and seafood. No meat or poultry.' },
+    ar: { label: 'نباتي مع الأسماك', desc: 'نظام نباتي مع الأسماك والمأكولات البحرية، بدون لحوم أو دواجن.' },
+  }],
+  ['vegan', {
+    en: { label: 'Vegan', desc: 'Fully plant-based. No meat, fish, dairy, eggs or honey.' },
+    ar: { label: 'نباتي صِرف', desc: 'نباتي بالكامل، بدون لحوم أو أسماك أو ألبان أو بيض أو عسل.' },
+  }],
+  ['vegetarian', {
+    en: { label: 'Vegetarian', desc: 'No meat, poultry or fish. Includes dairy and eggs.' },
+    ar: { label: 'نباتي', desc: 'بدون لحوم أو دواجن أو أسماك، ويشمل الألبان والبيض.' },
+  }],
+]
+
+function dietaryEntry(name) {
+  const lower = (name || '').toLowerCase()
+  const i = DIETARY_DISPLAY.findIndex(([key]) => lower.includes(key))
+  return i === -1 ? null : { index: i, text: DIETARY_DISPLAY[i][1] }
 }
 
-const DIETARY_AR = {
-  'Halal-friendly': 'حلال',
-  'Low-carb high-fat': 'قليل الكربوهيدرات عالي الدهون (كيتو)',
-  'Kosher-friendly': 'كوشير',
-  'Balanced diet': 'نظام متوازن',
-  'Fish-based vegetarian': 'نباتي مع الأسماك',
-  'Strict plant-based': 'نباتي صِرف',
-  'Plant-based with dairy & eggs': 'نباتي مع الألبان والبيض',
+// { label, desc } for a diet type; desc is '' for a type we have no copy for.
+export function dietaryInfo(name, lang) {
+  const e = dietaryEntry(name)
+  if (!e) return { label: name, desc: '' }
+  return e.text[lang === 'ar' ? 'ar' : 'en']
 }
 
 export function dietaryDisplayName(name, lang) {
-  const lower = (name || '').toLowerCase()
-  for (const [key, label] of Object.entries(DIETARY_DISPLAY)) {
-    if (lower.includes(key)) return lang === 'ar' ? (DIETARY_AR[label] || label) : label
-  }
-  return name
+  return dietaryInfo(name, lang).label
+}
+
+export function sortDietaryTypes(types) {
+  const idx = (t) => dietaryEntry(t.dietaryTypeName)?.index ?? 999
+  return [...types].sort((a, b) => idx(a) - idx(b))
 }
 
 // Conditions/allergies hidden in the demo questionnaire

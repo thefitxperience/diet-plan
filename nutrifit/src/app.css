@@ -287,72 +287,81 @@ input[type='date'] {
 }
 input[type='date']::-webkit-date-and-time-value { text-align: start; }
 
-/* 3-step progress indicator (ported from fit-demo) */
-.step-progress {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 2rem;
+/* Wizard step indicator (StepProgress in ui.jsx). Each step owns an equal
+   column and centres its circle in it, so circle centres sit at
+   (i + ½) / steps of the width. The track is inset by half a column on each
+   side — first centre to last centre — and the fill is --progress of it, so it
+   always ends on the current circle. Logical insets mirror it for Arabic. */
+.stepper {
+  --dot: 34px;
   position: relative;
-  padding: 0 10px;
+  margin: 1.25rem 0 1.75rem;
 }
-.step-progress::before {
-  content: '';
+.stepper-track {
   position: absolute;
-  top: 18px;
-  inset-inline-start: 10px;
-  inset-inline-end: 10px;
-  height: 2px;
+  top: calc(var(--dot) / 2 - 1.5px);
+  inset-inline: calc(50% / var(--steps));
+  height: 3px;
+  border-radius: 3px;
   background: var(--border);
-  z-index: 0;
 }
-.step-progress-line {
+.stepper-fill {
   position: absolute;
-  top: 18px;
-  inset-inline-start: 10px;
-  height: 2px;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: calc(var(--progress) * 100%);
+  border-radius: inherit;
   background: var(--blue);
-  transition: width 0.4s ease;
-  z-index: 1;
+  transition: width 0.35s ease;
 }
-.step-item {
+.stepper-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--steps), minmax(0, 1fr));
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.stepper-step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.4rem;
-  position: relative;
-  z-index: 2;
-  flex: 1;
+  gap: 0.45rem;
+  min-width: 0;
 }
-.step-circle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: white;
-  border: 2px solid var(--border);
+.stepper-dot {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 0.9rem;
+  width: var(--dot);
+  height: var(--dot);
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: white;
   color: var(--muted);
-  transition: all 0.3s ease;
+  font-weight: 700;
+  font-size: 0.88rem;
+  line-height: 1;
+  transition: background 0.25s ease, border-color 0.25s ease, color 0.25s ease, box-shadow 0.25s ease;
 }
-.step-item.active .step-circle,
-.step-item.completed .step-circle {
-  border-color: var(--blue);
+.stepper-step.done .stepper-dot { background: var(--blue); border-color: var(--blue); color: white; }
+.stepper-step.current .stepper-dot {
   background: var(--blue);
+  border-color: var(--blue);
   color: white;
+  box-shadow: 0 0 0 4px #D6E6FF;  /* solid, so the track does not show through */
 }
-.step-item .step-label {
+.stepper-label {
+  max-width: 100%;
+  padding-inline: 2px;
   font-size: 0.75rem;
   font-weight: 600;
-  color: var(--muted);
-  text-align: center;
   line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  color: var(--muted);
 }
-.step-item.active .step-label,
-.step-item.completed .step-label { color: var(--text); }
+.stepper-step.done .stepper-label, .stepper-step.current .stepper-label { color: var(--text); }
 
 /* Radio cards (goal / plan style) */
 .radio-cards { display: grid; gap: 0.75rem; }
@@ -378,6 +387,140 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
 .radio-card input:checked + label { background: var(--blue); color: white; border-color: var(--blue); }
 .radio-card label:hover { border-color: var(--blue); }
 @media (max-width: 600px) { .radio-cards.cols-3 { grid-template-columns: 1fr; } }
+
+/* Dropdown with a description under each option (DescribedSelect — intake
+   goal / activity / diet). The trigger matches the native inputs above. */
+.picker-field { margin-bottom: 0.9rem; }
+.picker-label { display: block; margin-bottom: 0.3rem; font-weight: 600; font-size: 0.88rem; color: var(--navy); }
+.dsel { position: relative; }
+.dsel-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 2.4rem;
+  padding: 0.55rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.dsel-trigger:focus-visible, .dsel.open .dsel-trigger { outline: 2px solid var(--blue-35); border-color: var(--blue); }
+.dsel-text { display: flex; flex-direction: column; gap: 0.15rem; flex: 1; min-width: 0; text-align: start; }
+.dsel-label { font-size: 0.95rem; font-weight: 600; line-height: 1.3; }
+.dsel-desc { font-size: 0.8rem; line-height: 1.35; color: var(--muted); }
+.dsel-placeholder { font-size: 0.95rem; color: var(--muted); }
+.dsel-caret {
+  flex: 0 0 auto;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-right: 2px solid var(--muted);  /* physical: a drawn shape, not a direction */
+  border-bottom: 2px solid var(--muted);
+  transform: translateY(-25%) rotate(45deg);
+  transition: transform 0.15s ease;
+}
+.dsel.open .dsel-caret { transform: translateY(25%) rotate(225deg); }
+.dsel-backdrop, .dsel-sheet-title { display: none; }
+.dsel-pop {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  inset-inline: 0;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(18, 38, 73, 0.18);
+}
+.dsel.up .dsel-pop { top: auto; bottom: calc(100% + 4px); }
+.dsel-pop { animation: dsel-fade 0.15s ease; }
+/* Exit: the component keeps the list mounted for CLOSE_MS (200ms) while these play. */
+.dsel.closing .dsel-pop { animation: dsel-fade-out 0.2s ease forwards; pointer-events: none; }
+.dsel-list {
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  max-height: min(560px, 75vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* Phones: a bottom sheet over a backdrop, tall enough to show every option. */
+@media (max-width: 640px) {
+  .dsel-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(18, 38, 73, 0.45);
+    animation: dsel-fade 0.15s ease;
+  }
+  .dsel-pop, .dsel.up .dsel-pop {
+    position: fixed;
+    z-index: 101;
+    top: auto;
+    bottom: 0;
+    inset-inline: 0;
+    display: flex;
+    flex-direction: column;
+    max-height: 92dvh;
+    border: none;
+    border-radius: 16px 16px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -8px 32px rgba(18, 38, 73, 0.25);
+    animation: dsel-slide 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+  }
+  .dsel.closing .dsel-pop { animation: dsel-slide-out 0.2s ease-in forwards; }
+  .dsel.closing .dsel-backdrop { animation: dsel-fade-out 0.2s ease forwards; pointer-events: none; }
+  .dsel-sheet-title {
+    display: block;
+    padding: 0.9rem 1.1rem 0.4rem;
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--navy);
+  }
+  .dsel-list { max-height: none; flex: 1; padding: 0 0.5rem 0.6rem; }
+  .dsel-option { padding-block: 0.5rem; }
+}
+/* Short phones (iPhone SE with Safari's bars showing): tighten so the
+   seven-option diet list still fits without scrolling. */
+@media (max-width: 640px) and (max-height: 700px) {
+  .dsel-pop, .dsel.up .dsel-pop { max-height: 97dvh; }
+  .dsel-sheet-title { padding: 0.65rem 1.1rem 0.15rem; font-size: 0.95rem; }
+  .dsel-option { padding-block: 0.32rem; }
+  .dsel-option + .dsel-option { margin-top: 0; }
+  .dsel-option .dsel-text { gap: 0.05rem; }
+  .dsel-option .dsel-label { font-size: 0.9rem; }
+  .dsel-option .dsel-desc { font-size: 0.76rem; line-height: 1.28; }
+}
+@keyframes dsel-fade { from { opacity: 0; } }
+@keyframes dsel-fade-out { to { opacity: 0; } }
+@keyframes dsel-slide { from { transform: translateY(100%); } }
+@keyframes dsel-slide-out { to { transform: translateY(18%); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .dsel-pop, .dsel-backdrop, .dsel.closing .dsel-pop, .dsel.closing .dsel-backdrop { animation-duration: 0.01s; }
+}
+.dsel-option {
+  position: relative;
+  padding: 0.6rem 0.75rem;
+  padding-inline-end: 2rem;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.dsel-option + .dsel-option { margin-top: 2px; }
+.dsel-option.active { background: rgba(0, 94, 255, 0.07); }
+.dsel-option.selected .dsel-label { color: var(--blue); }
+.dsel-option.selected::after {  /* check mark */
+  content: '';
+  position: absolute;
+  inset-inline-end: 0.85rem;
+  top: 50%;
+  width: 0.3rem;
+  height: 0.6rem;
+  border-right: 2px solid var(--blue);
+  border-bottom: 2px solid var(--blue);
+  transform: translateY(-60%) rotate(45deg);
+}
 
 /* Body-composition inputs: fixed 3 across (matches fit-demo step 2) */
 .bodycomp-grid {
@@ -598,6 +741,100 @@ html.intake-active, body.intake-active { background: var(--navy); }
 .intake-head { align-items: center; }
 .intake-body { margin-top: 1.4rem; } /* space under the gym name + language button */
 .intake-card h1 { color: var(--navy); margin: 0; text-align: center; }
+
+/* Intake "All done" screen: mark, title and message as one centred group,
+   with the space above the halo matching the space under the message. */
+.intake-done { text-align: center; padding: 1.1rem 0 1.6rem; }
+.intake-done h2 { margin: 0 0 0.5rem; }
+.intake-done p { margin: 0; line-height: 1.5; }
+
+/* Intake "All done" mark: blue disc with a halo, check draws itself in. */
+.intake-done-mark {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 1.6rem;   /* clears the 7px halo with room to spare */
+  border-radius: 50%;
+  background: var(--blue);
+  color: white;
+  box-shadow: 0 0 0 7px #D6E6FF, 0 8px 24px rgba(0, 94, 255, 0.3);
+  animation: done-pop 0.45s cubic-bezier(0.3, 1.5, 0.5, 1) both;
+}
+.intake-done-mark path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: done-draw 0.4s ease-out 0.3s forwards;
+}
+@keyframes done-pop { from { transform: scale(0.4); opacity: 0; } }
+@keyframes done-draw { to { stroke-dashoffset: 0; } }
+@media (prefers-reduced-motion: reduce) {
+  .intake-done-mark { animation: none; }
+  .intake-done-mark path { animation: none; stroke-dashoffset: 0; }
+}
+
+/* Intake step 1 once the InBody has been read: file tile + details + Replace. */
+.inbody-received {
+  border: 1px solid rgba(0, 94, 255, 0.22);
+  border-radius: 14px;
+  background: linear-gradient(135deg, rgba(0, 94, 255, 0.06), rgba(100, 224, 255, 0.08));
+  overflow: hidden;
+}
+.inbody-received-main { display: flex; align-items: center; gap: 0.95rem; padding: 1.05rem 1.1rem; }
+.inbody-received-icon {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: white;
+  color: var(--blue);
+  box-shadow: 0 2px 8px rgba(18, 38, 73, 0.1);
+}
+.inbody-received-badge {
+  position: absolute;
+  bottom: -5px;
+  inset-inline-end: -5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid white;
+  background: var(--ok);
+  color: white;
+  animation: inbody-badge-pop 0.35s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+  animation-delay: 0.1s;
+}
+@keyframes inbody-badge-pop { from { transform: scale(0); } }
+.inbody-received-text { flex: 1; min-width: 0; }
+.inbody-received-title { font-weight: 700; font-size: 1rem; color: var(--navy); }
+.inbody-received-meta { margin-top: 0.2rem; font-size: 0.78rem; color: var(--muted); }
+.inbody-received-meta .nowrap { white-space: nowrap; }
+.inbody-received-replace {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-top: 1px solid rgba(0, 94, 255, 0.14);
+  background: rgba(255, 255, 255, 0.6);
+  color: var(--blue);
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.inbody-received-replace:hover { background: white; }
+.inbody-received-replace:focus-visible { outline: 2px solid var(--blue); outline-offset: -2px; }
+@media (prefers-reduced-motion: reduce) { .inbody-received-badge { animation: none; } }
 
 .input-with-icon { position: relative; }
 .input-with-icon input { padding-inline-end: 2.6rem; }
