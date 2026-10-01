@@ -2,8 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/x-icon" href="./icon.ico" />
-    <link rel="icon" type="image/png" href="./icon.png" />
+    <!-- Root-absolute (Vite prefixes the build base): relative "./" paths broke on
+         nested routes like /diet/<gym>, where the browser fell back to an old
+         /favicon.ico left on the server. public/favicon.ico is the same icon. -->
+    <link rel="icon" type="image/x-icon" href="/icon.ico" />
+    <link rel="icon" type="image/png" href="/icon.png" />
+    <link rel="apple-touch-icon" href="/icon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#122649" />
     <meta name="mobile-web-app-capable" content="yes" />
