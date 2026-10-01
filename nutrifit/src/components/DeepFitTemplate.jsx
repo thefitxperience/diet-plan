@@ -308,7 +308,7 @@ const ASSESS = {
   lose: 'Your goal is to lose weight, so your daily target works out to {target} kcal — about {shift} kcal below that level, a pace that protects muscle while body fat comes down.',
   gain: 'Your goal is to gain weight, so your daily target works out to {target} kcal — about {shift} kcal above that level, enough to build up gradually rather than all at once.',
   maintain: 'Your goal is to maintain your current weight, so your daily target works out to {target} kcal, in line with what your body uses.',
-  recomp: 'Your goal is to lose fat while building muscle, so your daily target works out to {target} kcal — about {shift} kcal below that level, a small gap that lets muscle grow while body fat comes down. Your weight may barely move, so judge progress by your next InBody.',
+  recomp: 'Your goal is to lose fat while building muscle, so your daily target works out to {target} kcal, about {shift} kcal below that level. This small gap lets muscle grow while body fat comes down. Your weight may barely move, so judge progress by your next InBody.',
   adjusted: 'Your dietitian reviewed these figures against your full assessment and set your final daily target at {final} kcal.',
 }
 
