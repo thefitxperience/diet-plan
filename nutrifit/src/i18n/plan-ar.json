@@ -85,7 +85,9 @@
     "in line with maintenance": "يوافق مستوى الحفاظ على الوزن",
     "Two snacks a day sit inside your {kcal} kcal target, so spread them between meals rather than after dinner.": "وجبتان خفيفتان يومياً تدخلان ضمن هدفك البالغ {kcal} كيلو سعرة، لذا وزّعهما بين الوجبات بدلاً من بعد العشاء.",
     "EACH": "لكل واحدة",
-    "sleep_hours_unit": "ساعات"
+    "sleep_hours_unit": "ساعات",
+    "Body Recomposition": "إعادة تكوين الجسم",
+    "Your goal is to lose fat and build muscle, so your daily target is {target} kcal — about {shift} kcal below that level. Track progress with your next InBody, not the scale.": "هدفك هو خسارة الدهون وبناء العضلات، لذا يبلغ هدفك اليومي {target} كيلو سعرة — أي أقل بنحو {shift} كيلو سعرة من ذلك المستوى. تابع تقدّمك بتحليل InBody القادم لا بالميزان."
   },
   "food": {
     "Mujaddara": "مجدرة",
@@ -861,7 +863,8 @@
     "Complex carbohydrates fuel the brain, support hormonal health, and aid recovery. Many people find them easiest to use around the most active part of their day.": "الكربوهيدرات المعقدة تغذي الدماغ، وتدعم الصحة الهرمونية، وتساعد في التعافي. يجد كثيرون أن أسهل وقت لتناولها هو حول أكثر أوقات يومهم نشاطاً.",
     "Every meal below carries several calorie-matched options: choose whichever suits your appetite and schedule.": "تحتوي كل وجبة أدناه على عدة خيارات متساوية في السعرات: اختر ما يناسب شهيتك وجدولك.",
     "Include a clear protein source at every main meal.": "احرص على وجود مصدر بروتين واضح في كل وجبة رئيسية.",
-    "Useful for meat-free days and for adding fiber.": "مفيدة في الأيام الخالية من اللحوم ولإضافة الألياف."
+    "Useful for meat-free days and for adding fiber.": "مفيدة في الأيام الخالية من اللحوم ولإضافة الألياف.",
+    "Protein is what lets muscle grow while your calories sit slightly below maintenance. Aim for approximately 1.6 to 2.2 grams of protein per kilogram of body weight per day, include a clear protein source at every meal, and pair your plan with regular strength training.": "البروتين هو ما يسمح بنمو العضلات بينما تبقى سعراتك أقل بقليل من مستوى الحفاظ على الوزن. استهدف ما بين 1.6 إلى 2.2 غرام من البروتين لكل كيلوغرام من وزن الجسم يومياً، وأدرج مصدراً واضحاً للبروتين في كل وجبة، واحرص على ممارسة تمارين القوة بانتظام."
   },
   "listItems": {
     "Upon waking: 1 glass of water.": "عند الاستيقاظ: كوب واحد من الماء.",

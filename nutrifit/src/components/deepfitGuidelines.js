@@ -68,8 +68,10 @@ export const HYDRATION = {
 export const PROTEIN = {
   ...titled('Protein Intake', 'Protein intake'),
   note: 'Protein supports muscle preservation, metabolism, blood sugar balance, and satiety. Aim for approximately 1.2 to 1.6 grams of protein per kilogram of body weight per day. Include a clear protein source at every main meal.',
-  // Drives the derived per-client range shown on the navy panel.
-  gPerKg: [1.2, 1.6],
+  // Shape Up (recomposition) plans: higher range, and training is part of it.
+  // The per-client grams on the navy panel come from proteinRangeFor() in
+  // planModel — keep the numbers in both notes in step with it.
+  noteRecomp: 'Protein is what lets muscle grow while your calories sit slightly below maintenance. Aim for approximately 1.6 to 2.2 grams of protein per kilogram of body weight per day, include a clear protein source at every meal, and pair your plan with regular strength training.',
 }
 
 // ── Page 6 — food groups, recovery, sign-off ─────────────────────────────────

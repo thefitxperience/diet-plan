@@ -367,6 +367,7 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
 .radio-cards { display: grid; gap: 0.75rem; }
 .radio-cards.cols-3 { grid-template-columns: repeat(3, 1fr); }
 .radio-cards.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.radio-cards.cols-4 { grid-template-columns: repeat(4, 1fr); }
 .radio-card input { position: absolute; opacity: 0; pointer-events: none; }
 .radio-card label {
   display: flex;
@@ -387,6 +388,7 @@ input[type='date']::-webkit-date-and-time-value { text-align: start; }
 .radio-card input:checked + label { background: var(--blue); color: white; border-color: var(--blue); }
 .radio-card label:hover { border-color: var(--blue); }
 @media (max-width: 600px) { .radio-cards.cols-3 { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { .radio-cards.cols-4 { grid-template-columns: repeat(2, 1fr); } }
 
 /* Dropdown with a description under each option (DescribedSelect — intake
    goal / activity / diet). The trigger matches the native inputs above. */

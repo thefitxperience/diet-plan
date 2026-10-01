@@ -89,14 +89,38 @@ export function duplicateOption(opt) {
 // API splits a plan: breakfast 25%, lunch 30%, dinner 25%, snack 10%/option).
 export const MEAL_KCAL_RATIO = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
 
-// The FIT API shifts a plan's calories by its goal: −500 kcal for weight loss,
-// +500 for weight gain, unchanged for maintenance. We SEND the user's TDEE (the
-// API applies the shift); this returns the intake the client actually eats — the
-// number to show on the plan and to base our own per-meal scaling fallbacks on,
-// so catalog/keto-supplement meals line up with the API's goal-adjusted dishes.
-export const GOAL_KCAL_SHIFT = { lose: -500, gain: 500, maintain: 0 }
+// Daily calorie shift from maintenance (TDEE) per goal: −500 kcal for weight
+// loss, +500 for weight gain, unchanged for maintenance. Body recomposition
+// ("Shape Up": lose fat while building muscle) runs a deliberately small deficit
+// — enough for fat to come down without starving muscle growth; it leans on
+// higher protein (PROTEIN_G_PER_KG) and strength training rather than calories.
+// Returns the intake the client actually eats — the plan's daily total.
+export const GOAL_KCAL_SHIFT = { lose: -500, recomp: -250, gain: 500, maintain: 0 }
 export function goalAdjustedKcal(kcal, goal) {
   return Math.max(0, (parseFloat(kcal) || 0) + (GOAL_KCAL_SHIFT[goal] || 0))
+}
+
+// Daily protein (g per kg body weight). Recomposition needs the higher range:
+// protein is what lets muscle grow while calories sit below maintenance.
+export const PROTEIN_G_PER_KG = { default: [1.2, 1.6], recomp: [1.6, 2.2] }
+export const proteinRangeFor = (goal) => PROTEIN_G_PER_KG[goal] || PROTEIN_G_PER_KG.default
+
+// Below this activity multiplier the client reported little or no exercise
+// (sedentary = 1.05) — recomposition without strength training is just slow
+// fat loss, so a Shape Up plan for them is flagged for the dietitian.
+export const RECOMP_MIN_ACTIVITY = 1.2
+
+// Protein in a typical day: each meal's options averaged (they are
+// interchangeable, so the client may pick any), snacks counted twice.
+export function typicalDayProtein(plan) {
+  let total = 0
+  for (const m of plan?.meals || []) {
+    const opts = m.options || []
+    if (!opts.length) continue
+    const avg = opts.reduce((s, o) => s + (parseFloat(o.macros?.protein) || 0), 0) / opts.length
+    total += avg * (m.id === 'snack' ? 2 : 1)
+  }
+  return Math.round(total)
 }
 
 // ── Client assessment summary (§4.4) ─────────────────────────────────────────
@@ -621,6 +645,18 @@ export function validatePlan(plan) {
   }
   for (const [name, where] of placedIn) {
     if (where.length > 1) issues.push({ code: 'duplicateAcrossMeals', option: name, meals: where.join(', ') })
+  }
+
+  // Shape Up (recomposition) only works with enough protein and with training.
+  // Both are plan-level checks, so — like every issue here — they hold the plan
+  // back from auto-approval until a dietitian has looked at it.
+  const a = plan.assessment || {}
+  if (a.goal === 'recomp') {
+    const [minPerKg] = proteinRangeFor('recomp')
+    const min = Math.round((a.weight || 0) * minPerKg)
+    const protein = typicalDayProtein(plan)
+    if (min && protein < min) issues.push({ code: 'recompLowProtein', protein, min })
+    if (a.activityMultiplier && a.activityMultiplier < RECOMP_MIN_ACTIVITY) issues.push({ code: 'recompInactive' })
   }
 
   for (const m of meals) {

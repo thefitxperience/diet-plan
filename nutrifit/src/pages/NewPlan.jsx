@@ -11,7 +11,7 @@ import { Field, Alert, Loading, Spinner, BackButton, StepProgress } from '../com
 import {
   fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
   dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
-  GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
+  GOALS, GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal, planCalorieWarnings, stampPlanChecks } from '../lib/planModel'
@@ -249,8 +249,8 @@ export default function NewPlan() {
 
           <label className="field">
             <span>{t('wizard.goal')} *</span>
-            <div className="radio-cards cols-3">
-              {['maintain', 'lose', 'gain'].map((g) => (
+            <div className="radio-cards cols-4">
+              {GOALS.map((g) => (
                 <div className="radio-card" key={g}>
                   <input type="radio" id={`goal-${g}`} name="goal" checked={form.goal === g}
                     onChange={() => setForm({ ...form, goal: g })} />

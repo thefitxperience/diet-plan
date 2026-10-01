@@ -183,13 +183,20 @@ export const EXCLUDED_ALLERGIES = [
   'Phenylketonuria', 'Celiac Disease', 'Celiac Disease / Gluten Sensitivity', 'Latex-Fruit Syndrome',
 ]
 
-// Goal & plan-style radios map onto API plan types by keyword (demo logic)
+// Goal & plan-style radios map onto API plan types by keyword (demo logic).
+// Plans are generated from our own catalog now, so the API type is only
+// recorded on the questionnaire — but it must resolve or submission stops.
+// The API has no recomposition type, so Shape Up records the maintenance one.
 export const GOAL_KEYWORDS = {
   maintain: ['maintenance', 'maintain'],
   lose: ['weight loss', 'lose', 'fat loss'],
+  recomp: ['maintenance', 'maintain'],
   gain: ['weight gain', 'gain', 'muscle gain'],
 }
-export const GOAL_LABELS = { maintain: 'Maintenance', lose: 'Weight Loss', gain: 'Weight Gain' }
+// Order is the order goals are offered in. These are the clinical names shown
+// on the PDF and staff screens; the intake uses the client-facing wizard.goal.*.
+export const GOAL_LABELS = { maintain: 'Maintenance', lose: 'Weight Loss', recomp: 'Body Recomposition', gain: 'Weight Gain' }
+export const GOALS = Object.keys(GOAL_LABELS)
 
 export const PLAN_STYLE_KEYWORDS = {
   normal: ['default', 'normal', 'regular', 'standard'],

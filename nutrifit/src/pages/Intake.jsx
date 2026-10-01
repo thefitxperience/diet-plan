@@ -14,7 +14,7 @@ import { extractInBody, parseInBodyText } from '../lib/inbodyParser'
 import {
   fetchLookups, activityInfo, sortActivities, activityMultiplier,
   dietaryInfo, sortDietaryTypes, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
-  GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
+  GOALS, GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
 } from '../lib/fitApi'
 import { generateCatalogPlan } from '../lib/planGenerator'
 import { goalAdjustedKcal, stampPlanChecks } from '../lib/planModel'
@@ -398,7 +398,7 @@ export default function Intake({ slug }) {
                 <PickerField label={t('wizard.goal')} value={form.goal}
                   placeholder={t('intake.selectGoal')}
                   onChange={(v) => setForm({ ...form, goal: v })}
-                  options={['maintain', 'lose', 'gain'].map((g) => ({
+                  options={GOALS.map((g) => ({
                     id: g, label: t(`wizard.goal.${g}`), desc: t(`intake.goalDesc.${g}`),
                   }))} />
 

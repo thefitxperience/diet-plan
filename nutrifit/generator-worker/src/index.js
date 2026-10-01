@@ -1,8 +1,8 @@
 // Cloudflare Worker: catalog-based diet-plan generator API.
 //
 // POST /generate  — body: {
-//   dietaryTypeId, secondaryTypeId, goal ('lose'|'gain'|'maintain'),
-//   kilocalorieNeeded, allergyNames?, conditionNames?, firstName?, lastName?
+//   dietaryTypeId, secondaryTypeId, goal ('lose'|'recomp'|'gain'|'maintain'),
+//   kilocalorieNeeded, weight?, allergyNames?, conditionNames?, firstName?, lastName?
 // }
 // Returns the FIT /v3/generate response shape (foodDishByCategoryMap …) built
 // from our curated catalog, so any site that already renders the FIT response
@@ -46,15 +46,16 @@ export default {
     const rawKcal = parseFloat(body.kilocalorieNeeded) || 0
     if (!rawKcal) return json({ error: 'kilocalorieNeeded is required' }, 400, origin)
 
-    // The client actually eats the goal-adjusted amount (−500 lose / +500 gain);
+    // The client actually eats the goal-adjusted amount (see GOAL_KCAL_SHIFT);
     // generate meals at that level but echo back the raw TDEE for header display.
     const dailyKcal = goalAdjustedKcal(rawKcal, goal)
 
     try {
       const { plan } = await generateCatalogPlan(
-        { dietaryTypeId: body.dietaryTypeId || '', secondaryTypeId: body.secondaryTypeId || '' },
+        // weight lets a Shape Up ('recomp') plan be checked against its protein floor
+        { dietaryTypeId: body.dietaryTypeId || '', secondaryTypeId: body.secondaryTypeId || '', weight: body.weight },
         { allergyNames: body.allergyNames || [], conditionNames: body.conditionNames || [] },
-        { dailyKcal, fullName: [body.firstName, body.lastName].filter(Boolean).join(' ') },
+        { dailyKcal, goal, fullName: [body.firstName, body.lastName].filter(Boolean).join(' ') },
       )
       return json(toFitDietPlanResponse(plan, { kcalTotalNeeded: rawKcal }), 200, origin)
     } catch (e) {

@@ -9,7 +9,7 @@
 import {
   optionFromCatalog, scaleOptionToKcal, rankByPortion, MAX_OPTIONS_PER_MEAL,
   MEAL_DEFS, optionWeight, MEAL_WEIGHT_CAP, autofillArabic, formatAmount,
-  buildAssessment,
+  buildAssessment, typicalDayProtein, proteinRangeFor,
 } from './planModel'
 import { processOption, canonicalTokens, norm } from './dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
@@ -33,14 +33,30 @@ export function slotTargetKcal(slot, daily, isIF) {
  * Build a full plan model from the catalog.
  * @param payload {dietaryTypeId, secondaryTypeId} — diet + IF flag
  * @param restrictions {allergyNames?, conditionNames?}
- * @param ctx {dailyKcal (goal-adjusted), fullName?, dob?, testDate?, nextCheckup?, goalText?}
+ * @param ctx {dailyKcal (goal-adjusted), goal?, fullName?, dob?, testDate?, nextCheckup?, goalText?}
  */
-export async function generateCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}) {
+export async function generateCatalogPlan(payload, restrictions = {}, ctx = {}) {
+  const result = buildCatalogPlan(payload, restrictions, ctx, false)
+  // Shape Up (recomposition) needs ≥1.6 g protein per kg. The catalog usually
+  // gets there on its own, so only when it doesn't, rebuild favouring
+  // protein-dense dishes — always favouring them would push most plans well
+  // past the 2.2 g/kg top of the range. Keep whichever plan has more protein;
+  // if neither reaches the floor, validatePlan flags it for the dietitian.
+  if (ctx.goal !== 'recomp') return result
+  const min = (parseFloat(payload.weight) || 0) * proteinRangeFor('recomp')[0]
+  if (!min || typicalDayProtein(result.plan) >= min) return result
+  const boosted = buildCatalogPlan(payload, restrictions, ctx, true)
+  return typicalDayProtein(boosted.plan) > typicalDayProtein(result.plan) ? boosted : result
+}
+
+function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}, highProtein = false) {
   const tokens = canonicalTokens([...allergyNames, ...conditionNames])
   const isIF = payload.secondaryTypeId === 'IntermittentFasting'
   const diet = payload.dietaryTypeId
   const daily = ctx.dailyKcal || 0
   const substitutions = []
+  // Share of the dish's calories that come from protein (4 kcal per gram).
+  const proteinDensity = (o) => (o.kcal ? ((o.macros?.protein || 0) * 4) / o.kcal : 0)
 
   // Review §4.2 — disliked ingredients. Unlike an allergy this is a preference,
   // not a safety rule: a dish containing one is ranked out rather than dropped,
@@ -95,6 +111,19 @@ export async function generateCatalogPlan(payload, { allergyNames = [], conditio
     const tol = Math.max(60, target * 0.12)
     const inBand = sorted.filter((o) => rank(o) === 0 && Math.abs(o.kcal - target) <= tol)
     let pool = inBand.length >= 3 ? inBand : sorted
+
+    // Protein-first pass (Shape Up plans that came up short — see
+    // generateCatalogPlan). Among dishes that already fit this meal's calories,
+    // prefer the most protein-dense, keeping the top half — enough to fill the
+    // table and still vary on regenerate. Phase 2 re-sorts the chosen few by
+    // calorie fit, so the daily total holds.
+    if (highProtein) {
+      const fit = pool.filter((o) => rank(o) === 0)
+      const rest = pool.filter((o) => rank(o) !== 0)
+      fit.sort((a, b) => proteinDensity(b) - proteinDensity(a))
+      const keep = Math.max(MAX_OPTIONS_PER_MEAL * 2, Math.ceil(fit.length / 2))
+      pool = [...fit.slice(0, keep), ...rest]
+    }
 
     // Regenerating should offer a genuinely different selection, not recompute an
     // identical plan — there are usually far more in-band candidates than the

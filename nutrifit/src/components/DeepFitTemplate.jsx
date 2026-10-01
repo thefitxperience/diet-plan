@@ -32,7 +32,7 @@ import {
   ABOUT_SECTION, ABOUT_BLOCKS, GUIDELINES_SECTION, GUIDELINES_INTRO,
   HYDRATION, PROTEIN, GROUPS_SECTION, GROUPS, VEG_FRUIT, SLEEP,
 } from './deepfitGuidelines'
-import { formatAmount, ingredientState } from '../lib/planModel'
+import { formatAmount, ingredientState, proteinRangeFor } from '../lib/planModel'
 import './deepfit.css'
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/plan/${name}`
@@ -308,6 +308,7 @@ const ASSESS = {
   lose: 'Your goal is to lose weight, so your daily target works out to {target} kcal — about {shift} kcal below that level, a pace that protects muscle while body fat comes down.',
   gain: 'Your goal is to gain weight, so your daily target works out to {target} kcal — about {shift} kcal above that level, enough to build up gradually rather than all at once.',
   maintain: 'Your goal is to maintain your current weight, so your daily target works out to {target} kcal, in line with what your body uses.',
+  recomp: 'Your goal is to lose fat and build muscle, so your daily target is {target} kcal — about {shift} kcal below that level. Track progress with your next InBody, not the scale.',
   adjusted: 'Your dietitian reviewed these figures against your full assessment and set your final daily target at {final} kcal.',
 }
 
@@ -334,7 +335,7 @@ function AssessmentSummary({ assessment: a, dailyKcal, t }) {
     ? tpl(ASSESS.energy, { bmr: kcal(a.bmr), maintenance: kcal(a.maintenanceKcal) })
     : tpl(ASSESS.energyShort, { maintenance: kcal(a.maintenanceKcal || a.bmr) })
 
-  const goalKey = a.goal === 'lose' ? ASSESS.lose : a.goal === 'gain' ? ASSESS.gain : ASSESS.maintain
+  const goalKey = ASSESS[a.goal] || ASSESS.maintain
   const goalLine = tpl(goalKey, {
     target: kcal(adjusted ? a.recommendedKcal : final),
     shift: kcal(Math.abs(a.goalShift)),
@@ -364,6 +365,7 @@ function AssessmentSummary({ assessment: a, dailyKcal, t }) {
 // "500 kcal below maintenance" — the one-line gloss under the daily target.
 const TARGET_NOTE = {
   lose: '{shift} kcal below maintenance',
+  recomp: '{shift} kcal below maintenance',
   gain: '{shift} kcal above maintenance',
   maintain: 'in line with maintenance',
 }
@@ -376,11 +378,11 @@ function targetNote(a, t) {
   return t.ui(key).split('{shift}').join(t.num(shift))
 }
 
-// Daily protein range, derived from body weight at the rate the guidelines
-// quote (1.2–1.6 g/kg). Not stored on the plan — it is presentation arithmetic.
+// Daily protein range, derived from body weight at the goal's rate (1.2–1.6
+// g/kg; 1.6–2.2 for Shape Up). Not stored on the plan — presentation arithmetic.
 function proteinRange(a, t) {
   if (!a?.weight) return ''
-  const [lo, hi] = PROTEIN.gPerKg
+  const [lo, hi] = proteinRangeFor(a.goal)
   return t.num(`${Math.round(a.weight * lo)}–${Math.round(a.weight * hi)} g`)
 }
 
@@ -596,7 +598,7 @@ export default function DeepFitTemplate({
                 </div>
                 <div className="deepfit-protein">
                   <div className="deepfit-block-title">{t.title(PROTEIN)}</div>
-                  <div className="deepfit-protein-note">{t.para(PROTEIN.note)}</div>
+                  <div className="deepfit-protein-note">{t.para(a?.goal === 'recomp' ? PROTEIN.noteRecomp : PROTEIN.note)}</div>
                   {range && (
                     <div className="deepfit-protein-figure">
                       <Mono className="deepfit-figure-value">{range}</Mono>
