@@ -587,12 +587,20 @@ export const MIN_SAFE_KCAL = 1450
 // `floor` is the approving practitioner's own minimum, which they set themselves —
 // thresholds differ between dietitians, so it must not be imposed globally.
 // MIN_SAFE_KCAL is only the default when they haven't set one.
+// How far under BMR a target may sit before it is flagged. A standard Lean Down
+// plan (maintenance − 500) lands a little under BMR for most clients who aren't
+// very active, so flagging any shortfall fired on nearly every weight-loss plan
+// before anyone had touched it. More than 15% under is a steep deficit worth a look.
+export const BMR_WARNING_MARGIN = 0.15
+
 export function planCalorieWarnings({ bmr = 0, multiplier = 0, goal = 'maintain', targetKcal = 0, maintenanceKcal = 0, floor = MIN_SAFE_KCAL } = {}) {
   const w = []
   const t = Math.round(targetKcal || 0)
   const fl = Math.round(floor || MIN_SAFE_KCAL)
   if (t && t < fl) w.push({ code: 'belowFloor', floor: fl, target: t })
-  if (bmr && t && t < Math.round(bmr)) w.push({ code: 'belowBmr', bmr: Math.round(bmr), target: t })
+  if (bmr && t && t < bmr * (1 - BMR_WARNING_MARGIN)) {
+    w.push({ code: 'belowBmr', bmr: Math.round(bmr), target: t, pct: Math.round((1 - t / bmr) * 100) })
+  }
   if (bmr && t && t > bmr * 2.4) w.push({ code: 'implausiblyHigh', bmr: Math.round(bmr), target: t })
   // Very high self-reported activity swings the target a lot — flag it so the
   // dietitian sanity-checks the questionnaire (the "heavy exercise" case).

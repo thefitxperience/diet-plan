@@ -177,7 +177,7 @@
   "wizard.caloriesHint": "Enter manually or auto-calculated from BMR and activity level",
   "wizard.goalAdjustedNote": "The client will eat about {target} kcal/day for {goal}.",
   "wizard.warn.belowFloor": "Target {target} kcal is below the recommended floor of {floor} kcal — confirm this is intentional before generating.",
-  "wizard.warn.belowBmr": "Target {target} kcal is below the client's estimated BMR ({bmr} kcal).",
+  "wizard.warn.belowBmr": "Target {target} kcal is {pct}% below the client's estimated BMR ({bmr} kcal). That is a steep deficit, so confirm it is intended.",
   "wizard.warn.implausiblyHigh": "Target {target} kcal is unusually high relative to BMR ({bmr} kcal) — double-check the inputs.",
   "wizard.warn.highActivity": "A high self-reported activity level is driving this target up — verify the activity selection.",
   "wizard.warn.raisedToMinimum": "The goal would put this client at {raw} kcal, so the target was raised to the {min} kcal minimum.",
