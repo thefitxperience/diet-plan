@@ -11,7 +11,7 @@ import {
   MEAL_DEFS, optionWeight, MEAL_WEIGHT_CAP, autofillArabic, formatAmount,
   buildAssessment, typicalDayProtein, proteinRangeFor,
 } from './planModel'
-import { processOption, canonicalTokens, norm } from './dietaryRules'
+import { processOption, canonicalTokens, norm, makeDislikeMatcher } from './dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
 
 const SLOT_CONTRIB = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
@@ -58,13 +58,15 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
   // Share of the dish's calories that come from protein (4 kcal per gram).
   const proteinDensity = (o) => (o.kcal ? ((o.macros?.protein || 0) * 4) / o.kcal : 0)
 
-  // Review §4.2 — disliked ingredients. Unlike an allergy this is a preference,
-  // not a safety rule: a dish containing one is ranked out rather than dropped,
-  // so a long dislike list can never leave a meal empty. Matched against the
-  // ORIGINAL name too, so an allergy swap can't smuggle a disliked food back in.
-  const disliked = new Set(dislikedIngredients.map(norm).filter(Boolean))
-  const isDisliked = (opt) => disliked.size > 0 && (opt.ingredients || [])
-    .some((ing) => disliked.has(norm(ing.name_en)) || disliked.has(norm(ing.original_en)))
+  // Review §4.2 — foods to avoid. Matched by food family (avoiding almonds
+  // removes almond milk too; see makeDislikeMatcher) and against the ORIGINAL
+  // name, so an allergy swap can't smuggle a disliked food back in. A dish
+  // containing one is left out; it only returns as a last resort, when a meal
+  // would otherwise have fewer than MIN_OPTIONS_PER_MEAL options.
+  const avoids = makeDislikeMatcher(dislikedIngredients)
+  const isDisliked = (opt) => (opt.ingredients?.length
+    ? opt.ingredients.some((ing) => avoids(ing.name_en) || avoids(ing.original_en))
+    : avoids(opt.name_en))
 
   // ── Phase 1: rank each meal's candidates against its own calorie target ─────
   // Most catalog dishes belong to more than one category (a steak is both lunch
@@ -110,7 +112,9 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
     // never thin.
     const tol = Math.max(60, target * 0.12)
     const inBand = sorted.filter((o) => rank(o) === 0 && Math.abs(o.kcal - target) <= tol)
-    let pool = inBand.length >= 3 ? inBand : sorted
+    // Fallback for thin meals: closest first, but never a disliked dish here —
+    // phase 2 tops a meal up to MIN_OPTIONS_PER_MEAL from `sorted` if needed.
+    let pool = inBand.length >= 3 ? inBand : sorted.filter((o) => !isDisliked(o))
 
     // Protein-first pass (Shape Up plans that came up short — see
     // generateCatalogPlan). Among dishes that already fit this meal's calories,
@@ -216,6 +220,14 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
     // increments it so each regeneration offers a different selection.
     variant: Math.max(0, Math.trunc(ctx.variant || 0)),
     isIF,
+    // Who the plan is for, so the PDF's food-groups page can leave out what this
+    // client can't or won't eat (personaliseFoodGroups).
+    restrictions: {
+      diet: payload.dietaryTypeId || '',
+      allergies: allergyNames,
+      conditions: conditionNames,
+      dislikes: dislikedIngredients,
+    },
     meals,
   })
   return { plan: model, apiResponse: { source: 'catalog', mealCount: mealCatalog.length }, substitutions, attempts: 0 }

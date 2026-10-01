@@ -9,13 +9,13 @@ import { useAuth } from '../auth/AuthProvider'
 import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, BackButton, StepProgress } from '../components/ui'
 import {
-  fetchLookups, activityDisplayName, sortActivities, activityMultiplier,
-  dietaryDisplayName, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
-  GOALS, GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
-} from '../lib/fitApi'
-import { generateCatalogPlan } from '../lib/planGenerator'
+  ACTIVITIES, DIETARY_TYPES, activityDisplayName, sortActivities, activityMultiplier,
+  dietaryDisplayName, sortDietaryTypes,
+  GOALS, GOAL_LABELS, PLAN_TYPE_IDS, PLAN_STYLE_IDS, calcAge,
+} from '../lib/lookups'
+import { generateCatalogPlan } from '../lib/catalogGenerator'
 import { goalAdjustedKcal, planCalorieWarnings, stampPlanChecks } from '../lib/planModel'
-import { restrictionLabel } from '../lib/restrictionNames'
+import { restrictionLabel, CONDITIONS, ALLERGIES } from '../lib/restrictionNames'
 import { DislikePicker } from '../components/PreferenceFields'
 
 export default function NewPlan() {
@@ -26,7 +26,6 @@ export default function NewPlan() {
 
   const [client, setClient] = useState(null)
   const [inbodyList, setInbodyList] = useState(null)
-  const [lookups, setLookups] = useState(null)
   const [error, setError] = useState(null)
   const [step, setStep] = useState(1)
   const [generating, setGenerating] = useState(false)
@@ -43,11 +42,9 @@ export default function NewPlan() {
     Promise.all([
       supabase.from('clients').select('*').eq('id', clientId).single(),
       supabase.from('inbody_results').select('*').eq('client_id', clientId).order('created_at', { ascending: false }),
-      fetchLookups().catch((e) => { setError(`Lookup API unreachable: ${e.message}`); return null }),
-    ]).then(([{ data: c }, { data: ib }, lk]) => {
+    ]).then(([{ data: c }, { data: ib }]) => {
       setClient(c)
       setInbodyList(ib || [])
-      setLookups(lk)
       if (ib?.length) applyInbody(ib[0])
     })
   }, [clientId])
@@ -67,34 +64,29 @@ export default function NewPlan() {
     }))
   }
 
-  const activities = useMemo(() => lookups ? sortActivities(lookups.activities) : [], [lookups])
-  const conditions = useMemo(
-    () => (lookups?.conditions || []).filter((c) => !EXCLUDED_CONDITIONS.includes(c.conditionName)),
-    [lookups]
-  )
-  const allergies = useMemo(
-    () => (lookups?.allergies || []).filter((a) => !EXCLUDED_ALLERGIES.includes(a.allergyName)),
-    [lookups]
-  )
+  const activities = sortActivities(ACTIVITIES)
+  const dietaryTypes = sortDietaryTypes(DIETARY_TYPES)
+  const conditions = CONDITIONS
+  const allergies = ALLERGIES
 
   // Daily calories auto-calc: BMR × activity multiplier, manual override allowed
   useEffect(() => {
-    if (form.caloriesTouched || !form.bmr || !form.activityId || !lookups) return
-    const act = lookups.activities.find((a) => a.enumId === form.activityId)
+    if (form.caloriesTouched || !form.bmr || !form.activityId) return
+    const act = ACTIVITIES.find((a) => a.enumId === form.activityId)
     const mult = activityMultiplier(act)
     if (mult) setForm((f) => ({ ...f, calories: Math.round(parseFloat(f.bmr) * mult) }))
-  }, [form.bmr, form.activityId, form.caloriesTouched, lookups])
+  }, [form.bmr, form.activityId, form.caloriesTouched])
 
   // Non-blocking clinical sanity checks on the calorie target (floor, plausible
   // range, high self-reported activity). Shown on the calories step.
   const calorieInfo = useMemo(() => {
     const bmr = parseFloat(form.bmr) || 0
     const maintenance = parseFloat(form.calories) || 0
-    const act = lookups?.activities?.find((a) => a.enumId === form.activityId)
+    const act = ACTIVITIES.find((a) => a.enumId === form.activityId)
     const multiplier = act ? (activityMultiplier(act) || 0) : 0
     const target = goalAdjustedKcal(maintenance, form.goal)
     return { target, warnings: planCalorieWarnings({ bmr, multiplier, goal: form.goal, targetKcal: target, maintenanceKcal: maintenance }) }
-  }, [form.bmr, form.calories, form.activityId, form.goal, lookups])
+  }, [form.bmr, form.calories, form.activityId, form.goal])
 
   if (!client || inbodyList === null) return <Loading />
 
@@ -116,9 +108,8 @@ export default function NewPlan() {
     setGenerating(true)
     setError(null)
     try {
-      const typeId = matchTypeId(lookups.planTypes, GOAL_KEYWORDS[form.goal], 'typeId')
-      const secondaryTypeId = matchTypeId(lookups.planSecondaryTypes, PLAN_STYLE_KEYWORDS[form.planStyle], 'secondaryTypeId')
-      if (!typeId || !secondaryTypeId) throw new Error('Could not resolve goal/plan style IDs from the API lookups')
+      const typeId = PLAN_TYPE_IDS[form.goal]
+      const secondaryTypeId = PLAN_STYLE_IDS[form.planStyle]
 
       const payload = {
         firstName: client.first_name,
@@ -167,7 +158,7 @@ export default function NewPlan() {
           dailyKcal: goalAdjustedKcal(payload.kilocalorieNeeded, form.goal),
           goalText: GOAL_LABELS[form.goal],
           goal: form.goal,
-          activityMultiplier: activityMultiplier(lookups?.activities?.find((a) => a.enumId === form.activityId)) || 0,
+          activityMultiplier: activityMultiplier(ACTIVITIES.find((a) => a.enumId === form.activityId)) || 0,
         },
       )
       planModel.dietary = { substitutions } // silent audit trail
@@ -214,7 +205,6 @@ export default function NewPlan() {
 
       {step === 1 && (
         <div className="card">
-          {!lookups && <Alert kind="warn">Lookups not loaded — check the network / proxy.</Alert>}
           <div className="grid cols-2">
             <Field label={t('wizard.activity')} required>
               <select value={form.activityId} onChange={set('activityId')}>
@@ -227,7 +217,7 @@ export default function NewPlan() {
             <Field label={t('wizard.dietaryType')} required>
               <select value={form.dietaryTypeId} onChange={set('dietaryTypeId')}>
                 <option value="">{t('wizard.selectDietary')}</option>
-                {(lookups?.dietaryTypes || []).map((d) => (
+                {dietaryTypes.map((d) => (
                   <option key={d.dietaryTypeId} value={d.dietaryTypeId}>{dietaryDisplayName(d.dietaryTypeName, lang)}</option>
                 ))}
               </select>
@@ -355,7 +345,7 @@ export default function NewPlan() {
             {t('common.next')}
           </button>
         ) : (
-          <button className="btn" disabled={generating || !lookups} onClick={generate}>
+          <button className="btn" disabled={generating} onClick={generate}>
             {generating ? <>{t('wizard.generating')} <Spinner /></> : t('wizard.generate')}
           </button>
         )}

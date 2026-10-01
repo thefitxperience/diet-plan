@@ -31,9 +31,6 @@ jobs:
         env:
           VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
-          VITE_FIT_PROXY_URL: ${{ vars.VITE_FIT_PROXY_URL }}
-          VITE_FIT_API_USER: ${{ vars.VITE_FIT_API_USER }}
-          VITE_FIT_API_PASS: ${{ vars.VITE_FIT_API_PASS }}
           VITE_EMAILJS_SERVICE_ID: ${{ vars.VITE_EMAILJS_SERVICE_ID }}
           VITE_EMAILJS_TEMPLATE_ID: ${{ vars.VITE_EMAILJS_TEMPLATE_ID }}
           VITE_EMAILJS_PUBLIC_KEY: ${{ vars.VITE_EMAILJS_PUBLIC_KEY }}

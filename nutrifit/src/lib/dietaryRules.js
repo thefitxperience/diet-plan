@@ -42,6 +42,72 @@ function entryFor(name) {
   return data.ingredients[norm(name)] || null
 }
 
+// Allergens the FIT restriction table doesn't cover: peanut, milk (a protein
+// allergy, unlike lactose intolerance, so lactose-free dairy is unsafe too) and
+// fish (the table's "seafood allergy" lumps fish with shellfish). Matched on
+// the ingredient name; there is no designed swap, so a dish containing one is
+// dropped for that client. Tokens are the normalised allergy names.
+const PLANT_BASED = /\b(almond|oat|soy|soya|coconut|cashew|rice|peanut|hazelnut|vegan)\b/
+const DAIRY = /\b(milk|cheese|cheddar|feta|halloum|halloumi|mozzarella|mozarella|parmesan|ricotta|labneh|labne|yogh?urt|butter|buttermilk|cream|crème|whey|ghee|cottage|latte|kefir|akkawi|kashkaval|paneer|gorgonzola|brie|jameed|caesar)\b/
+const FISH = /\b(fish|salmon|tuna|cod|sardines?|anchov(y|ies)|mackerel|hammour|tilapia|trout|halibut|sea bass|caesar)\b/
+export const LOCAL_ALLERGENS = {
+  'peanut allergy': (n) => /\bpeanuts?\b/.test(n),
+  'milk allergy': (n) => DAIRY.test(n) && !PLANT_BASED.test(n),
+  'fish allergy': (n) => FISH.test(n),
+}
+
+// Every restriction an ingredient is unsuitable for: the FIT table's, plus ours.
+function restrictionsOf(name, listed = entryFor(name)?.restrictions || []) {
+  const n = norm(name)
+  const local = Object.keys(LOCAL_ALLERGENS).filter((tok) => LOCAL_ALLERGENS[tok](n))
+  return local.length ? [...listed, ...local] : listed
+}
+
+// ── Foods to avoid ───────────────────────────────────────────────────────────
+// Dislikes are picked as exact catalog names ("Almonds", "Eggs, whole"), but a
+// client who avoids almonds means almond milk and almond butter too. So each
+// dislike is reduced to its food — the name before the first comma, minus
+// cooking/portion words, singular — and any ingredient naming that food matches.
+// "Black beans" stays black beans; "Fish, salmon" means salmon, not all fish.
+const QUALIFIERS = new Set(['whole', 'cooked', 'raw', 'boiled', 'grilled', 'baked', 'roasted', 'steamed', 'fried',
+  'fresh', 'frozen', 'dried', 'canned', 'drained', 'or', 'and', 'with', 'without', 'plain', 'unsweetened', 'small',
+  'medium', 'large', 'full', 'fat', 'low', 'free', 'skimmed', 'half', 'reduced', 'light', 'lean', 'skinless', 'skin',
+  'breast', 'thigh', 'fillet', 'strip', 'slice', 'sliced', 'minced', 'ground', 'chopped', 'scrambled', 'unpeeled'])
+// Generic heads that need the next part of the name to say which food it is.
+const CATEGORY_HEADS = new Set(['fish', 'shellfish', 'oil', 'cheese'])
+// One-word foods that plant products borrow ("almond milk" is not milk).
+const BORROWED = new Set(['milk', 'butter', 'cream', 'yogurt', 'latte', 'cheese', 'flour'])
+// Words that make a different food of the same name (sweet potato ≠ potato).
+const DISTINCT = new Set(['sweet'])
+
+const singular = (w) => (w.endsWith('ies') ? `${w.slice(0, -3)}y`
+  : w.endsWith('oes') ? w.slice(0, -2)
+    : w.length > 3 && w.endsWith('s') && !w.endsWith('ss') ? w.slice(0, -1) : w)
+export const foodWords = (text) => norm(text).replace(/[^a-z\u00c0-\u024f\s]/g, ' ').split(/\s+/).filter(Boolean).map(singular)
+
+function dislikeKey(name) {
+  const segments = norm(name).split(',').map((s) => foodWords(s))
+  let words = segments[0] || []
+  if (words.length === 1 && CATEGORY_HEADS.has(words[0]) && segments[1]) words = [...words, ...segments[1]]
+  words = words.filter((w) => !QUALIFIERS.has(w))
+  // "Fish, salmon" → salmon: the generic word goes once something specific remains.
+  const specific = words.filter((w) => w !== 'fish' && w !== 'shellfish')
+  return specific.length ? specific : words
+}
+
+/** (name) => true when the named food or ingredient is one the client avoids. */
+export function makeDislikeMatcher(dislikes = []) {
+  const keys = dislikes.map(dislikeKey).filter((k) => k.length)
+  if (!keys.length) return () => false
+  return (name) => {
+    if (!name) return false
+    const have = new Set(foodWords(name))
+    return keys.some((key) => key.every((w) => have.has(w))
+      && !(key.length === 1 && BORROWED.has(key[0]) && PLANT_BASED.test(norm(name)))
+      && ![...DISTINCT].some((w) => have.has(w) && !key.includes(w)))
+  }
+}
+
 // Swap the unsuitable ingredients of one option in place (targeted, quantity-
 // preserving). Returns { swaps, conflicts } for the option:
 //   swaps     – substitutions applied to ingredients that had a safe alternative
@@ -60,10 +126,9 @@ export function processOption(opt, tokens) {
   for (const slot of slots) {
     const name = slot.get()
     const entry = entryFor(name)
-    if (!entry) continue // unknown item — nothing we can assert
-    const violated = conflicts(entry.restrictions)
+    const violated = conflicts(restrictionsOf(name, entry?.restrictions || []))
     if (!violated.length) continue
-    const safeAlt = (entry.alternatives || []).find((alt) => conflicts(alt.restrictions).length === 0)
+    const safeAlt = (entry?.alternatives || []).find((alt) => conflicts(restrictionsOf(alt.name, alt.restrictions)).length === 0)
     if (safeAlt) {
       slot.orig(name)
       slot.set(safeAlt.name)

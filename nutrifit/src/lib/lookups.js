@@ -1,52 +1,25 @@
-// FIT generation API client (plan §4). All calls go through the Cloudflare
-// Worker proxy (GitHub Pages is HTTPS, the API is HTTP).
+// The questionnaire's option lists — diet types, activity levels, goals and
+// plan styles — and their display helpers. These were fetched from the FIT API
+// on every page load; they are fixed, so they live here now and the app no
+// longer calls that API at all. (Conditions and allergies: restrictionNames.)
+//
+// The ids are the API's own, kept identical so saved questionnaires and the
+// meal catalog's diet tags still line up: dietaryTypeId is matched against each
+// dish's `diets`, and the generator reads secondaryTypeId === 'IntermittentFasting'.
 
-const PROXY = import.meta.env.VITE_FIT_PROXY_URL || 'https://fit-proxy.andyayas27.workers.dev'
-const BASE = `${PROXY}/rest/s1/fit/dietPlan`
+const ids = (field, values) => values.map((v) => ({ [`${field}Id`]: v, [`${field}Name`]: v }))
 
-// Known debt (§11): credentials in client JS — move into the Worker later.
-const AUTH = 'Basic ' + btoa(
-  `${import.meta.env.VITE_FIT_API_USER || 'fit'}:${import.meta.env.VITE_FIT_API_PASS || 'Fit@2024'}`
-)
+export const DIETARY_TYPES = ids('dietaryType', ['Halal', 'Keto', 'Kosher', 'Omnivore', 'Pescatarian', 'Vegan', 'Vegetarian'])
 
-const HEADERS = { 'Content-Type': 'application/json', Authorization: AUTH }
-
-async function get(path) {
-  const res = await fetch(`${BASE}${path}`, { headers: HEADERS })
-  if (!res.ok) throw new Error(`${path} failed: ${res.status}`)
-  return res.json()
-}
-
-let lookupsCache = null
-
-export async function fetchLookups() {
-  if (lookupsCache) return lookupsCache
-  const [dietaryTypes, activities, conditions, allergies, planTypes, planSecondaryTypes] =
-    await Promise.all([
-      get('/dietaryType'), get('/activity'), get('/condition'),
-      get('/allergy'), get('/planType'), get('/planSecondaryType'),
-    ])
-  lookupsCache = {
-    dietaryTypes: dietaryTypes.dietaryTypeList || [],
-    activities: activities.activityList || [],
-    conditions: conditions.conditionList || [],
-    allergies: allergies.allergyList || [],
-    planTypes: planTypes.planTypeList || [],
-    planSecondaryTypes: planSecondaryTypes.planSecondaryTypeList || [],
-  }
-  return lookupsCache
-}
-
-export async function generatePlan(payload) {
-  const res = await fetch(`${BASE}/v3/generate`, {
-    method: 'POST',
-    headers: HEADERS,
-    body: JSON.stringify(payload),
-  })
-  const text = await res.text()
-  if (!res.ok) throw new Error(`Generate failed: ${res.status} — ${text.slice(0, 300)}`)
-  return JSON.parse(text)
-}
+// Descriptions carry the keywords the helpers below read (multiplier, display
+// name, order). The editor reads the id as words ("Alt Moderately Active").
+export const ACTIVITIES = [
+  { enumId: 'AltSedentary', description: 'Sedentary' },
+  { enumId: 'AltLightlyActive', description: 'Lightly Active' },
+  { enumId: 'AltModeratelyActive', description: 'Moderately Active' },
+  { enumId: 'AltVeryActive', description: 'Very Active' },
+  { enumId: 'AltExtraActive', description: 'Extra Active' },
+]
 
 // ── Display-name mappings ported from the demo ───────────────────────
 
@@ -119,7 +92,7 @@ export function activityMultiplier(activity) {
   return null
 }
 
-// Matched by keyword against the API's dietaryTypeName. Order here is the order
+// Matched by keyword against dietaryTypeName. Order here is the order
 // the intake shows them in. `desc` is the one-liner shown to clients under the name.
 const DIETARY_DISPLAY = [
   ['halal', {
@@ -174,39 +147,15 @@ export function sortDietaryTypes(types) {
   return [...types].sort((a, b) => idx(a) - idx(b))
 }
 
-// Conditions/allergies hidden in the demo questionnaire
-export const EXCLUDED_CONDITIONS = [
-  'Cardiovascular Diseases', 'Diabetes', 'Nut allergy', 'Thyroid Dysfunction',
-  'GERD (Acid Reflux)', 'hyperkaliemia', 'Oral Allergy Syndrome', 'Chronic Kidney Disease',
-]
-export const EXCLUDED_ALLERGIES = [
-  'Phenylketonuria', 'Celiac Disease', 'Celiac Disease / Gluten Sensitivity', 'Latex-Fruit Syndrome',
-]
-
-// Goal & plan-style radios map onto API plan types by keyword (demo logic).
-// Plans are generated from our own catalog now, so the API type is only
-// recorded on the questionnaire — but it must resolve or submission stops.
-// The API has no recomposition type, so Shape Up records the maintenance one.
-export const GOAL_KEYWORDS = {
-  maintain: ['maintenance', 'maintain'],
-  lose: ['weight loss', 'lose', 'fat loss'],
-  recomp: ['maintenance', 'maintain'],
-  gain: ['weight gain', 'gain', 'muscle gain'],
-}
 // Order is the order goals are offered in. These are the clinical names shown
 // on the PDF and staff screens; the intake uses the client-facing wizard.goal.*.
 export const GOAL_LABELS = { maintain: 'Maintenance', lose: 'Weight Loss', recomp: 'Body Recomposition', gain: 'Weight Gain' }
 export const GOALS = Object.keys(GOAL_LABELS)
 
-export const PLAN_STYLE_KEYWORDS = {
-  normal: ['default', 'normal', 'regular', 'standard'],
-  if: ['intermittent fasting', 'if', 'fasting'],
-}
-
-export function matchTypeId(list, keywords, idField, nameField = 'typeName') {
-  const m = list.find((t) => keywords.some((k) => (t[nameField] || '').toLowerCase().includes(k)))
-  return m ? m[idField] : null
-}
+// The API's plan-type ids, recorded on the questionnaire for continuity. There
+// is no recomposition type, so Shape Up records Maintenance.
+export const PLAN_TYPE_IDS = { maintain: 'Maintenance', lose: 'WeightLoss', recomp: 'Maintenance', gain: 'WeightGain' }
+export const PLAN_STYLE_IDS = { normal: 'Default', if: 'IntermittentFasting' }
 
 export function calcAge(dateOfBirth) {
   if (!dateOfBirth) return 0

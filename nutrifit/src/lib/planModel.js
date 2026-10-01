@@ -96,8 +96,18 @@ export const MEAL_KCAL_RATIO = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, sna
 // higher protein (PROTEIN_G_PER_KG) and strength training rather than calories.
 // Returns the intake the client actually eats — the plan's daily total.
 export const GOAL_KCAL_SHIFT = { lose: -500, recomp: -250, gain: 500, maintain: 0 }
+
+// Hard floor for any generated plan. A small, inactive client on Lean Down could
+// otherwise land around 600 kcal; dietitians don't prescribe below ~1,200. This
+// is separate from MIN_SAFE_KCAL (each practitioner's review threshold), which
+// only flags a plan — this one changes the target itself.
+export const MIN_PLAN_KCAL = 1200
+
+// No input (0) stays 0, so callers can still detect a missing maintenance figure.
 export function goalAdjustedKcal(kcal, goal) {
-  return Math.max(0, (parseFloat(kcal) || 0) + (GOAL_KCAL_SHIFT[goal] || 0))
+  const base = parseFloat(kcal) || 0
+  if (!base) return 0
+  return Math.max(MIN_PLAN_KCAL, base + (GOAL_KCAL_SHIFT[goal] || 0))
 }
 
 // Daily protein (g per kg body weight). Recomposition needs the higher range:
@@ -155,7 +165,10 @@ export function buildAssessment(payload = {}, ctx = {}) {
     activityMultiplier: num(ctx.activityMultiplier),
     maintenanceKcal,
     goal,
-    goalShift: GOAL_KCAL_SHIFT[goal] || 0,
+    // The shift actually applied: differs from GOAL_KCAL_SHIFT when the
+    // MIN_PLAN_KCAL floor lifted the target, and `floored` says so.
+    goalShift: maintenanceKcal ? goalAdjustedKcal(maintenanceKcal, goal) - maintenanceKcal : GOAL_KCAL_SHIFT[goal] || 0,
+    floored: !!maintenanceKcal && maintenanceKcal + (GOAL_KCAL_SHIFT[goal] || 0) < MIN_PLAN_KCAL,
     recommendedKcal: goalAdjustedKcal(maintenanceKcal, goal),
   }
 }
@@ -584,6 +597,9 @@ export function planCalorieWarnings({ bmr = 0, multiplier = 0, goal = 'maintain'
   // Very high self-reported activity swings the target a lot — flag it so the
   // dietitian sanity-checks the questionnaire (the "heavy exercise" case).
   if (multiplier && multiplier >= 1.725) w.push({ code: 'highActivity', multiplier })
+  // The goal would have gone below the hard floor, so generation raised it.
+  const raw = Math.round((maintenanceKcal || 0) + (GOAL_KCAL_SHIFT[goal] || 0))
+  if (maintenanceKcal && raw < MIN_PLAN_KCAL) w.push({ code: 'raisedToMinimum', raw, min: MIN_PLAN_KCAL })
   return w
 }
 

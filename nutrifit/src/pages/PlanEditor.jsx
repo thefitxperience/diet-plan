@@ -2,7 +2,7 @@
 // contextual inspector. Structured editing — edits mutate the plan model,
 // the template re-renders.
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, Link } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useI18n } from '../lib/i18n'
@@ -16,10 +16,11 @@ import {
   stampPlanChecks, mealShares, setMealShare, mealServings,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
-import { GOAL_LABELS, activityDisplayName } from '../lib/fitApi'
+import { planRestrictions } from '../lib/foodGroups'
+import { GOAL_LABELS, activityDisplayName } from '../lib/lookups'
 import mealCatalog from '../data/mealCatalog.json'
 import { arDigits } from '../lib/digits'
-import { generateCatalogPlan } from '../lib/planGenerator'
+import { generateCatalogPlan } from '../lib/catalogGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 import { useAuth } from '../auth/AuthProvider'
 import { listCustomMeals, saveCustomMeal } from '../lib/customMeals'
@@ -86,9 +87,16 @@ export default function PlanEditor() {
   const [exporting, setExporting] = useState(false)
 
   // Measure the preview column so "Fit width" tracks pane collapse and resizing.
+  // A callback ref, not a mount-time effect: the editor renders <Loading /> until
+  // the plan arrives, so the canvas mounts later. An effect that ran once on
+  // mount found no element and never measured, which left the preview at 100%
+  // and cut it off on smaller laptops.
   const canvasRef = useRef()
-  useEffect(() => {
-    const el = canvasRef.current
+  const canvasObserver = useRef()
+  const attachCanvas = useCallback((el) => {
+    canvasRef.current = el
+    canvasObserver.current?.disconnect()
+    canvasObserver.current = null
     if (!el || typeof ResizeObserver === 'undefined') return
     const ro = new ResizeObserver(() => {
       // clientWidth includes the canvas padding, so take it off — otherwise
@@ -98,7 +106,7 @@ export default function PlanEditor() {
       if (w > 0) setFitScale(Math.min(1.5, Math.max(0.4, w / PAGE_WIDTH)))
     })
     ro.observe(el)
-    return () => ro.disconnect()
+    canvasObserver.current = ro
   }, [])
   // Fixed 125% preview. Capped by the measured width so a narrower window can't
   // push the page wider than the column and bring back horizontal scrolling.
@@ -139,6 +147,11 @@ export default function PlanEditor() {
   // Pre-export sanity checks (header vs meal totals, option spread, macros,
   // units). Non-blocking — shown as a panel and echoed in the sign-off dialog.
   const validation = useMemo(() => (plan ? validatePlan(plan) : []), [plan])
+
+  // Older plans don't carry restrictions (who the plan is for); lend them the
+  // questionnaire's so the PDF's food-groups page is personalised all the same.
+  const previewPlan = useMemo(() => (plan && !plan.restrictions && row?.questionnaire
+    ? { ...plan, restrictions: planRestrictions(plan, row.questionnaire) } : plan), [plan, row?.questionnaire])
 
   // Clinical sanity checks on the calorie target itself. These previously only
   // ran in the new-plan wizard, so a target below the safe floor reached approval
@@ -551,10 +564,10 @@ export default function PlanEditor() {
 
       <div className="editor-shell">
         {/* canvas — no scroll container of its own: the page scrolls as one */}
-        <div className="editor-canvas" ref={canvasRef}>
+        <div className="editor-canvas" ref={attachCanvas}>
           <div className="editor-pages" style={{ zoom: scale }}>
           <DeepFitTemplate
-            plan={plan}
+            plan={previewPlan}
             lang={previewLang}
             gym={gym}
             selectable

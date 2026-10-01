@@ -242,7 +242,6 @@
 "Kosher",
 "Omnivore",
 "Pescatarian",
-"Vegan",
 "Vegetarian"
 ],
 "kcal": 463,
@@ -3606,7 +3605,6 @@
 ],
 "diets": [
 "Halal",
-"Kosher",
 "Omnivore"
 ],
 "kcal": 504,
@@ -4246,7 +4244,6 @@
 ],
 "diets": [
 "Halal",
-"Kosher",
 "Omnivore",
 "Pescatarian"
 ],

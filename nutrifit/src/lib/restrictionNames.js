@@ -1,6 +1,31 @@
-// Arabic labels for the medical-condition / allergy names that come from the
-// FIT API lookups (the API only returns English). Keyed by the exact English
-// name (conditionName / allergyName). Used to render the questionnaire in AR.
+// The medical conditions and allergies the questionnaires offer, and their
+// Arabic labels. These used to come from the FIT API, whose list had stray and
+// inconsistent entries ("Mellitus", "Thyroid" next to "Hyperthyroidism"); now
+// the list is ours. Only the NAME travels with a plan (the questionnaire's
+// conditionNames / allergyNames), and every name here must map to the tokens the
+// rules use — canonicalTokens() in dietaryRules, LOCAL_ALLERGENS, and
+// RESTRICTION_EXCLUDES in foodGroups. Adding one? Check it maps.
+
+const list = (field, names) => names.map((name) => ({
+  [`${field}Id`]: name.toLowerCase().replace(/[^a-z]+/g, '-').replace(/^-|-$/g, ''),
+  [`${field}Name`]: name,
+}))
+
+export const CONDITIONS = list('condition', [
+  'Cardiovascular Disease', 'Celiac Disease', 'Diabetes', 'Fatty Liver Disease', 'Favism',
+  'GERD (Acid Reflux)', 'Gout', 'Hemochromatosis', 'Histamine Intolerance', 'Hypercholesterolemia',
+  'Hyperkalemia', 'Hypertension', 'Hyperthyroidism', 'Hypoglycemia', 'IBS', 'Kidney Stones',
+  'Lactose Intolerance', 'Pancreatitis', 'Phenylketonuria', 'Thyroid Dysfunction', "Wilson's Disease",
+])
+
+export const ALLERGIES = list('allergy', [
+  'Egg Allergy', 'Fish Allergy', 'Gluten Sensitivity', 'Latex-Fruit Cross-Reactivity',
+  'Legume Family Cross-Reactivity', 'Milk Allergy', 'Nut Allergy', 'Oral Allergy Syndrome',
+  'Peanut Allergy', 'Seafood Allergy', 'Sesame Allergy', 'Soy Allergy', 'Wheat Allergy',
+])
+
+// Arabic labels, keyed by the exact English name. Older plans carry the FIT
+// API's spellings, so those stay here too.
 
 const AR = {
   // conditions
@@ -38,6 +63,9 @@ const AR = {
   'Celiac Disease': 'الداء البطني (حساسية القمح)',
   'Celiac Disease / Gluten Sensitivity': 'الداء البطني / حساسية الغلوتين',
   'Egg Allergy': 'حساسية البيض',
+  'Fish Allergy': 'حساسية السمك',
+  'Milk Allergy': 'حساسية الحليب',
+  'Peanut Allergy': 'حساسية الفول السوداني',
   'Gluten Sensitivity': 'حساسية الغلوتين',
   'Latex-Fruit Cross-Reactivity': 'التفاعل التحسّسي بين اللاتكس والفواكه',
   'Latex-Fruit Syndrome': 'متلازمة اللاتكس والفواكه',
@@ -46,8 +74,10 @@ const AR = {
   'Nut allergy': 'حساسية المكسرات',
   'Oral Allergy Syndrome': 'متلازمة حساسية الفم',
   'SeaFood Allergy': 'حساسية المأكولات البحرية',
+  'Seafood Allergy': 'حساسية المأكولات البحرية',
   'Sesame Allergy': 'حساسية السمسم',
   'Soy allergy': 'حساسية الصويا',
+  'Soy Allergy': 'حساسية الصويا',
   'Wheat Allergy': 'حساسية القمح',
 }
 

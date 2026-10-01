@@ -67,8 +67,9 @@ Pending users see a "waiting for approval" screen and have no data access
 1. Push this folder to a GitHub repo (`main` branch).
 2. Repo → Settings → Pages → Source: **GitHub Actions**.
 3. Repo → Settings → Secrets and variables → Actions → **Variables**: add
-   `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_FIT_PROXY_URL`,
-   `VITE_FIT_API_USER`, `VITE_FIT_API_PASS` (+ `VITE_EMAILJS_*` if used).
+   `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY` (+ `VITE_EMAILJS_*` if used).
+   The app no longer calls the FIT API: plans come from the in-app meal catalog
+   and the questionnaire lists are in `src/lib/lookups.js` / `restrictionNames.js`.
 4. Push — `.github/workflows/deploy.yml` builds and publishes automatically.
 
 All `VITE_*` values ship to the browser by design; authorization lives in
@@ -108,8 +109,6 @@ to `plan_events` (who, when, comment).
 
 ## Notes & known debts (plan §11)
 
-- FIT API basic-auth is still injected from client JS → move the header into
-  the Cloudflare Worker and strip `VITE_FIT_API_*`.
 - html2canvas PDFs are rasterized → server-side Puppeteer in Phase 2.
 - EmailJS public key is client-side with monthly caps → transactional provider later.
 - **InBody270** and **InBody380** parsing are validated against real samples,

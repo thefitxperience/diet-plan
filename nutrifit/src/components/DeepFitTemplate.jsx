@@ -32,8 +32,9 @@ import {
   ABOUT_SECTION, ABOUT_BLOCKS, GUIDELINES_SECTION, GUIDELINES_INTRO,
   HYDRATION, PROTEIN, GROUPS_SECTION, GROUPS, VEG_FRUIT, SLEEP,
 } from './deepfitGuidelines'
-import { formatAmount, ingredientState, proteinRangeFor } from '../lib/planModel'
-import { GOAL_LABELS } from '../lib/fitApi'
+import { formatAmount, ingredientState, proteinRangeFor, MIN_PLAN_KCAL } from '../lib/planModel'
+import { GOAL_LABELS } from '../lib/lookups'
+import { personaliseFoodGroups } from '../lib/foodGroups'
 import appEn from '../i18n/en.json'
 import appAr from '../i18n/ar.json'
 import './deepfit.css'
@@ -325,6 +326,7 @@ const ASSESS = {
   gain: 'Your goal is to gain weight, so your daily target works out to {target} kcal — about {shift} kcal above that level, enough to build up gradually rather than all at once.',
   maintain: 'Your goal is to maintain your current weight, so your daily target works out to {target} kcal, in line with what your body uses.',
   recomp: 'Your goal is to lose fat while building muscle, so your daily target works out to {target} kcal, about {shift} kcal below that level. This small gap lets muscle grow while body fat comes down. Your weight may barely move, so judge progress by your next InBody.',
+  floored: 'Your goal would take your daily target below {min} kcal, the minimum we recommend, so it is set at {target} kcal to keep your plan nutritionally complete.',
   adjusted: 'Your dietitian reviewed these figures against your full assessment and set your final daily target at {final} kcal.',
 }
 
@@ -351,10 +353,11 @@ function AssessmentSummary({ assessment: a, dailyKcal, t }) {
     ? tpl(ASSESS.energy, { bmr: kcal(a.bmr), maintenance: kcal(a.maintenanceKcal) })
     : tpl(ASSESS.energyShort, { maintenance: kcal(a.maintenanceKcal || a.bmr) })
 
-  const goalKey = ASSESS[a.goal] || ASSESS.maintain
+  const goalKey = a.floored ? ASSESS.floored : ASSESS[a.goal] || ASSESS.maintain
   const goalLine = tpl(goalKey, {
     target: kcal(adjusted ? a.recommendedKcal : final),
     shift: kcal(Math.abs(a.goalShift)),
+    min: kcal(MIN_PLAN_KCAL),
   })
 
   return (
@@ -388,6 +391,7 @@ const TARGET_NOTE = {
 
 function targetNote(a, t) {
   if (!a?.goal) return ''
+  if (a.floored) return t.ui('the minimum we recommend')
   const key = TARGET_NOTE[a.goal] || TARGET_NOTE.maintain
   const shift = Math.abs(a.goalShift || 0)
   if (a.goal !== 'maintain' && !shift) return ''
@@ -504,13 +508,19 @@ export default function DeepFitTemplate({
     </div>
   )
 
+  // Items are dictionary strings, or { en, ar } once personalised for the client.
+  const itemText = (it) => (!it ? ' ' : typeof it === 'string' ? t.item(it) : t.isAr ? it.ar : it.en)
   const itemGrid = (items) => (
     <div className="deepfit-item-grid">
       {items.map((it, i) => (
-        <div className="deepfit-item" key={i}>{it ? t.item(it) : ' '}</div>
+        <div className="deepfit-item" key={i}>{itemText(it)}</div>
       ))}
     </div>
   )
+
+  // Page 6 leaves out foods this client can't or won't eat (plan.restrictions).
+  const food = personaliseFoodGroups(GROUPS, VEG_FRUIT, plan.restrictions, ITEMS)
+    || { groups: GROUPS, vegFruit: VEG_FRUIT }
 
   const aboutLength = ABOUT_BLOCKS.reduce((n, b) => n + t.para(b.body).length, 0)
 
@@ -629,13 +639,13 @@ export default function DeepFitTemplate({
         }
 
         /* ── Page 6 ─────────────────────────────────────────────────────── */
-        const tightCards = GROUPS.some((g) => g.items.filter(Boolean).length > 8)
+        const tightCards = food.groups.some((g) => g.items.filter(Boolean).length > 8)
         return (
           <PlanPage key={idx} pageRef={attachRef(idx)} page={idx + 1} total={pages.length}
                       kicker={t.ui(KICKER.guidelines2)} gym={gym} t={t} wide>
             <SectionTitle entry={GROUPS_SECTION} t={t} />
             <div className="deepfit-group-grid">
-              {GROUPS.map((g) => (
+              {food.groups.map((g) => (
                 <div className={`deepfit-card${tightCards ? ' is-tight' : ''}`} key={g.key}>
                   <div className="deepfit-card-title">{t.title(g)}</div>
                   <div className="deepfit-card-note">{t.para(g.note)}</div>
@@ -648,7 +658,7 @@ export default function DeepFitTemplate({
               <div className="deepfit-card-title">{t.title(VEG_FRUIT)}</div>
               <div className="deepfit-vegfruit-note">{t.para(VEG_FRUIT.note)}</div>
               <div className="deepfit-sublists">
-                {VEG_FRUIT.columns.map((c) => (
+                {food.vegFruit.columns.map((c) => (
                   <div className="deepfit-sublist" key={c.key}>
                     <div className="deepfit-sublist-label">{t.title(c)}</div>
                     {itemGrid(c.items)}

@@ -12,13 +12,13 @@ import { useI18n } from '../lib/i18n'
 import { Field, Alert, Spinner, StepProgress, fmtDate } from '../components/ui'
 import { extractInBody, parseInBodyText } from '../lib/inbodyParser'
 import {
-  fetchLookups, activityInfo, sortActivities, activityMultiplier,
-  dietaryInfo, sortDietaryTypes, EXCLUDED_CONDITIONS, EXCLUDED_ALLERGIES,
-  GOALS, GOAL_KEYWORDS, GOAL_LABELS, PLAN_STYLE_KEYWORDS, matchTypeId, calcAge,
-} from '../lib/fitApi'
-import { generateCatalogPlan } from '../lib/planGenerator'
+  ACTIVITIES, DIETARY_TYPES, activityInfo, sortActivities, activityMultiplier,
+  dietaryInfo, sortDietaryTypes,
+  GOALS, GOAL_LABELS, PLAN_TYPE_IDS, PLAN_STYLE_IDS, calcAge,
+} from '../lib/lookups'
+import { generateCatalogPlan } from '../lib/catalogGenerator'
 import { goalAdjustedKcal, stampPlanChecks } from '../lib/planModel'
-import { restrictionLabel } from '../lib/restrictionNames'
+import { restrictionLabel, CONDITIONS, ALLERGIES } from '../lib/restrictionNames'
 import PhoneField from '../components/PhoneField'
 import { DislikePicker } from '../components/PreferenceFields'
 import DescribedSelect from '../components/DescribedSelect'
@@ -60,7 +60,6 @@ export default function Intake({ slug }) {
 
   const [gym, setGym] = useState(null)
   const [gymError, setGymError] = useState(false)
-  const [lookups, setLookups] = useState(null)
   const [step, setStep] = useState(1)
 
   // InBody (parsed silently — no client-facing review)
@@ -113,17 +112,16 @@ export default function Intake({ slug }) {
       if (error || !g) { setGymError(true); return }
       setGym(g)
     })
-    fetchLookups().then(setLookups).catch(() => setLookups(null))
   }, [token])
 
   // Each step is its own screen — start it at the top, not wherever the last one
   // was scrolled to.
   useEffect(() => { window.scrollTo(0, 0) }, [step])
 
-  const activities = lookups ? sortActivities(lookups.activities) : []
-  const dietaryTypes = lookups ? sortDietaryTypes(lookups.dietaryTypes) : []
-  const conditions = (lookups?.conditions || []).filter((c) => !EXCLUDED_CONDITIONS.includes(c.conditionName))
-  const allergies = (lookups?.allergies || []).filter((a) => !EXCLUDED_ALLERGIES.includes(a.allergyName))
+  const activities = sortActivities(ACTIVITIES)
+  const dietaryTypes = sortDietaryTypes(DIETARY_TYPES)
+  const conditions = CONDITIONS
+  const allergies = ALLERGIES
 
   async function handleFile(f) {
     if (!f) return
@@ -172,15 +170,13 @@ export default function Intake({ slug }) {
   async function submit() {
     setSubmitting(true); setError(null)
     try {
-      if (!lookups) throw new Error('Could not reach the plan service. Please try again.')
-      const typeId = matchTypeId(lookups.planTypes, GOAL_KEYWORDS[form.goal], 'typeId')
-      const secondaryTypeId = matchTypeId(lookups.planSecondaryTypes, PLAN_STYLE_KEYWORDS[form.planStyle], 'secondaryTypeId')
-      if (!typeId || !secondaryTypeId) throw new Error('Could not resolve plan options — please contact your gym.')
+      const typeId = PLAN_TYPE_IDS[form.goal]
+      const secondaryTypeId = PLAN_STYLE_IDS[form.planStyle]
 
       const age = calcAge(form.dob)
       const confirmed = { ...values }; delete confirmed._text_sample
       const bmr = parseFloat(values.bmr) || estimateBmr({ weight: values.weight, height: values.height, age, gender: form.gender })
-      const act = lookups.activities.find((a) => a.enumId === form.activityId)
+      const act = ACTIVITIES.find((a) => a.enumId === form.activityId)
       const mult = activityMultiplier(act) || 1.2
       const calories = Math.round(bmr * mult)
 

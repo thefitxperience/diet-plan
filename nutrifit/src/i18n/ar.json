@@ -180,6 +180,7 @@
   "wizard.warn.belowBmr": "الهدف {target} سعرة أقل من معدل الأيض الأساسي المقدّر للعميل ({bmr} سعرة).",
   "wizard.warn.implausiblyHigh": "الهدف {target} سعرة مرتفع بشكل غير معتاد مقارنة بمعدل الأيض ({bmr} سعرة) — راجع البيانات المدخلة.",
   "wizard.warn.highActivity": "مستوى نشاط مرتفع تم الإبلاغ عنه ذاتياً يرفع هذا الهدف — تحقق من اختيار مستوى النشاط.",
+  "wizard.warn.raisedToMinimum": "كان الهدف سيضع هذا العميل عند {raw} سعرة، لذا رُفع الهدف إلى الحد الأدنى {min} سعرة.",
   "wizard.conditions": "الحالات الطبية",
   "wizard.noConditions": "لا توجد حالات طبية",
   "wizard.allergies": "الحساسية",

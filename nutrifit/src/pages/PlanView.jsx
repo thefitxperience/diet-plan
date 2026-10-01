@@ -10,6 +10,12 @@ import { useI18n } from '../lib/i18n'
 import { Alert, Loading, Spinner, StatusBadge, BackButton, fmtDateTime } from '../components/ui'
 import DeepFitTemplate from '../components/DeepFitTemplate'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
+import { planRestrictions } from '../lib/foodGroups'
+
+// Older plans don't carry restrictions; lend them the questionnaire's so the
+// PDF's food-groups page is personalised all the same.
+const withRestrictions = (row) => (row.plan_data && !row.plan_data.restrictions && row.questionnaire
+  ? { ...row.plan_data, restrictions: planRestrictions(row.plan_data, row.questionnaire) } : row.plan_data)
 import { waLink, sendEmail, emailConfigured, uploadPdfSnapshot, recordDelivery, signedPdfUrl, blobToBase64, planShareUrl } from '../lib/delivery'
 
 export function EventLog({ planId, refresh }) {
@@ -259,7 +265,7 @@ export default function PlanView() {
       )}
 
       <div className="editor-canvas" ref={canvasRef} style={{ maxHeight: 'none', marginBottom: '1rem' }}>
-        <DeepFitTemplate plan={row.plan_data} lang={lang2} gym={planGym} />
+        <DeepFitTemplate plan={withRestrictions(row)} lang={lang2} gym={planGym} />
       </div>
 
       <EventLog planId={id} refresh={refresh} />
