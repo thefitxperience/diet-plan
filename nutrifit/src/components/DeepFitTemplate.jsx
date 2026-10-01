@@ -33,11 +33,27 @@ import {
   HYDRATION, PROTEIN, GROUPS_SECTION, GROUPS, VEG_FRUIT, SLEEP,
 } from './deepfitGuidelines'
 import { formatAmount, ingredientState, proteinRangeFor } from '../lib/planModel'
+import { GOAL_LABELS } from '../lib/fitApi'
+import appEn from '../i18n/en.json'
+import appAr from '../i18n/ar.json'
 import './deepfit.css'
 
 const ASSET = (name) => `${import.meta.env.BASE_URL}assets/plan/${name}`
 
 const UI = planAr.ui || {}
+
+// The diet type prints under the same client-facing name the intake offered
+// ("Shape Up", "Lean Down"…), read from the app dictionary so the two never
+// drift. The plan stores the clinical label (GOAL_LABELS) in header.dietType,
+// which staff screens keep using. The stored label is checked first because it
+// is set at generation; assessment.goal defaults to 'maintain' on plans built
+// without a goal. Anything unrecognised prints as stored.
+function dietTypeName(plan, t) {
+  const stored = plan.header?.dietType || ''
+  const goal = Object.keys(GOAL_LABELS).find((k) => GOAL_LABELS[k] === stored) || (!stored && plan.assessment?.goal)
+  const name = goal && (t.isAr ? appAr : appEn)[`wizard.goal.${goal}`]
+  return name || t.ui(stored)
+}
 const PARA = planAr.paragraphs || {}
 const ITEMS = planAr.listItems || {}
 
@@ -459,7 +475,8 @@ export default function DeepFitTemplate({
     }
   }
 
-  const clientKicker = [h.fullName, t.ui(h.dietType)]
+  const dietName = dietTypeName(plan, t)
+  const clientKicker = [h.fullName, dietName]
     .filter(Boolean)
     .map((s) => (t.isAr ? s : String(s).toUpperCase()))
     .join(' · ')
@@ -521,7 +538,7 @@ export default function DeepFitTemplate({
               <div className="deepfit-target-row">
                 <div className="deepfit-diet-panel">
                   <div className="deepfit-panel-label">{t.ui('DIET TYPE')}</div>
-                  <div className="deepfit-diet-name">{t.ui(h.dietType)}</div>
+                  <div className="deepfit-diet-name">{dietName}</div>
                   <div className="deepfit-diet-note">{t.para(DIET_TYPE_NOTE)}</div>
                 </div>
                 {h.dailyKcal ? (
