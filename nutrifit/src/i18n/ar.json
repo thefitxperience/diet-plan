@@ -112,6 +112,7 @@
   "intake.goalDesc.gain": "زيادة الوزن والحجم بفائض معتدل في السعرات الحرارية اليومية.",
   "intake.submit": "إرسال",
   "intake.selectGender": "اختر الجنس",
+  "intake.dobTooYoung": "يرجى إدخال تاريخ ميلاد صحيح.",
   "intake.selectGoal": "اختر الهدف",
   "intake.consent": "أوافق على تخزين بياناتي الصحية لغرض إعداد الخطة الغذائية",
   "intake.submitting": "جارٍ تجهيز خطتك…",

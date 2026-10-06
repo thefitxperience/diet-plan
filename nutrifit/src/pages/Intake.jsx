@@ -46,6 +46,8 @@ function PickerField({ label, ...props }) {
 // real intake token, so a client can open /#/intake/bodycoach instead of a UUID.
 // The pretty slug stays in the URL; the real token is used behind the scenes.
 // Add gyms here as needed (slug must be lowercase).
+const MIN_AGE = 10
+
 const INTAKE_SLUGS = {
   bodycoach: '78054fa5-5885-46cd-b7a0-dced92581b6b',
 }
@@ -160,8 +162,18 @@ export default function Intake({ slug }) {
     setForm({ ...form, [k]: list, [noneKey]: false })
   }
 
+  // Minimum age 10: a date of birth of today (age 0) or in the future would
+  // otherwise go through. `max` greys out later dates in most pickers, but iOS
+  // Safari ignores it, so the age is checked here as well.
+  const maxDob = (() => {
+    const d = new Date()
+    d.setFullYear(d.getFullYear() - MIN_AGE)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+  })()
+  const dobTooYoung = !!form.dob && form.dob > maxDob
+
   const stepValid = {
-    2: form.firstName && form.lastName && form.dob && form.gender &&
+    2: form.firstName && form.lastName && form.dob && !dobTooYoung && form.gender &&
       (form.phone || '').replace(/\D/g, '').length >= 8,
     3: form.goal && form.activityId && form.dietaryTypeId,
     4: form.consent,
@@ -355,8 +367,10 @@ export default function Intake({ slug }) {
                   <Field label={t('clients.lastName')} required>
                     <input type="text" value={form.lastName} onChange={set('lastName')} />
                   </Field>
-                  <Field label={t('clients.dob')} required>
-                    <input type="date" value={form.dob} onChange={set('dob')} />
+                  <Field label={t('clients.dob')} required error={dobTooYoung}
+                    hint={dobTooYoung ? t('intake.dobTooYoung') : undefined}>
+                    <input type="date" value={form.dob} max={maxDob} onChange={set('dob')}
+                      className={dobTooYoung ? 'invalid' : undefined} />
                   </Field>
                   <Field label={t('clients.gender')} required>
                     <select value={form.gender} onChange={set('gender')}>

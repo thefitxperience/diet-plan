@@ -112,6 +112,7 @@
   "intake.goalDesc.gain": "Gain weight and size with a moderate daily calorie surplus.",
   "intake.submit": "Submit",
   "intake.selectGender": "Select gender",
+  "intake.dobTooYoung": "Please enter a valid date of birth.",
   "intake.selectGoal": "Select goal",
   "intake.consent": "I consent to storing my health data for diet plan preparation",
   "intake.submitting": "Preparing your plan…",

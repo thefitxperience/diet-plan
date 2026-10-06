@@ -220,6 +220,7 @@ function parseInBody270(text, { ocr = false } = {}) {
 // field, then derivable cross-checks, then a last-resort InBody-score scan.
 function finalize(text, out) {
   labelAnchoredFill(text, out)
+  reconcileWeight(text, out)
 
   // Body Fat Mass = Weight − Fat Free Mass (definitional). When both are read
   // (they have strong anchors), derive it — more reliable than the OCR-fragile
@@ -233,8 +234,11 @@ function finalize(text, out) {
   if (out.lbm == null && out.weight != null && out.fatMass != null) {
     out.lbm = Math.round((out.weight - out.fatMass) * 10) / 10
   }
-  if (out.pbf == null && out.fatMass != null && out.weight) {
-    out.pbf = Math.round((out.fatMass / out.weight) * 1000) / 10
+  // PBF = fat / weight. A printed PBF that disagrees with that by more than two
+  // points is a misread (OCR picks up the bar-chart scale, e.g. "8.0" for 31.7%).
+  if (out.fatMass != null && out.weight) {
+    const derived = Math.round((out.fatMass / out.weight) * 1000) / 10
+    if (out.pbf == null || Math.abs(out.pbf - derived) > 2) out.pbf = derived
   }
   // BMI = weight / height² — derive it when the printed value (under a bar chart,
   // among scale numbers) didn't survive OCR.
@@ -261,6 +265,57 @@ function finalize(text, out) {
     }
   }
   return out
+}
+
+// Weight is printed several times on the sheet, and OCR noise sitting next to it
+// (e.g. the phase angle's "50 kHz" on the 270S) can be read instead — one
+// client's 59.9 kg arrived as 50. The sheet also prints two figures that pin
+// weight down: Fat Free Mass + Body Fat Mass (equal by definition), Target
+// Weight − Weight Control (the Weight Control section), and BMI × height². A
+// weight that agrees with any of them is kept. One that agrees with none is
+// replaced by the printed weight that agrees best; if none does, by the checks'
+// own value — but only when two of them agree, so a single misread check can't
+// overrule a correct weight.
+const WEIGHT_TOLERANCE = 1.5 // kg
+
+function weightCandidates(text) {
+  const found = []
+  for (const line of text.split('\n')) {
+    if (!/weight|\(kg\)/i.test(line)) continue
+    for (const m of line.matchAll(/(\d{2,4}(?:\.\d)?)(?!\s*(?:k\s*h?z|%|\d))/gi)) {
+      let n = parseFloat(m[1])
+      if (n > 300 && n / 10 <= 300) n = n / 10 // dropped decimal: "599" → 59.9
+      if (n >= 30 && n <= 300) found.push(n)
+    }
+  }
+  return found
+}
+
+// "Target Weight 55.1 kg" and "Weight Control -4.8 kg": current = target − control.
+function weightFromControl(text) {
+  const target = text.match(/Target\s*Weight[^0-9\n]{0,6}(\d{2,3}(?:\.\d)?)/i)
+  const control = text.match(/Weight\s*Control[^0-9+\-\n]{0,6}([+\-−–]?)\s*(\d{1,2}(?:\.\d)?)\s*kg/i)
+  if (!target || !control) return null
+  const delta = parseFloat(control[2]) * (control[1] && control[1] !== '+' ? -1 : 1)
+  return parseFloat(target[1]) - delta
+}
+
+function reconcileWeight(text, out) {
+  const refs = []
+  if (out.lbm != null && out.fatMass != null) refs.push(out.lbm + out.fatMass)
+  const fromControl = weightFromControl(text)
+  if (fromControl != null && fromControl >= 30 && fromControl <= 300) refs.push(fromControl)
+  if (out.bmi != null && out.height) refs.push(out.bmi * (out.height / 100) ** 2)
+  const near = (n, r) => Math.abs(n - r) <= WEIGHT_TOLERANCE
+  if (!refs.length || (out.weight != null && refs.some((r) => near(out.weight, r)))) return
+  const score = (n) => refs.filter((r) => near(n, r)).length
+  const best = weightCandidates(text)
+    .filter((n) => score(n) > 0)
+    .sort((a, b) => score(b) - score(a) || Math.abs(a - refs[0]) - Math.abs(b - refs[0]))[0]
+  if (best != null) { out.weight = best; return }
+  // No printed weight agrees: use a check's value, if another check confirms it.
+  const agreed = refs.find((r, i) => refs.some((q, j) => j !== i && near(r, q)))
+  if (agreed != null) out.weight = Math.round(agreed * 10) / 10
 }
 
 // OCR-tolerant fallback: pull each metric by its printed label + the nearest
@@ -318,6 +373,9 @@ function labelAnchoredFill(text, out) {
   set('smm', grab(new RegExp('Skeletal\\s*Muscle\\s*Mass\\s*' + DEC + '\\s*kg', 'i'), 10, 100))
   set('smm', grab(/\bSMM\b[^\n]*%[^\n]*\n[^\d\n]*(\d{2,3}\.\d)/i, 10, 100))
   set('bmi', grab(/\bBMI\b[^0-9]{0,4}(\d{1,2}\.\d)/i, 10, 60))
+  // 270S: the BMI value sits on the line after the "BMI (kg/m²) 10.0 15.0 …" scale
+  // row, as its first decimal (same layout as SMM above).
+  set('bmi', grab(/\bBMI\b[^\n]*\n[^\d\n]*(\d{1,2}\.\d)/i, 10, 60))
   // Score prints as "NN/100 Points"; OCR often mangles "/1" (→ '"' or merges a
   // digit), so anchor on "…00 Points" and absorb one stray digit after the score.
   set('score', grab(/(\d{2})\d?[^0-9]{0,3}0\s*0\s*Points/i, 1, 100))
