@@ -11,11 +11,19 @@ const list = (field, names) => names.map((name) => ({
   [`${field}Name`]: name,
 }))
 
+// Phenylketonuria is deliberately not offered: it needs a phenylalanine-measured
+// diet with a medical formula, which generated plans can't provide safely.
+// Hyperthyroidism isn't offered either: it has no food rules of its own, and
+// clients can still report a thyroid issue via "Thyroid Dysfunction".
+// Not offered for the same reasons: low blood pressure (nothing to filter — the
+// advice is more fluids and not cutting salt) and chronic kidney disease
+// (protein, potassium and phosphorus limits set from blood tests and stage).
 export const CONDITIONS = list('condition', [
   'Cardiovascular Disease', 'Celiac Disease', 'Diabetes', 'Fatty Liver Disease', 'Favism',
   'GERD (Acid Reflux)', 'Gout', 'Hemochromatosis', 'Histamine Intolerance', 'Hypercholesterolemia',
-  'Hyperkalemia', 'Hypertension', 'Hyperthyroidism', 'Hypoglycemia', 'IBS', 'Kidney Stones',
-  'Lactose Intolerance', 'Pancreatitis', 'Phenylketonuria', 'Thyroid Dysfunction', "Wilson's Disease",
+  'Hypertriglyceridemia',
+  'Hyperkalemia', 'Hypertension', 'Hypoglycemia', 'IBS', 'Kidney Stones',
+  'Lactose Intolerance', 'Pancreatitis', 'Thyroid Dysfunction', "Wilson's Disease",
 ])
 
 export const ALLERGIES = list('allergy', [
@@ -43,6 +51,7 @@ const AR = {
   'Hemochromatosis': 'داء ترسّب الأصبغة الدموية',
   'Histamine Intolerance': 'عدم تحمّل الهيستامين',
   'Hypercholesterolemia': 'ارتفاع الكوليسترول',
+  'Hypertriglyceridemia': 'ارتفاع الدهون الثلاثية',
   'Hyperkalemia': 'ارتفاع بوتاسيوم الدم',
   'hyperkaliemia': 'ارتفاع بوتاسيوم الدم',
   'Hypertension': 'ارتفاع ضغط الدم',

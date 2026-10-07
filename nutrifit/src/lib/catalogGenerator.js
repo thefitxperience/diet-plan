@@ -9,9 +9,11 @@
 import {
   optionFromCatalog, scaleOptionToKcal, rankByPortion, MAX_OPTIONS_PER_MEAL,
   MEAL_DEFS, optionWeight, MEAL_WEIGHT_CAP, autofillArabic, formatAmount,
-  buildAssessment, typicalDayProtein, proteinRangeFor,
+  buildAssessment, typicalDayProtein, proteinRangeFor, translateIngredient, ingredientMetaFor,
+  carbRuleFor, diabeticMaxGrams, VEGAN_PROTEIN_FLOOR, PLANT_PROTEIN_POWDER, PROTEIN_SCOOP_GRAMS,
+  fatRuleFor, goutMaxGrams, PROTEIN_SIDES, proteinFloorFor,
 } from './planModel'
-import { processOption, canonicalTokens, norm, makeDislikeMatcher } from './dietaryRules'
+import { processOption, canonicalTokens, norm, makeDislikeMatcher, isSafeFor } from './dietaryRules'
 import mealCatalog from '../data/mealCatalog.json'
 
 const SLOT_CONTRIB = { breakfast: 0.25, lunch: 0.30, dinner: 0.25, snack: 0.10 }
@@ -49,6 +51,8 @@ export async function generateCatalogPlan(payload, restrictions = {}, ctx = {}) 
   return typicalDayProtein(boosted.plan) > typicalDayProtein(result.plan) ? boosted : result
 }
 
+const RED_MEAT = /\b(steak|lamb|beef|veal|minced meat)\b/
+
 function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}, highProtein = false) {
   const tokens = canonicalTokens([...allergyNames, ...conditionNames])
   const isIF = payload.secondaryTypeId === 'IntermittentFasting'
@@ -67,6 +71,67 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
   const isDisliked = (opt) => (opt.ingredients?.length
     ? opt.ingredients.some((ing) => avoids(ing.name_en) || avoids(ing.original_en))
     : avoids(opt.name_en))
+
+  // Blood-sugar conditions (diabetes / hypoglycemia): carbs per option within
+  // CARB_RULES, options in a meal close to each other, and — for diabetes —
+  // smaller portions of fast carbs (one banana, moderate rice and bread).
+  const carbRule = carbRuleFor(conditionNames)
+  // Low-fat conditions (GERD, pancreatitis): fat per option capped (FAT_RULES).
+  const fatRule = fatRuleFor(conditionNames)
+  // Per-client portion caps: diabetes (fast carbs), gout (poultry and fish).
+  const condText = conditionNames.join(' ')
+  // Fatty liver: red meat kept occasional (the condition rules already leave
+  // out steak and lamb; this limits the lean cuts that remain).
+  const limitRedMeat = /fatty liver/i.test(condText)
+  const capFns = [/diabet/i.test(condText) && diabeticMaxGrams, /gout/i.test(condText) && goutMaxGrams].filter(Boolean)
+  const scaleOpts = capFns.length
+    ? { maxGrams: (name) => capFns.map((f) => f(name)).filter((v) => v != null).reduce((a, b) => Math.min(a, b), Infinity) }
+    : {}
+
+  // Vegan plans: plant protein powder on options under the protein floor
+  // (dietitian review) — unless the powder isn't safe or is avoided. Only as
+  // much as the floor needs (half a scoop to one scoop): options are
+  // alternatives, so a full scoop on every one could add five scoops to a day.
+  const veganTopUp = diet === 'Vegan' && isSafeFor(PLANT_PROTEIN_POWDER, tokens) && !avoids(PLANT_PROTEIN_POWDER)
+  const powderProteinPerG = (ingredientMetaFor(PLANT_PROTEIN_POWDER)?.per100g.protein || 75) / 100
+  // Protein sides (yogurt, egg whites or tofu — the first the client can eat),
+  // sized to reach a floor, capped per side. Vegetarian main meals use the vegan
+  // floor; diabetic plans use their own floor on every meal and snack.
+  const canHaveSide = ([name]) => isSafeFor(name, tokens) && !avoids(name)
+    && (diet !== 'Vegan' || !/yogurt|egg/i.test(name))
+  const vegSide = diet === 'Vegetarian' ? PROTEIN_SIDES.find(canHaveSide) || null : null
+  const diabetesFloor = proteinFloorFor(conditionNames)
+  // Kosher keeps meat and dairy apart: a meat dish gets egg whites, not yogurt.
+  const hasMeat = (opt) => (opt.ingredients || []).some((i) => /chicken|turkey|beef|steak|lamb|minced meat/i.test(i.name_en))
+  const sideFor = (opt) => PROTEIN_SIDES.find((s) => canHaveSide(s)
+    && !(diet === 'Kosher' && /yogurt/i.test(s[0]) && hasMeat(opt))) || null
+  const withProteinSide = (opt, target, floor, side = vegSide) => {
+    if (!side || !opt.ingredients?.length) return opt
+    const [name, maxG] = side
+    const meta = ingredientMetaFor(name)
+    if (!meta || opt.ingredients.some((i) => i.name_en === name)) return opt
+    const perG = meta.per100g.protein / 100
+    const grams = Math.min(maxG, meta.max, Math.max(meta.min, Math.ceil((floor - (opt.macros?.protein || 0)) / perG / 10) * 10))
+    return scaleOptionToKcal({
+      ...opt,
+      ingredients: [...opt.ingredients, { name_en: name, name_ar: translateIngredient(name) || '', grams, uom: 'g' }],
+    }, target, scaleOpts)
+  }
+
+  const withProteinScoop = (opt, target, floor) => {
+    const add = (grams) => scaleOptionToKcal({
+      ...opt,
+      ingredients: [...opt.ingredients, {
+        name_en: PLANT_PROTEIN_POWDER, name_ar: translateIngredient(PLANT_PROTEIN_POWDER) || '', grams, uom: 'g',
+      }],
+    }, target, scaleOpts)
+    const short = floor - (opt.macros?.protein || 0)
+    const half = PROTEIN_SCOOP_GRAMS / 2
+    const out = add(Math.min(PROTEIN_SCOOP_GRAMS, Math.max(half, Math.ceil(short / powderProteinPerG / 5) * 5)))
+    // Rescaling trims the dish's other protein a little; if that leaves it just
+    // under the floor, a full scoop instead.
+    return (out.macros?.protein || 0) < floor ? add(PROTEIN_SCOOP_GRAMS) : out
+  }
 
   // ── Phase 1: rank each meal's candidates against its own calorie target ─────
   // Most catalog dishes belong to more than one category (a steak is both lunch
@@ -88,7 +153,21 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
         opt._swaps = swaps
       }
       // Scale AFTER swaps so macros/kcal reflect the final ingredient set.
-      opt = scaleOptionToKcal(opt, target)
+      opt = scaleOptionToKcal(opt, target, scaleOpts)
+      const proteinFloor = VEGAN_PROTEIN_FLOOR[m.id === 'snack' ? 'snack' : 'main']
+      if (veganTopUp && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinScoop(opt, target, proteinFloor)
+      else if (vegSide && m.id !== 'snack' && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinSide(opt, target, proteinFloor)
+      // Diabetes: every meal and snack up to its protein floor (keto plans are
+      // high in protein already, and their carbs are not ranged).
+      const diabetesMin = diabetesFloor?.[m.id === 'snack' ? 'snack' : 'main']
+      // A side that would push the option out of the carb range isn't added:
+      // on small snacks the two limits can't both fit, and carbs come first.
+      if (diabetesMin && diet !== 'Keto' && (opt.macros?.protein || 0) < diabetesMin) {
+        const sided = withProteinSide(opt, target, diabetesMin, sideFor(opt))
+        const [lo, hi] = carbRule?.[m.id === 'snack' ? 'snack' : 'main'] || []
+        const inCarbs = (o) => (lo == null || (o.macros?.carbs ?? 0) >= lo) && (hi == null || (o.macros?.carbs ?? 0) <= hi)
+        if (inCarbs(sided) || !inCarbs(opt)) opt = sided
+      }
       seen.add(key)
       options.push(opt)
     }
@@ -138,6 +217,40 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
     // Only rotate where there is real surplus: on a restrictive diet the pool is
     // barely bigger than the table, and churning it just forces the duplicate
     // fallback below without buying the client any new choices.
+    // Blood-sugar conditions: keep options whose carbs sit in range, closest to
+    // each other first (phase 2 takes the first few, so the meal stays steady).
+    // Too few in range: closest to the range instead — validatePlan flags it.
+    // Low-fat conditions: options within the fat cap; too few, the leanest.
+    if (fatRule) {
+      const cap = fatRule[m.id === 'snack' ? 'snack' : 'main']
+      const fat = (o) => o.macros?.fats ?? 0
+      const lean = pool.filter((o) => fat(o) <= cap)
+      pool = lean.length >= MIN_OPTIONS_PER_MEAL ? lean : [...pool].sort((a, b) => fat(a) - fat(b))
+    }
+
+    if (carbRule) {
+      const [lo, hi] = carbRule[m.id === 'snack' ? 'snack' : 'main']
+      const carbs = (o) => o.macros?.carbs ?? 0
+      const outBy = (o) => (lo != null && carbs(o) < lo ? lo - carbs(o) : hi != null && carbs(o) > hi ? carbs(o) - hi : 0)
+      const inRange = pool.filter((o) => outBy(o) === 0)
+      if (inRange.length >= MIN_OPTIONS_PER_MEAL) {
+        const sorted = inRange.map(carbs).sort((a, b) => a - b)
+        const mid = sorted[Math.floor(sorted.length / 2)]
+        pool = inRange.sort((a, b) => Math.abs(carbs(a) - mid) - Math.abs(carbs(b) - mid))
+        // Diabetes: options that also meet the protein floor go first. Snacks,
+        // which only need a few options, drop the rest when three or more meet it.
+        const proteinMin = diabetesFloor?.[m.id === 'snack' ? 'snack' : 'main']
+        if (proteinMin) {
+          const meets = (o) => (o.macros?.protein || 0) >= proteinMin
+          const strong = pool.filter(meets)
+          pool = m.id === 'snack' && strong.length >= MIN_OPTIONS_PER_MEAL
+            ? strong : [...strong, ...pool.filter((o) => !meets(o))]
+        }
+      } else {
+        pool = [...pool].sort((a, b) => outBy(a) - outBy(b))
+      }
+    }
+
     const variant = Math.max(0, Math.trunc(ctx.variant || 0))
     if (variant > 0 && pool.length > MAX_OPTIONS_PER_MEAL + 1) {
       // Rotate only the plates that fit the weight guideline, keeping oversized
@@ -150,6 +263,14 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
         const off = (variant * (MAX_OPTIONS_PER_MEAL - 1)) % rest.length
         pool = [best, ...rest.slice(off), ...rest.slice(0, off), ...over]
       }
+    }
+    // At most one red-meat option per meal for fatty liver: the rest move to
+    // the back of the pool and only come back if the meal would be thin.
+    if (limitRedMeat) {
+      const isRed = (o) => (o.ingredients?.length ? o.ingredients.map((i) => i.name_en) : [o.name_en])
+        .some((n) => RED_MEAT.test(norm(n)))
+      const first = pool.findIndex(isRed)
+      if (first >= 0) pool = [...pool.filter((o, i) => !isRed(o) || i === first), ...pool.filter((o, i) => isRed(o) && i !== first)]
     }
     return { def: m, target, pool, sorted }
   })

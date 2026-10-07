@@ -3072,19 +3072,19 @@
 "Pescatarian",
 "Vegetarian"
 ],
-"kcal": 610,
-"servingGrams": 300,
+"kcal": 461,
+"servingGrams": 210,
 "ingredientCount": 4,
 "macros": {
-"protein": 21,
+"protein": 15,
 "carbs": 55,
-"fats": 34
+"fats": 22
 },
 "ingredients": [
 {
 "name_en": "Labneh",
 "name_ar": "لبنة",
-"grams": 180,
+"grams": 90,
 "uom": "g",
 "alt_en": "Labneh, low fat"
 },
@@ -5311,7 +5311,6 @@
 "desc_en": "Grilled steak with boiled eggs, avocado and butter.",
 "desc_ar": "ستيك مشوي مع البيض المسلوق والأفوكادو والزبدة.",
 "categories": [
-"breakfast",
 "lunch",
 "dinner"
 ],
@@ -5860,6 +5859,1850 @@
 "grams": 60,
 "uom": "g",
 "alt_en": ""
+}
+]
+},
+{
+"id": "leb_balila",
+"name_en": "Balila (Warm Chickpeas with Lemon & Olive Oil)",
+"name_ar": "بليلة",
+"desc_en": "Warm chickpeas dressed with lemon, olive oil and parsley, with pita.",
+"desc_ar": "حمص دافئ متبل بالليمون وزيت الزيتون والبقدونس، مع خبز بيتا.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 422,
+"servingGrams": 215,
+"ingredientCount": 4,
+"macros": {
+"protein": 18,
+"carbs": 64,
+"fats": 12
+},
+"ingredients": [
+{
+"name_en": "Chickpeas Beans, cooked or canned",
+"name_ar": "حمص مطبوخ أو معلب",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Parsley",
+"name_ar": "بقدونس",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_fatteh_hummus",
+"name_en": "Fatteh Hummus",
+"name_ar": "فتة حمص",
+"desc_en": "Chickpeas layered with yogurt, tahini and toasted pita.",
+"desc_ar": "حمص مع اللبن والطحينة والخبز المحمص.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 460,
+"servingGrams": 270,
+"ingredientCount": 4,
+"macros": {
+"protein": 25,
+"carbs": 60,
+"fats": 15
+},
+"ingredients": [
+{
+"name_en": "Chickpeas Beans, cooked or canned",
+"name_ar": "حمص مطبوخ أو معلب",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Plain Greek yogurt",
+"name_ar": "زبادي يوناني سادة",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Tahini/sesame paste",
+"name_ar": "طحينة",
+"grams": 10,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_batata_w_bayd",
+"name_en": "Batata w Bayd (Potatoes with Eggs)",
+"name_ar": "بطاطا وبيض",
+"desc_en": "Potatoes and onions cooked with eggs.",
+"desc_ar": "بطاطا وبصل مطبوخة مع البيض.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 331,
+"servingGrams": 285,
+"ingredientCount": 4,
+"macros": {
+"protein": 16,
+"carbs": 34,
+"fats": 15
+},
+"ingredients": [
+{
+"name_en": "Potatoes baked or boiled",
+"name_ar": "بطاطس مشوية أو مسلوقة",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Whole eggs",
+"name_ar": "بيض كامل",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_yakhnet_batata",
+"name_en": "Yakhnet Batata (Potato & Meat Stew) with Rice",
+"name_ar": "يخنة بطاطا باللحمة مع رز",
+"desc_en": "Potato and lean meat stew in tomato sauce, served with rice.",
+"desc_ar": "يخنة بطاطا ولحم قليل الدهن بصلصة الطماطم، تقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 542,
+"servingGrams": 480,
+"ingredientCount": 5,
+"macros": {
+"protein": 34,
+"carbs": 72,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Potatoes baked or boiled",
+"name_ar": "بطاطس مشوية أو مسلوقة",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_sabanekh_bi_lahme",
+"name_en": "Sabanekh bi Lahme (Spinach & Meat Stew) with Rice",
+"name_ar": "سبانخ باللحمة مع رز",
+"desc_en": "Spinach cooked with lean meat, onions and lemon, served with rice.",
+"desc_ar": "سبانخ مطبوخة مع لحم قليل الدهن والبصل والليمون، تقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 465,
+"servingGrams": 410,
+"ingredientCount": 5,
+"macros": {
+"protein": 34,
+"carbs": 43,
+"fats": 18
+},
+"ingredients": [
+{
+"name_en": "Spinach, cooked",
+"name_ar": "سبانخ مطبوخة",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_daoud_basha",
+"name_en": "Daoud Basha (Meatballs in Tomato Sauce) with Rice",
+"name_ar": "داود باشا مع رز",
+"desc_en": "Lean meatballs simmered in tomato sauce with onions, served with rice.",
+"desc_ar": "كرات لحم قليل الدهن مطبوخة بصلصة الطماطم والبصل، تقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 466,
+"servingGrams": 380,
+"ingredientCount": 4,
+"macros": {
+"protein": 37,
+"carbs": 45,
+"fats": 15
+},
+"ingredients": [
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_kousa_mahshi",
+"name_en": "Kousa Mahshi (Stuffed Zucchini with Rice & Meat)",
+"name_ar": "كوسا محشي",
+"desc_en": "Zucchini stuffed with rice and lean meat, cooked in tomato sauce.",
+"desc_ar": "كوسا محشوة بالأرز واللحم قليل الدهن، مطبوخة بصلصة الطماطم.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 369,
+"servingGrams": 460,
+"ingredientCount": 4,
+"macros": {
+"protein": 28,
+"carbs": 41,
+"fats": 11
+},
+"ingredients": [
+{
+"name_en": "Zucchini cooked",
+"name_ar": "كوسا مطبوخة",
+"grams": 200,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_maghmour",
+"name_en": "Maghmour (Eggplant, Chickpea & Tomato Stew)",
+"name_ar": "مغمور (مسقعة لبنانية)",
+"desc_en": "Eggplant, chickpeas and onions cooked in tomato sauce, with pita.",
+"desc_ar": "باذنجان وحمص وبصل مطبوخة بصلصة الطماطم، مع خبز بيتا.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 468,
+"servingGrams": 460,
+"ingredientCount": 6,
+"macros": {
+"protein": 16,
+"carbs": 75,
+"fats": 14
+},
+"ingredients": [
+{
+"name_en": "Eggplant cooked",
+"name_ar": "باذنجان مطبوخ",
+"grams": 200,
+"uom": "g"
+},
+{
+"name_en": "Chickpeas Beans, cooked or canned",
+"name_ar": "حمص مطبوخ أو معلب",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_baked_kibbeh_with_salad",
+"name_en": "Baked Kibbeh with Salad",
+"name_ar": "كبة بالصينية مع سلطة",
+"desc_en": "Oven-baked bulgur and lean meat kibbeh with a green salad.",
+"desc_ar": "كبة برغل ولحم قليل الدهن مخبوزة في الفرن مع سلطة خضراء.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 384,
+"servingGrams": 315,
+"ingredientCount": 5,
+"macros": {
+"protein": 31,
+"carbs": 28,
+"fats": 17
+},
+"ingredients": [
+{
+"name_en": "Bulgur",
+"name_ar": "برغل",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+},
+{
+"name_en": "Salad Greens and lettuce",
+"name_ar": "خضار الخس والسلطة",
+"grams": 60,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_salmon_with_tarator",
+"name_en": "Salmon with Tarator (Tahini Sauce) and Rice",
+"name_ar": "سلمون بالطراطور مع رز",
+"desc_en": "Salmon with a lemony tahini sauce, served with rice.",
+"desc_ar": "سلمون مع صلصة الطحينة بالليمون، يقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"kcal": 575,
+"servingGrams": 275,
+"ingredientCount": 4,
+"macros": {
+"protein": 35,
+"carbs": 32,
+"fats": 33
+},
+"ingredients": [
+{
+"name_en": "Salmon",
+"name_ar": "سلمون",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Tahini/sesame paste",
+"name_ar": "طحينة",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 100,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_shish_taouk_plate_with_potatoes",
+"name_en": "Shish Taouk Plate with Potatoes",
+"name_ar": "صحن شيش طاووق مع بطاطا",
+"desc_en": "Grilled chicken skewers with garlic yogurt sauce, potatoes and salad.",
+"desc_ar": "أسياخ دجاج مشوية مع صلصة اللبن، بطاطا وسلطة.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 391,
+"servingGrams": 410,
+"ingredientCount": 5,
+"macros": {
+"protein": 51,
+"carbs": 29,
+"fats": 7
+},
+"ingredients": [
+{
+"name_en": "Chicken Breast, without skin, cooked/grilled",
+"name_ar": "صدر الدجاج بدون جلد مطبوخ/مشوي",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Yogurt sauce",
+"name_ar": "صلصة اللبن",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Potatoes baked or boiled",
+"name_ar": "بطاطس مشوية أو مسلوقة",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Salad Greens and lettuce",
+"name_ar": "خضار الخس والسلطة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 50,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_shish_taouk_sandwich",
+"name_en": "Shish Taouk Sandwich",
+"name_ar": "سندويش شيش طاووق",
+"desc_en": "Grilled chicken in pita with lettuce, tomato and yogurt sauce.",
+"desc_ar": "دجاج مشوي بخبز بيتا مع الخس والطماطم وصلصة اللبن.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 409,
+"servingGrams": 280,
+"ingredientCount": 5,
+"macros": {
+"protein": 46,
+"carbs": 42,
+"fats": 7
+},
+"ingredients": [
+{
+"name_en": "Chicken Breast, without skin, cooked/grilled",
+"name_ar": "صدر الدجاج بدون جلد مطبوخ/مشوي",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 70,
+"uom": "g"
+},
+{
+"name_en": "Lettuce",
+"name_ar": "خس",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Yogurt sauce",
+"name_ar": "صلصة اللبن",
+"grams": 20,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_kafta_sandwich",
+"name_en": "Kafta Sandwich",
+"name_ar": "سندويش كفتة",
+"desc_en": "Grilled lean kafta in pita with tomato, onion and parsley.",
+"desc_ar": "كفتة مشوية قليلة الدهن بخبز بيتا مع الطماطم والبصل والبقدونس.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 422,
+"servingGrams": 240,
+"ingredientCount": 5,
+"macros": {
+"protein": 34,
+"carbs": 43,
+"fats": 14
+},
+"ingredients": [
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 70,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Onions Raw",
+"name_ar": "بصل طازج",
+"grams": 20,
+"uom": "g"
+},
+{
+"name_en": "Parsley",
+"name_ar": "بقدونس",
+"grams": 10,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_labneh_vegetable_sandwich",
+"name_en": "Labneh & Vegetable Sandwich",
+"name_ar": "سندويش لبنة وخضار",
+"desc_en": "Labneh in pita with cucumber, tomato, mint and olives.",
+"desc_ar": "لبنة بخبز بيتا مع الخيار والطماطم والنعناع والزيتون.",
+"categories": [
+"breakfast",
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 281,
+"servingGrams": 230,
+"ingredientCount": 6,
+"macros": {
+"protein": 11,
+"carbs": 41,
+"fats": 10
+},
+"ingredients": [
+{
+"name_en": "Labneh",
+"name_ar": "لبنة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Mint",
+"name_ar": "نعناع",
+"grams": 5,
+"uom": "g"
+},
+{
+"name_en": "Olives, black or green",
+"name_ar": "زيتون أسود أو أخضر",
+"grams": 15,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_riz_bi_haleeb",
+"name_en": "Riz bi Haleeb (Lebanese Rice Pudding)",
+"name_ar": "رز بحليب",
+"desc_en": "Creamy rice pudding made with milk and a touch of honey.",
+"desc_ar": "أرز بالحليب مع لمسة من العسل.",
+"categories": [
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 234,
+"servingGrams": 290,
+"ingredientCount": 3,
+"macros": {
+"protein": 9,
+"carbs": 40,
+"fats": 4
+},
+"ingredients": [
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Milk, half Skimmed",
+"name_ar": "حليب نصف دسم",
+"grams": 200,
+"uom": "g"
+},
+{
+"name_en": "Honey",
+"name_ar": "عسل",
+"grams": 10,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_dates_stuffed_with_walnuts",
+"name_en": "Dates Stuffed with Walnuts",
+"name_ar": "تمر محشي بالجوز",
+"desc_en": "Dates filled with walnut halves.",
+"desc_ar": "تمر محشو بأنصاف الجوز.",
+"categories": [
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 211,
+"servingGrams": 55,
+"ingredientCount": 2,
+"macros": {
+"protein": 3,
+"carbs": 32,
+"fats": 10
+},
+"ingredients": [
+{
+"name_en": "Dates (Deglet Noor)",
+"name_ar": "تمر دقلة النور",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Walnuts",
+"name_ar": "جوز",
+"grams": 15,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_tahini_with_dates",
+"name_en": "Tahini with Dates",
+"name_ar": "طحينة مع تمر",
+"desc_en": "Dates with a spoon of tahini for dipping.",
+"desc_ar": "تمر مع ملعقة طحينة للتغميس.",
+"categories": [
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 179,
+"servingGrams": 47,
+"ingredientCount": 2,
+"macros": {
+"protein": 3,
+"carbs": 27,
+"fats": 8
+},
+"ingredients": [
+{
+"name_en": "Tahini/sesame paste",
+"name_ar": "طحينة",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Dates (Deglet Noor)",
+"name_ar": "تمر دقلة النور",
+"grams": 32,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_tofu_scramble_with_spinach_and_toast",
+"name_en": "Tofu Scramble with Spinach and Toast",
+"name_ar": "توفو مخفوق مع السبانخ والتوست",
+"desc_en": "Scrambled firm tofu with spinach, tomato and onion, with wholewheat toast.",
+"desc_ar": "توفو مخفوق مع السبانخ والطماطم والبصل، مع توست القمح الكامل.",
+"categories": [
+"breakfast",
+"lunch"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 435,
+"servingGrams": 355,
+"ingredientCount": 6,
+"macros": {
+"protein": 35,
+"carbs": 29,
+"fats": 22
+},
+"ingredients": [
+{
+"name_en": "Tofu, Raw Firm",
+"name_ar": "توفو خام صلب",
+"grams": 180,
+"uom": "g"
+},
+{
+"name_en": "Spinach, cooked",
+"name_ar": "سبانخ مطبوخة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 20,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+},
+{
+"name_en": "Whole wheat bread",
+"name_ar": "خبز القمح الكامل",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_lentil_and_quinoa_bowl",
+"name_en": "Lentil and Quinoa Bowl",
+"name_ar": "وعاء العدس والكينوا",
+"desc_en": "Lentils and quinoa with cucumber, tomato, parsley and a lemon dressing.",
+"desc_ar": "عدس وكينوا مع الخيار والطماطم والبقدونس وصلصة الليمون.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 358,
+"servingGrams": 370,
+"ingredientCount": 6,
+"macros": {
+"protein": 19,
+"carbs": 56,
+"fats": 8
+},
+"ingredients": [
+{
+"name_en": "Lentils, cooked",
+"name_ar": "عدس مطبوخ",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Quinoa (cooked, plain)",
+"name_ar": "كينوا مطبوخة سادة",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Parsley",
+"name_ar": "بقدونس",
+"grams": 10,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_white_bean_and_quinoa_salad",
+"name_en": "White Bean and Quinoa Salad",
+"name_ar": "سلطة الفاصولياء البيضاء والكينوا",
+"desc_en": "White beans and quinoa with tomato, parsley, lemon and olive oil.",
+"desc_ar": "فاصولياء بيضاء وكينوا مع الطماطم والبقدونس والليمون وزيت الزيتون.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 365,
+"servingGrams": 315,
+"ingredientCount": 5,
+"macros": {
+"protein": 19,
+"carbs": 58,
+"fats": 7
+},
+"ingredients": [
+{
+"name_en": "White beans, cooked",
+"name_ar": "فاصولياء بيضاء مطبوخة",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Quinoa (cooked, plain)",
+"name_ar": "كينوا مطبوخة سادة",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Parsley",
+"name_ar": "بقدونس",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 10,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_tofu_and_chickpea_tahini_bowl",
+"name_en": "Tofu and Chickpea Tahini Bowl",
+"name_ar": "وعاء التوفو والحمص بالطحينة",
+"desc_en": "Tofu and chickpeas over greens with cucumber and a tahini dressing.",
+"desc_ar": "توفو وحمص على الخضار الورقية مع الخيار وصلصة الطحينة.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 442,
+"servingGrams": 335,
+"ingredientCount": 5,
+"macros": {
+"protein": 31,
+"carbs": 37,
+"fats": 21
+},
+"ingredients": [
+{
+"name_en": "Tofu, Cooked",
+"name_ar": "توفو مطبوخ",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Chickpeas Beans, cooked or canned",
+"name_ar": "حمص مطبوخ أو معلب",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Tahini/sesame paste",
+"name_ar": "طحينة",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Salad Greens and lettuce",
+"name_ar": "خضار الخس والسلطة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_black_bean_and_tofu_rice_bowl",
+"name_en": "Black Bean and Tofu Rice Bowl",
+"name_ar": "وعاء الأرز مع الفاصولياء السوداء والتوفو",
+"desc_en": "Black beans, tofu and peppers over rice with fresh salsa.",
+"desc_ar": "فاصولياء سوداء وتوفو وفلفل على الأرز مع صلصة طازجة.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 462,
+"servingGrams": 410,
+"ingredientCount": 5,
+"macros": {
+"protein": 29,
+"carbs": 66,
+"fats": 10
+},
+"ingredients": [
+{
+"name_en": "Black Beans",
+"name_ar": "فاصولياء سوداء",
+"grams": 120,
+"uom": "g"
+},
+{
+"name_en": "Tofu, Cooked",
+"name_ar": "توفو مطبوخ",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Tomato salsa",
+"name_ar": "صلصة طماطم حارة",
+"grams": 40,
+"uom": "g"
+},
+{
+"name_en": "Bell pepper",
+"name_ar": "فلفل رومي",
+"grams": 50,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_hummus_and_falafel_protein_plate",
+"name_en": "Hummus and Falafel Protein Plate",
+"name_ar": "صحن حمص وفلافل غني بالبروتين",
+"desc_en": "Hummus, baked falafel and lentils with a fresh salad.",
+"desc_ar": "حمص وفلافل مخبوزة وعدس مع سلطة طازجة.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 635,
+"servingGrams": 370,
+"ingredientCount": 5,
+"macros": {
+"protein": 27,
+"carbs": 68,
+"fats": 31
+},
+"ingredients": [
+{
+"name_en": "Hummus",
+"name_ar": "حمص",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Falafel, Baked with oil",
+"name_ar": "فلافل بالفرن مع زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Lentils, cooked",
+"name_ar": "عدس مطبوخ",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Salad Greens and lettuce",
+"name_ar": "خضار الخس والسلطة",
+"grams": 60,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 50,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_peanut_butter_protein_oats",
+"name_en": "Peanut Butter Protein Oats",
+"name_ar": "شوفان بزبدة الفول السوداني والبروتين",
+"desc_en": "Oats cooked in almond milk with plant protein, peanut butter and banana.",
+"desc_ar": "شوفان مطبوخ بحليب اللوز مع بروتين نباتي وزبدة الفول السوداني والموز.",
+"categories": [
+"breakfast",
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 480,
+"servingGrams": 355,
+"ingredientCount": 5,
+"macros": {
+"protein": 36,
+"carbs": 53,
+"fats": 15
+},
+"ingredients": [
+{
+"name_en": "Rolled oats",
+"name_ar": "شوفان مطحون",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Almond Milk, unsweetened",
+"name_ar": "حليب اللوز غير المحلى",
+"grams": 200,
+"uom": "g"
+},
+{
+"name_en": "Peanut Butter",
+"name_ar": "زبدة الفول السوداني",
+"grams": 15,
+"uom": "g"
+},
+{
+"name_en": "Plant protein powder",
+"name_ar": "مسحوق بروتين نباتي",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Banana",
+"name_ar": "موز",
+"grams": 60,
+"uom": "g"
+}
+]
+},
+{
+"id": "veg_plant_protein_shake_with_banana",
+"name_en": "Plant Protein Shake with Banana",
+"name_ar": "مخفوق بروتين نباتي مع الموز",
+"desc_en": "Plant protein blended with almond milk and banana.",
+"desc_ar": "بروتين نباتي مخفوق مع حليب اللوز والموز.",
+"categories": [
+"snack",
+"breakfast"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 223,
+"servingGrams": 360,
+"ingredientCount": 3,
+"macros": {
+"protein": 25,
+"carbs": 22,
+"fats": 5
+},
+"ingredients": [
+{
+"name_en": "Plant protein powder",
+"name_ar": "مسحوق بروتين نباتي",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Almond Milk, unsweetened",
+"name_ar": "حليب اللوز غير المحلى",
+"grams": 250,
+"uom": "g"
+},
+{
+"name_en": "Banana",
+"name_ar": "موز",
+"grams": 80,
+"uom": "g"
+}
+]
+},
+{
+"id": "keto_tuna_cucumber_bites",
+"name_en": "Tuna Cucumber Bites",
+"name_ar": "لقيمات الخيار بالتونة",
+"desc_en": "Tuna on cucumber slices with a drizzle of olive oil.",
+"desc_ar": "تونة على شرائح الخيار مع رشة زيت زيتون.",
+"categories": [
+"snack"
+],
+"diets": [
+"Keto",
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian"
+],
+"kcal": 152,
+"servingGrams": 185,
+"ingredientCount": 3,
+"macros": {
+"protein": 22,
+"carbs": 4,
+"fats": 6
+},
+"ingredients": [
+{
+"name_en": "Fish, Tuna, Canned in water, drained",
+"name_ar": "تونة معلبة بالماء مصفاة",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+}
+]
+},
+{
+"id": "keto_avocado_and_egg_snack_plate",
+"name_en": "Avocado and Egg Snack Plate",
+"name_ar": "صحن أفوكادو وبيض",
+"desc_en": "Two boiled eggs with avocado and cucumber.",
+"desc_ar": "بيضتان مسلوقتان مع الأفوكادو والخيار.",
+"categories": [
+"snack"
+],
+"diets": [
+"Keto",
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 242,
+"servingGrams": 200,
+"ingredientCount": 3,
+"macros": {
+"protein": 14,
+"carbs": 7,
+"fats": 19
+},
+"ingredients": [
+{
+"name_en": "Egg, whole, boiled",
+"name_ar": "بيض مسلوق",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Avocado",
+"name_ar": "أفوكادو",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 50,
+"uom": "g"
+}
+]
+},
+{
+"id": "keto_labneh_with_cucumber_and_olive_oil",
+"name_en": "Labneh with Cucumber and Olive Oil",
+"name_ar": "لبنة مع الخيار وزيت الزيتون",
+"desc_en": "Labneh with cucumber sticks, olive oil and mint.",
+"desc_ar": "لبنة مع أصابع الخيار وزيت الزيتون والنعناع.",
+"categories": [
+"snack"
+],
+"diets": [
+"Keto",
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 126,
+"servingGrams": 153,
+"ingredientCount": 4,
+"macros": {
+"protein": 4,
+"carbs": 6,
+"fats": 10
+},
+"ingredients": [
+{
+"name_en": "Labneh",
+"name_ar": "لبنة",
+"grams": 45,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+},
+{
+"name_en": "Mint",
+"name_ar": "نعناع",
+"grams": 3,
+"uom": "g"
+}
+]
+},
+{
+"id": "keto_avocado_with_chia_and_lemon",
+"name_en": "Avocado with Chia and Lemon",
+"name_ar": "أفوكادو مع بذور الشيا والليمون",
+"desc_en": "Avocado with chia seeds and a squeeze of lemon.",
+"desc_ar": "أفوكادو مع بذور الشيا وعصير الليمون.",
+"categories": [
+"snack"
+],
+"diets": [
+"Keto",
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 199,
+"servingGrams": 95,
+"ingredientCount": 3,
+"macros": {
+"protein": 3,
+"carbs": 12,
+"fats": 18
+},
+"ingredients": [
+{
+"name_en": "Avocado",
+"name_ar": "أفوكادو",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Chia Seeds",
+"name_ar": "بذور الشيا",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Lemon Juice & Olive Oil",
+"name_ar": "عصير الليمون وزيت الزيتون",
+"grams": 5,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_bamieh_bi_lahme",
+"name_en": "Bamieh bi Lahme (Okra & Meat Stew) with Rice",
+"name_ar": "بامية باللحمة مع رز",
+"desc_en": "Okra and lean meat stewed in tomato sauce, served with rice.",
+"desc_ar": "بامية ولحم قليل الدهن مطبوخة بصلصة الطماطم، تقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 456,
+"servingGrams": 530,
+"ingredientCount": 5,
+"macros": {
+"protein": 35,
+"carbs": 51,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Okra cooked",
+"name_ar": "بامية مطبوخة",
+"grams": 200,
+"uom": "g"
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_bamieh_bi_zeit",
+"name_en": "Bamieh bi Zeit (Okra in Olive Oil)",
+"name_ar": "بامية بالزيت",
+"desc_en": "Okra cooked in olive oil with tomato and onion, with pita.",
+"desc_ar": "بامية مطبوخة بزيت الزيتون مع الطماطم والبصل، مع خبز بيتا.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 282,
+"servingGrams": 380,
+"ingredientCount": 5,
+"macros": {
+"protein": 10,
+"carbs": 40,
+"fats": 12
+},
+"ingredients": [
+{
+"name_en": "Okra cooked",
+"name_ar": "بامية مطبوخة",
+"grams": 220,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Onions Cooked",
+"name_ar": "بصل مطبوخ",
+"grams": 30,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 40,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_bazella_w_riz",
+"name_en": "Bazella w Riz (Peas & Meat Stew) with Rice",
+"name_ar": "بازلاء ورز باللحمة",
+"desc_en": "Peas, carrots and lean meat in tomato sauce, served with rice.",
+"desc_ar": "بازلاء وجزر ولحم قليل الدهن بصلصة الطماطم، تقدم مع الأرز.",
+"categories": [
+"lunch",
+"dinner"
+],
+"diets": [
+"Halal",
+"Omnivore"
+],
+"kcal": 542,
+"servingGrams": 500,
+"ingredientCount": 5,
+"macros": {
+"protein": 39,
+"carbs": 67,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Green peas, cooked",
+"name_ar": "بازلاء خضراء مطبوخة",
+"grams": 150,
+"uom": "g"
+},
+{
+"name_en": "Lean minced meat, cooked without oil",
+"name_ar": "لحم مفروم قليل الدهن، مطبوخ بدون زيت",
+"grams": 100,
+"uom": "g"
+},
+{
+"name_en": "Carrot, cooked",
+"name_ar": "جزر مطبوخ",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Tomato Sauce",
+"name_ar": "صلصة الطماطم",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Rice, boiled",
+"name_ar": "أرز مسلوق",
+"grams": 120,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_za_atar_manoushe_with_vegetables",
+"name_en": "Za'atar Manoushe with Vegetables",
+"name_ar": "منقوشة زعتر مع خضار",
+"desc_en": "Wholewheat flatbread with za'atar and olive oil, with tomato, cucumber and mint.",
+"desc_ar": "خبز من القمح الكامل مع الزعتر وزيت الزيتون، مع الطماطم والخيار والنعناع.",
+"categories": [
+"breakfast",
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegan",
+"Vegetarian"
+],
+"kcal": 355,
+"servingGrams": 203,
+"ingredientCount": 6,
+"macros": {
+"protein": 10,
+"carbs": 52,
+"fats": 14
+},
+"ingredients": [
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 80,
+"uom": "g"
+},
+{
+"name_en": "Za'atar",
+"name_ar": "زعتر",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 10,
+"uom": "g"
+},
+{
+"name_en": "Tomato",
+"name_ar": "طماطم",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 50,
+"uom": "g"
+},
+{
+"name_en": "Mint",
+"name_ar": "نعناع",
+"grams": 3,
+"uom": "g"
+}
+]
+},
+{
+"id": "leb_za_atar_manoushe_with_labneh",
+"name_en": "Za'atar Manoushe with Labneh",
+"name_ar": "منقوشة زعتر مع لبنة",
+"desc_en": "Wholewheat flatbread with za'atar and olive oil, with labneh and cucumber.",
+"desc_ar": "خبز من القمح الكامل مع الزعتر وزيت الزيتون، مع اللبنة والخيار.",
+"categories": [
+"breakfast",
+"snack"
+],
+"diets": [
+"Halal",
+"Kosher",
+"Omnivore",
+"Pescatarian",
+"Vegetarian"
+],
+"kcal": 332,
+"servingGrams": 178,
+"ingredientCount": 5,
+"macros": {
+"protein": 11,
+"carbs": 46,
+"fats": 13
+},
+"ingredients": [
+{
+"name_en": "Pita Whole Wheat Bread",
+"name_ar": "خبز بيتا من القمح الكامل",
+"grams": 70,
+"uom": "g"
+},
+{
+"name_en": "Za'atar",
+"name_ar": "زعتر",
+"grams": 8,
+"uom": "g"
+},
+{
+"name_en": "Oil, olive",
+"name_ar": "زيت الزيتون",
+"grams": 5,
+"uom": "g"
+},
+{
+"name_en": "Labneh",
+"name_ar": "لبنة",
+"grams": 45,
+"uom": "g"
+},
+{
+"name_en": "Cucumber",
+"name_ar": "خيار",
+"grams": 50,
+"uom": "g"
 }
 ]
 }

@@ -115,6 +115,79 @@ export function goalAdjustedKcal(kcal, goal) {
 export const PROTEIN_G_PER_KG = { default: [1.2, 1.6], recomp: [1.6, 2.2] }
 export const proteinRangeFor = (goal) => PROTEIN_G_PER_KG[goal] || PROTEIN_G_PER_KG.default
 
+// Carbohydrates per option for blood-sugar conditions (dietitian review, Myriam
+// Chehab 28.09.2026: diabetes ~50–80 g per meal and 15–25 g per snack;
+// hypoglycemia at least 45 g per meal and 15 g per snack). [min, max] grams,
+// null = no bound. Options in one meal are also kept close to each other
+// (CARB_SPREAD_MAX) so swapping one for another doesn't swing blood sugar.
+// These numbers are the dietitian's to tune.
+export const CARB_RULES = {
+  diabetes: { main: [45, 80], snack: [15, 25] },
+  hypoglycemia: { main: [45, null], snack: [15, null] },
+}
+export const CARB_SPREAD_MAX = 30
+// Both conditions: the tighter bound of each.
+export function carbRuleFor(conditionNames = []) {
+  const text = conditionNames.join(' ').toLowerCase()
+  const rules = [/diabet/.test(text) && CARB_RULES.diabetes, /hypoglyc/.test(text) && CARB_RULES.hypoglycemia].filter(Boolean)
+  if (!rules.length) return null
+  const merge = (k) => [
+    Math.max(...rules.map((r) => r[k][0] ?? 0)) || null,
+    rules.map((r) => r[k][1]).filter((v) => v != null).reduce((a, b) => Math.min(a, b), Infinity),
+  ].map((v) => (v === Infinity ? null : v))
+  return { main: merge('main'), snack: merge('snack') }
+}
+// Diabetic portion caps (grams per ingredient): one banana, moderate rice and
+// bread, three dates — the review flagged 1.5 bananas and 155 g rice.
+const DIABETIC_MAX_GRAMS = [[/banana/i, 118], [/\brice\b(?!\s*cake)/i, 120], [/pita|bread|toast/i, 70], [/\bdate/i, 24]]
+export function diabeticMaxGrams(name) {
+  const hit = DIABETIC_MAX_GRAMS.find(([re]) => re.test(name || ''))
+  return hit ? hit[1] : null
+}
+
+// Fat per option for conditions that need low-fat meals (dietitian review:
+// GERD, meals over 15–20 g fat; pancreatitis, fat-free dairy and low fat).
+// Grams; the dietitian's to tune.
+export const FAT_RULES = {
+  gerd: { main: 20, snack: 10 },
+  pancreatitis: { main: 15, snack: 8 },
+}
+export function fatRuleFor(conditionNames = []) {
+  const text = conditionNames.join(' ').toLowerCase()
+  const rules = [/gerd|reflux/.test(text) && FAT_RULES.gerd, /pancreat/.test(text) && FAT_RULES.pancreatitis].filter(Boolean)
+  if (!rules.length) return null
+  return { main: Math.min(...rules.map((r) => r.main)), snack: Math.min(...rules.map((r) => r.snack)) }
+}
+
+// Gout: smaller poultry and fish portions (the review flagged 210 g chicken).
+const GOUT_MAX_GRAMS = [[/chicken|turkey|salmon|tuna|fish/i, 150]]
+export function goutMaxGrams(name) {
+  const hit = GOUT_MAX_GRAMS.find(([re]) => re.test(name || ''))
+  return hit ? hit[1] : null
+}
+
+// Vegan plans: plant protein powder is added to options below these grams of
+// protein (dietitian review: meals under 25 g, snacks under 15 g).
+export const VEGAN_PROTEIN_FLOOR = { main: 25, snack: 15 }
+export const PLANT_PROTEIN_POWDER = 'Plant protein powder'
+export const PROTEIN_SCOOP_GRAMS = 30
+// Protein minimum per option for diabetes (dietitian review: 20–25 g per meal,
+// 10–15 g per snack): protein with the carbs keeps blood sugar steadier. Snacks
+// take the low end: a 100–150 kcal snack that must also hold 15–25 g carbs has
+// no room for 15 g protein at most calorie levels.
+export const DIABETES_PROTEIN_FLOOR = { main: 20, snack: 10 }
+export const proteinFloorFor = (conditionNames = []) =>
+  (/diabet/i.test(conditionNames.join(' ')) ? DIABETES_PROTEIN_FLOOR : null)
+// Options under a protein floor get a protein side (the review: pair
+// low-protein dishes with yogurt, eggs or tofu) — the first of these the client
+// can eat, and no more than this many grams. Vegetarian main meals use the
+// vegan floor; diabetic plans use DIABETES_PROTEIN_FLOOR.
+export const PROTEIN_SIDES = [
+  ['Greek Yogurt 0% Fat', 150],
+  ['Egg, white, boiled', 132],
+  ['Tofu, Cooked', 120],
+]
+
 // Below this activity multiplier the client reported little or no exercise
 // (sedentary = 1.05) — recomposition without strength training is just slow
 // fat loss, so a Shape Up plan for them is flagged for the dietitian.
@@ -261,8 +334,9 @@ const ING_META = {}
 for (const [k, v] of Object.entries(ingredientMeta)) ING_META[k.trim().toLowerCase()] = v
 
 // How eagerly each category absorbs a calorie change (relative "pull").
+// Supplements (protein powder) are added in a set amount and never resized.
 const SCALE_WEIGHT = {
-  carb: 6, fat: 3, dairy: 1.6, protein: 1.3, fruit: 1, vegetable: 0.35, condiment: 0, other: 1,
+  carb: 6, fat: 3, dairy: 1.6, protein: 1.3, fruit: 1, vegetable: 0.35, condiment: 0, supplement: 0, other: 1,
 }
 
 export function ingredientMetaFor(name) {
@@ -334,7 +408,9 @@ function redistribute(parts, grams, remaining) {
 // step alone pulls "8 eggs" back to a realistic max and frees those calories
 // for carbs/fats). Falls back to linear scaling when nutrition is missing for
 // most of the dish, so uncovered dishes behave exactly as before.
-export function scaleOptionToKcal(option, targetKcal) {
+// `maxGrams(name)` optionally tightens an ingredient's serving cap for this
+// client (e.g. diabetic portions); it can only lower ingredientMeta's max.
+export function scaleOptionToKcal(option, targetKcal, { maxGrams } = {}) {
   const ings = option.ingredients || []
   if (!targetKcal || targetKcal <= 0 || !ings.length) return option
 
@@ -342,7 +418,9 @@ export function scaleOptionToKcal(option, targetKcal) {
     // Fall back to the pre-swap ingredient's nutrition for allergy/condition
     // substitutes (e.g. gluten-free bread ← whole wheat bread) — they're
     // designed to be like-for-like, so this keeps calories/macros accurate.
-    const meta = ingredientMetaFor(ing.name_en) || ingredientMetaFor(ing.original_en)
+    let meta = ingredientMetaFor(ing.name_en) || ingredientMetaFor(ing.original_en)
+    const cap = meta && maxGrams ? maxGrams(ing.name_en) : null
+    if (cap != null && cap < meta.max) meta = { ...meta, max: Math.max(cap, meta.min) }
     return { ing, meta, kcalPerG: meta ? meta.per100g.kcal / 100 : null }
   })
   if (parts.filter((p) => p.meta).length < Math.ceil(ings.length * 0.6)) {
@@ -429,6 +507,11 @@ const UNIT_FOODS = [
   { re: /banana/i, g: 118, step: 0.5, en: ['banana', 'bananas'], ar: ['موزة', 'موز'] },
   { re: /\bapple/i, g: 120, step: 0.5, en: ['apple', 'apples'], ar: ['تفاحة', 'تفاحات'] },
   { re: /\bdate/i, g: 8, step: 1, en: ['date', 'dates'], ar: ['تمرة', 'تمرات'] },
+  // Labneh is eaten by the spoonful; grams read oddly for a spread. 15 g per
+  // tablespoon (the dietitian review's own conversion: 200 g = 13 spoons).
+  { re: /\blabneh\b/i, g: 15, step: 1, en: ['tbsp', 'tbsp'], ar: ['ملعقة كبيرة', 'ملاعق كبيرة'] },
+  // Protein powder comes with a scoop; ~30 g per scoop across common brands.
+  { re: /protein powder/i, g: 30, step: 0.5, en: ['scoop', 'scoops'], ar: ['مكيال', 'مكاييل'] },
   // avocado intentionally left in grams (size varies a lot).
 ]
 
@@ -675,6 +758,40 @@ export function validatePlan(plan) {
   // Both are plan-level checks, so — like every issue here — they hold the plan
   // back from auto-approval until a dietitian has looked at it.
   const a = plan.assessment || {}
+  // Blood-sugar conditions: carbs per option within range, and options in one
+  // meal close to each other. One issue per meal, not per option.
+  // Diabetes: protein per option at or above DIABETES_PROTEIN_FLOOR.
+  const proteinFloor = proteinFloorFor(plan.restrictions?.conditions || [])
+  if (proteinFloor) {
+    for (const m of meals) {
+      const min = proteinFloor[m.id === 'snack' ? 'snack' : 'main']
+      const low = (m.options || []).filter((o) => o.macros?.protein != null && o.macros.protein < min).length
+      if (low) issues.push({ code: 'proteinLow', meal: m.id, count: low, min })
+    }
+  }
+  const carbRule = carbRuleFor(plan.restrictions?.conditions || [])
+  if (carbRule) {
+    for (const m of meals) {
+      const [lo, hi] = carbRule[m.id === 'snack' ? 'snack' : 'main']
+      const carbs = (m.options || []).map((o) => o.macros?.carbs).filter((c) => c != null)
+      if (!carbs.length) continue
+      const out = carbs.filter((c) => (lo != null && c < lo) || (hi != null && c > hi)).length
+      if (out) issues.push({ code: 'carbRange', meal: m.id, count: out, range: hi != null ? `${lo}–${hi}` : `${lo}+` })
+      const spread = Math.max(...carbs) - Math.min(...carbs)
+      if (spread > CARB_SPREAD_MAX) issues.push({ code: 'carbSpread', meal: m.id, spread: Math.round(spread) })
+    }
+  }
+
+  // Low-fat conditions: fat per option within FAT_RULES.
+  const fatRule = fatRuleFor(plan.restrictions?.conditions || [])
+  if (fatRule) {
+    for (const m of meals) {
+      const cap = fatRule[m.id === 'snack' ? 'snack' : 'main']
+      const over = (m.options || []).filter((o) => (o.macros?.fats ?? 0) > cap).length
+      if (over) issues.push({ code: 'fatHigh', meal: m.id, count: over, cap })
+    }
+  }
+
   if (a.goal === 'recomp') {
     const [minPerKg] = proteinRangeFor('recomp')
     const min = Math.round((a.weight || 0) * minPerKg)

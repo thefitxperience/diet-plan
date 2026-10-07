@@ -107,6 +107,12 @@
     "min": 5,
     "max": 20
   },
+  "Butter, Reduced-fat": {
+    "category": "fat",
+    "per100g": { "kcal": 499, "protein": 3.3, "carbs": 0, "fats": 55 },
+    "min": 5,
+    "max": 20
+  },
   "Cabbage": {
     "category": "vegetable",
     "per100g": { "kcal": 25, "protein": 1.3, "carbs": 5.8, "fats": 0.1 },
@@ -323,6 +329,12 @@
     "min": 30,
     "max": 100
   },
+  "Green peas, cooked": {
+    "category": "vegetable",
+    "per100g": { "kcal": 84, "protein": 5.4, "carbs": 15.6, "fats": 0.2 },
+    "min": 60,
+    "max": 200
+  },
   "Greek Yogurt 0% Fat": {
     "category": "dairy",
     "per100g": { "kcal": 59, "protein": 10, "carbs": 3.6, "fats": 0.4 },
@@ -380,8 +392,8 @@
   "Labneh": {
     "category": "dairy",
     "per100g": { "kcal": 145, "protein": 7, "carbs": 5, "fats": 11 },
-    "min": 50,
-    "max": 200
+    "min": 30,
+    "max": 90
   },
   "Lamb, cooked": {
     "category": "protein",
@@ -485,6 +497,12 @@
     "min": 20,
     "max": 100
   },
+  "Okra cooked": {
+    "category": "vegetable",
+    "per100g": { "kcal": 22, "protein": 1.9, "carbs": 4.5, "fats": 0.2 },
+    "min": 80,
+    "max": 250
+  },
   "Parsley": {
     "category": "vegetable",
     "per100g": { "kcal": 36, "protein": 3, "carbs": 6.3, "fats": 0.8 },
@@ -502,6 +520,12 @@
     "per100g": { "kcal": 418, "protein": 4.5, "carbs": 6, "fats": 42 },
     "min": 10,
     "max": 40
+  },
+  "Plant protein powder": {
+    "category": "supplement",
+    "per100g": { "kcal": 380, "protein": 75, "carbs": 8, "fats": 6 },
+    "min": 15,
+    "max": 30
   },
   "Pita Whole Wheat Bread": {
     "category": "carb",
@@ -550,6 +574,12 @@
     "per100g": { "kcal": 130, "protein": 2.7, "carbs": 28, "fats": 0.3 },
     "min": 80,
     "max": 300
+  },
+  "Rice noodles, cooked": {
+    "category": "carb",
+    "per100g": { "kcal": 108, "protein": 1.8, "carbs": 24, "fats": 0.2 },
+    "min": 80,
+    "max": 250
   },
   "Rolled oats": {
     "category": "carb",
@@ -694,5 +724,11 @@
     "per100g": { "kcal": 20, "protein": 1.4, "carbs": 3.6, "fats": 0.4 },
     "min": 40,
     "max": 200
+  },
+  "Za'atar": {
+    "category": "condiment",
+    "per100g": { "kcal": 360, "protein": 11, "carbs": 40, "fats": 18 },
+    "min": 5,
+    "max": 20
   }
 }

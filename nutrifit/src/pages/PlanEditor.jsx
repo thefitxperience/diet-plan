@@ -16,6 +16,7 @@ import {
   stampPlanChecks, mealShares, setMealShare, mealServings,
 } from '../lib/planModel'
 import { canonicalTokens, processOption } from '../lib/dietaryRules'
+import { dislikeLabel } from '../components/PreferenceFields'
 import { planRestrictions } from '../lib/foodGroups'
 import { GOAL_LABELS, activityDisplayName } from '../lib/lookups'
 import mealCatalog from '../data/mealCatalog.json'
@@ -849,7 +850,7 @@ function ClientCard({ t, q, plan }) {
   const prefs = [
     ['qDiet', [q.dietaryTypeId, q.secondaryTypeId === 'IntermittentFasting' ? t('editor.if') : ''].filter(Boolean).join(' · ')],
     ['qActivity', activity()],
-    ['qDislikes', (q.dislikes || []).join(' · ')],
+    ['qDislikes', (q.dislikes || []).map((d) => dislikeLabel(d, lang)).join(' · ')],
   ].filter(([, v]) => v)
 
   const list = (items) => (

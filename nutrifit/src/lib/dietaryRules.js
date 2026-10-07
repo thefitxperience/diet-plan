@@ -17,6 +17,7 @@
 
 import data from '../data/dietaryData.json'
 import { translateIngredient, translateFood, MAX_OPTIONS_PER_MEAL } from './planModel'
+import { rewriteDishText } from './swapText'
 
 // Must match norm() in scripts/gen_dietary_data.py exactly.
 export function norm(s) {
@@ -38,8 +39,18 @@ export function canonicalTokens(names = []) {
   return set
 }
 
+// Ingredients we introduced as swap targets or additions, with the restrictions
+// they still carry (low-salt feta is still dairy; rice noodles are gluten-free).
+const LOCAL_INGREDIENTS = {
+  'cheese feta, low-salt': { restrictions: ['ibs', 'lactose intolerance', 'phenylketonuria'] },
+  'cheddar, lactose-free': { restrictions: ['cardiovascular disease', 'diabetes', 'phenylketonuria'] },
+  'rice noodles, cooked': { restrictions: [] },
+  'plant protein powder': { restrictions: [] },
+  "za'atar": { restrictions: ['sesame allergy'] }, // the blend contains sesame seeds
+}
+
 function entryFor(name) {
-  return data.ingredients[norm(name)] || null
+  return data.ingredients[norm(name)] || LOCAL_INGREDIENTS[norm(name)] || null
 }
 
 // Allergens the FIT restriction table doesn't cover: peanut, milk (a protein
@@ -56,11 +67,124 @@ export const LOCAL_ALLERGENS = {
   'fish allergy': (n) => FISH.test(n),
 }
 
+// Condition rules the FIT table is missing, from the dietitian review (Myriam
+// Chehab, 28.09.2026). Each entry is [pattern on the normalised ingredient name,
+// action]. The action is one of:
+//   'Name'  swap to that ingredient, same grams. Only like-for-like swaps (the
+//           dish must still be what its name says), and the target needs
+//           nutrition in ingredientMeta.json or the same nutrition as the
+//           original (scaling falls back to the original's figures).
+//   REMOVE  take the ingredient out and keep the dish — for minor flavourings
+//           (onion, honey, olives) whose removal doesn't change the dish.
+//   null    no suitable swap: the dish is left out for this client.
+export const REMOVE = '(remove)'
+const REDS = /^(grilled steak|lamb, cooked|beef strips|lean minced meat)/
+const NUTS = /^(almonds|almond butter|almond flour|cashews|walnuts|mixed nuts)/
+const LOCAL_CONDITION_RULES = {
+  // Plant protein powder (added to vegan plans) is usually pea protein: a
+  // legume, and far too much protein for PKU. Never added for those clients.
+  'legume family cross-reactivity': [[/plant protein powder/, null]],
+  'phenylketonuria': [[/plant protein powder/, null]],
+  // Fatty liver: lower-fat dairy. Feta and labneh are acceptable per the review;
+  // cheddar is too fatty, and halloumi has no lower-fat equivalent in the data.
+  // Favism: fava beans (the FIT table flagged green beans instead), and falafel,
+  // which in Lebanon is often made with fava beans.
+  'favism': [[/fava/, null], [/falafel/, null]],
+  // IBS (low-FODMAP): onion and honey out, low-FODMAP swaps for apple and wheat.
+  'ibs': [
+    [/^(onions raw|onions cooked|red onion)$/, REMOVE],
+    [/^honey$/, REMOVE],
+    [/^apple/, 'Strawberries'],
+    [/^bulgur/, 'Quinoa (cooked, plain)'],
+    [/^cooked pasta$/, 'Pasta, Gluten Free, boiled'],
+    [/^cooked noodles$/, 'Rice noodles, cooked'],
+  ],
+  // Hypertension: low-salt cheese, no olives, no salty sauces.
+  'hypertension': [
+    [/^cheese feta$/, 'Cheese Feta, Low-Salt'],
+    [/^olives/, REMOVE],
+    [/^(teriyaki sauce|caesar dressing)$/, null],
+  ],
+  // Hyperkalemia: potato dishes out (tomatoes are already in the FIT table).
+  'hyperkalemia': [[/potatoes/, null]],
+  // Histamine intolerance: aged cheese out, fresh cheese in.
+  'histamine intolerance': [[/^cheddar$/, 'Cheese Mozzarella']],
+  // Egg allergy: egg noodles become rice noodles.
+  'egg allergy': [[/^cooked noodles$/, 'Rice noodles, cooked']],
+  // Lactose intolerance: lactose-free cheddar.
+  'lactose intolerance': [[/^cheddar$/, 'Cheddar, Lactose-Free']],
+  // Gout: no shellfish or red meat (poultry/fish portions are capped separately).
+  'gout': [[/^shellfish/, null], [REDS, null]],
+  // Wilson's disease: copper-rich foods out.
+  "wilson's disease": [
+    [/^(peanut butter|salmon|cocoa)$/, null], [/^shellfish/, null], [NUTS, null], [/^mushrooms/, REMOVE],
+  ],
+  // Kidney stones (oxalate): nuts, peanut butter and cocoa out (spinach is
+  // already in the FIT table).
+  'kidney stones': [[NUTS, null], [/^almond milk/, null], [/^(peanut butter|cocoa)$/, null]],
+  // High triglycerides: no added sugar or sweets, less saturated fat.
+  'hypertriglyceridemia': [
+    [/^honey$/, REMOVE],
+    [/^(dates|granola|coconut oil)/, null],
+    [/^cheddar$/, 'Cheese Feta'],
+    [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+    [/^butter$/, 'Butter, Reduced-fat'],
+    [/^(lamb, cooked|grilled steak)$/, null],
+  ],
+  // High cholesterol: lower-fat dairy, no lamb or steak.
+  'hypercholesterolemia': [
+    [/^cheddar$/, 'Cheese Feta'],
+    [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+    [/^(lamb, cooked|grilled steak)$/, null],
+  ],
+  // Pancreatitis: low fat — fat-free dairy, no full-fat cheese or butter
+  // (fat per option is also capped, see FAT_RULES).
+  'pancreatitis': [
+    [/^(cheddar|cheese halloum|cream cheese|butter)/, null],
+    [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+  ],
+  // Fatty liver: lower-fat dairy, less saturated fat (no coconut oil, so no fat
+  // bombs; reduced-fat butter) and red meat cut back to its lean forms (lean
+  // minced meat and beef strips stay; steak and lamb go).
+  'fatty liver disease': [
+    [/^cheddar$/, 'Cheese Feta'],
+    [/^cheese halloum/, null],
+    [/^greek yogurt full fat$/, 'Greek Yogurt 0% Fat'],
+    [/^plain greek yogurt$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+    [/^butter$/, 'Butter, Reduced-fat'],
+    [/^coconut oil/, null],
+    [/^(lamb, cooked|grilled steak)$/, null],
+  ],
+}
+const localRulesFor = (n) => Object.entries(LOCAL_CONDITION_RULES)
+  .flatMap(([tok, rules]) => rules.filter(([re]) => re.test(n)).map(([, alt]) => ({ tok, alt })))
+
 // Every restriction an ingredient is unsuitable for: the FIT table's, plus ours.
 function restrictionsOf(name, listed = entryFor(name)?.restrictions || []) {
   const n = norm(name)
-  const local = Object.keys(LOCAL_ALLERGENS).filter((tok) => LOCAL_ALLERGENS[tok](n))
-  return local.length ? [...listed, ...local] : listed
+  const local = [
+    ...Object.keys(LOCAL_ALLERGENS).filter((tok) => LOCAL_ALLERGENS[tok](n)),
+    ...localRulesFor(n).map((r) => r.tok),
+  ]
+  return local.length ? [...new Set([...listed, ...local])] : listed
+}
+
+/** True when the named ingredient breaks none of the client's restrictions. */
+export function isSafeFor(name, tokens) {
+  return !restrictionsOf(name).some((tok) => tokens.has(tok))
+}
+
+// Candidate swaps for an ingredient: our condition swaps for the restrictions
+// it breaks, then the FIT table's designed alternatives.
+function alternativesOf(name, entry, violated) {
+  const local = localRulesFor(norm(name))
+    .filter((r) => r.alt && r.alt !== REMOVE && violated.includes(r.tok))
+    .map((r) => ({ name: r.alt, restrictions: entryFor(r.alt)?.restrictions || [] }))
+  return [...local, ...(entry?.alternatives || [])]
 }
 
 // ── Foods to avoid ───────────────────────────────────────────────────────────
@@ -95,12 +219,32 @@ function dislikeKey(name) {
   return specific.length ? specific : words
 }
 
+// Whole food families a client can avoid in one pick ("All fish") instead of
+// choosing each fish. Stored in dislikes under `id`, like any other pick; the
+// pattern is tested against ingredient names, dish names and the food groups
+// page's items. Peanuts are not in "All nuts" (a legume, and its own allergy).
+export const AVOID_GROUPS = [
+  { id: 'All fish', ar: 'كل أنواع السمك', hint: 'Salmon, tuna, white fish', hintAr: 'السلمون، التونة، السمك الأبيض',
+    match: /\b(fish|salmon|tuna|cod|sardines?|mackerel|tilapia|sea ?bass|trout|anchov(y|ies)|hammour|seafood)\b/ },
+  { id: 'All shellfish', ar: 'كل ثمار البحر', hint: 'Shrimp, crab, calamari', hintAr: 'القريدس، السلطعون، الحبار',
+    match: /\b(shellfish|shrimps?|prawns?|crabs?|lobsters?|mussels?|clams?|oysters?|scallops?|squid|calamari|octopus|seafood)\b/ },
+  { id: 'All red meat', ar: 'كل اللحوم الحمراء', hint: 'Beef, steak, lamb, minced meat', hintAr: 'لحم البقر، الستيك، الغنم، اللحم المفروم',
+    match: /\b(beef|steaks?|lamb|veal|mutton|goat|minced meat|red meat)\b/ },
+  { id: 'All poultry', ar: 'كل أنواع الدواجن', hint: 'Chicken, turkey', hintAr: 'الدجاج، الحبش',
+    match: /\b(chicken|turkey|duck|poultry)\b/ },
+  { id: 'All nuts', ar: 'كل المكسرات', hint: 'Almonds, walnuts, cashews', hintAr: 'اللوز، الجوز، الكاجو',
+    match: /\b(nuts?|almonds?|walnuts?|cashews?|pistachios?|hazelnuts?|pecans?|macadamias?)\b/ },
+]
+export const avoidGroup = (id) => AVOID_GROUPS.find((g) => g.id === id)
+
 /** (name) => true when the named food or ingredient is one the client avoids. */
 export function makeDislikeMatcher(dislikes = []) {
-  const keys = dislikes.map(dislikeKey).filter((k) => k.length)
-  if (!keys.length) return () => false
+  const groups = dislikes.map(avoidGroup).filter(Boolean)
+  const keys = dislikes.filter((d) => !avoidGroup(d)).map(dislikeKey).filter((k) => k.length)
+  if (!keys.length && !groups.length) return () => false
   return (name) => {
     if (!name) return false
+    if (groups.some((g) => g.match.test(norm(name)))) return true
     const have = new Set(foodWords(name))
     return keys.some((key) => key.every((w) => have.has(w))
       && !(key.length === 1 && BORROWED.has(key[0]) && PLANT_BASED.test(norm(name)))
@@ -120,7 +264,7 @@ export function processOption(opt, tokens) {
   // Composite dishes carry an ingredient list; single-food options don't — for
   // those the dish name itself is the "ingredient" to vet.
   const slots = (opt.ingredients && opt.ingredients.length)
-    ? opt.ingredients.map((ing) => ({ get: () => ing.name_en, set: (v) => { ing.name_en = v; ing.name_ar = translateIngredient(v) || '' }, mark: (r) => { ing.substituted = true; ing.sub_reasons = r }, flag: (r) => { ing.conflict_reasons = r }, orig: (v) => { if (!ing.original_en) ing.original_en = v } }))
+    ? opt.ingredients.map((ing) => ({ get: () => ing.name_en, set: (v) => { ing.name_en = v; ing.name_ar = translateIngredient(v) || '' }, mark: (r) => { ing.substituted = true; ing.sub_reasons = r }, flag: (r) => { ing.conflict_reasons = r }, orig: (v) => { if (!ing.original_en) ing.original_en = v }, remove: () => { ing._remove = true } }))
     : [{ get: () => opt.name_en, set: (v) => { opt.name_en = v; opt.name_ar = translateFood?.(v) || opt.name_ar }, mark: () => {}, flag: () => {}, orig: () => {} }]
 
   for (const slot of slots) {
@@ -128,17 +272,25 @@ export function processOption(opt, tokens) {
     const entry = entryFor(name)
     const violated = conflicts(restrictionsOf(name, entry?.restrictions || []))
     if (!violated.length) continue
-    const safeAlt = (entry?.alternatives || []).find((alt) => conflicts(restrictionsOf(alt.name, alt.restrictions)).length === 0)
+    const safeAlt = alternativesOf(name, entry, violated).find((alt) => conflicts(restrictionsOf(alt.name, alt.restrictions)).length === 0)
+    const removable = slot.remove && opt.ingredients.length > 1
+      && localRulesFor(norm(name)).some((r) => r.alt === REMOVE && violated.includes(r.tok))
     if (safeAlt) {
       slot.orig(name)
       slot.set(safeAlt.name)
       slot.mark(violated)
       swaps.push({ from: name, to: safeAlt.name, reasons: violated })
+    } else if (removable) {
+      slot.remove()
+      swaps.push({ from: name, to: null, removed: true, reasons: violated })
     } else {
       slot.flag(violated)
       blockers.push({ ingredient: name, reasons: violated })
     }
   }
+  if (opt.ingredients?.some((i) => i._remove)) opt.ingredients = opt.ingredients.filter((i) => !i._remove)
+  // Keep the dish's name and description true to its new ingredients.
+  if (swaps.length && !blockers.length) rewriteDishText(opt, swaps)
   return { swaps, conflicts: blockers }
 }
 

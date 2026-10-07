@@ -1347,9 +1347,11 @@ html[lang='ar'] .insp-advanced > summary { letter-spacing: normal; text-transfor
   margin: 0; padding: 4px; list-style: none;
   background: var(--card, #fff); border: 1px solid var(--border, #E3DFD6);
   border-radius: 8px; box-shadow: 0 10px 30px rgba(18, 38, 73, 0.14);
-  max-height: 240px; overflow-y: auto;
+  max-height: 280px; overflow-y: auto;
 }
 .ingredient-dropdown li { margin: 0; }
+/* No room below (phone keyboard up): the list opens above the box instead. */
+.ingredient-dropdown.is-up { top: auto; bottom: calc(100% + 3px); box-shadow: 0 -10px 30px rgba(18, 38, 73, 0.14); }
 .ingredient-dropdown-item {
   display: block; width: 100%; text-align: start;
   background: none; border: none; border-radius: 6px;
@@ -1357,6 +1359,9 @@ html[lang='ar'] .insp-advanced > summary { letter-spacing: normal; text-transfor
 }
 .ingredient-dropdown-item.active,
 .ingredient-dropdown-item:hover { background: var(--blue-08); }
+/* Food-group picks ("All fish"): bold, with their examples underneath. */
+.ingredient-dropdown-item.is-group { font-weight: 600; }
+.ingredient-dropdown-hint { display: block; font-size: 0.78rem; font-weight: 400; color: var(--muted, #6B7280); margin-top: 1px; }
 
 /* Editable macros (option inspector). */
 .macro-edit { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }

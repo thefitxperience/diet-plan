@@ -31,10 +31,12 @@ import {
   DIET_TYPE_NOTE, KICKER,
   ABOUT_SECTION, ABOUT_BLOCKS, GUIDELINES_SECTION, GUIDELINES_INTRO,
   HYDRATION, PROTEIN, GROUPS_SECTION, GROUPS, VEG_FRUIT, SLEEP,
+  CONDITION_ADVICE_SECTION, CONDITION_ADVICE,
 } from './deepfitGuidelines'
 import { formatAmount, ingredientState, proteinRangeFor, MIN_PLAN_KCAL } from '../lib/planModel'
 import { GOAL_LABELS } from '../lib/lookups'
 import { personaliseFoodGroups } from '../lib/foodGroups'
+import { canonicalTokens } from '../lib/dietaryRules'
 import appEn from '../i18n/en.json'
 import appAr from '../i18n/ar.json'
 import './deepfit.css'
@@ -518,6 +520,10 @@ export default function DeepFitTemplate({
     </div>
   )
 
+  // Page 6 advice for the client's own conditions (none → no card).
+  const adviceTokens = canonicalTokens([...(plan.restrictions?.conditions || []), ...(plan.restrictions?.allergies || [])])
+  const advice = CONDITION_ADVICE.filter((a) => adviceTokens.has(a.token))
+
   // Page 6 leaves out foods this client can't or won't eat (plan.restrictions).
   const food = personaliseFoodGroups(GROUPS, VEG_FRUIT, plan.restrictions, ITEMS)
     || { groups: GROUPS, vegFruit: VEG_FRUIT }
@@ -676,6 +682,19 @@ export default function DeepFitTemplate({
                 {t.num(SLEEP.figure)} {t.title(SLEEP.figureUnit)}
               </Mono>
             </div>
+
+            {advice.length > 0 && (
+              <div className="deepfit-card" style={{ gap: 6 }}>
+                <div className="deepfit-card-title">{t.title(CONDITION_ADVICE_SECTION)}</div>
+                {/* One line per condition, name inline, so several conditions still
+                    fit the page. */}
+                {advice.map((a) => (
+                  <div key={a.token} className="deepfit-card-note">
+                    <strong>{t.title(a)}:</strong> {t.para(a.body)}
+                  </div>
+                ))}
+              </div>
+            )}
 
             {approval?.name && (
               <div className="deepfit-signoff">

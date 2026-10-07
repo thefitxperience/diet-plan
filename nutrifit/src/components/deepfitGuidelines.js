@@ -112,6 +112,28 @@ export const VEG_FRUIT = {
   ],
 }
 
+// Condition-specific advice for page 6, shown only for the client's own
+// conditions (canonical restriction tokens). From the dietitian review
+// (Myriam Chehab, 28.09.2026); the egg allowance (3–4 a week) is ours to confirm.
+export const CONDITION_ADVICE_SECTION = titled("Advice for your health conditions", "Advice for your health conditions")
+export const CONDITION_ADVICE = [
+  { token: "hypercholesterolemia", ...titled("High cholesterol", "High cholesterol"), body: "Keep whole eggs to about 3\u20134 a week (egg whites are fine), eat oily fish such as salmon twice a week, choose low-fat dairy, and keep red meat and fried food occasional." },
+  { token: "hypertriglyceridemia", ...titled("High triglycerides", "High triglycerides"), body: "Limit sugar, sweets, honey, juices and sugary drinks, choose whole grains over white bread and rice, eat oily fish such as salmon twice a week, and avoid alcohol." },
+  { token: "hypertension", ...titled("High blood pressure", "High blood pressure"), body: "Keep salt low: choose low-salt cheese, labneh and bread, avoid pickles, olives and salty snacks, and season with herbs, lemon and spices instead of salt." },
+  { token: "diabetes", ...titled("Diabetes", "Diabetes"), body: "Keep the amount of carbohydrate steady from meal to meal, pair carbohydrates with protein or vegetables, choose whole grains, and avoid sugary drinks and sweets." },
+  { token: "hypoglycemia", ...titled("Low blood sugar", "Low blood sugar"), body: "Eat at regular times and don't skip meals or snacks; each one includes carbohydrates. Keep a quick source of sugar with you in case your blood sugar drops." },
+  { token: "gout", ...titled("Gout", "Gout"), body: "Limit red meat, organ meats and shellfish, choose chicken, turkey, eggs, dairy or tofu instead, keep portions moderate, and drink plenty of water through the day." },
+  { token: "ibs", ...titled("Irritable bowel (IBS)", "Irritable bowel (IBS)"), body: "Your plan avoids common trigger foods such as onion, garlic, beans and wheat. Eat slowly, keep portions moderate, and note any food that causes bloating so your dietitian can adjust your plan." },
+  { token: "kidney stones", ...titled("Kidney stones", "Kidney stones"), body: "Drink plenty of water through the day unless your doctor has limited your fluids, keep salt low, and limit high-oxalate foods such as spinach, nuts and cocoa." },
+  { token: "fatty liver disease", ...titled("Fatty liver", "Fatty liver"), body: "Choose low-fat dairy and lean protein, limit fried and fatty food, sweets and sugary drinks, and keep red meat occasional." },
+  { token: "gerd", ...titled("Acid reflux (GERD)", "Acid reflux (GERD)"), body: "Eat smaller meals, don't lie down for 2 to 3 hours after eating, and limit fatty, fried and spicy food, coffee and chocolate." },
+  { token: "pancreatitis", ...titled("Pancreatitis", "Pancreatitis"), body: "Keep fat low at every meal: choose fat-free dairy and lean protein, avoid fried food and alcohol, and eat small, frequent meals." },
+  { token: "favism", ...titled("Favism (G6PD deficiency)", "Favism (G6PD deficiency)"), body: "Never eat fava beans, foul or falafel made with fava beans, and avoid any medicine your doctor has listed as unsafe for G6PD deficiency." },
+  { token: "wilson's disease", ...titled("Wilson's disease", "Wilson's disease"), body: "Limit foods rich in copper: shellfish, nuts, chocolate, mushrooms and liver." },
+  { token: "hyperkalemia", ...titled("High potassium", "High potassium"), body: "Limit high-potassium foods such as bananas, potatoes, tomatoes, oranges and spinach, and follow your doctor's advice on potassium." },
+  { token: "lactose intolerance", ...titled("Lactose intolerance", "Lactose intolerance"), body: "Your plan uses lactose-free dairy. Hard, aged cheeses are naturally very low in lactose and are usually well tolerated." },
+]
+
 export const SLEEP = {
   ...titled('Sleep & Recovery', 'Sleep & recovery'),
   note: 'Aim for 7–9 hours of sleep per night. Consistent sleep and wake times support appetite regulation, recovery, and overall well-being.',
