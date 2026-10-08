@@ -317,6 +317,7 @@
   "editor.searchMeals": "Search meals…",
   "editor.blankOption": "Blank option (enter manually)",
   "editor.noMealsFound": "No meals match your search",
+  "editor.mealsHidden": "{n} meals are hidden because they don't suit this client's diet, allergies, conditions or foods to avoid.",
   "editor.ingredientsCount": "{count} ingredients",
   "editor.autoAdjusted": "adjusted for restrictions",
   "meal.breakfast": "Breakfast",

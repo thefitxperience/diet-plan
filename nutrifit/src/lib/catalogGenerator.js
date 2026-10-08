@@ -53,20 +53,21 @@ export async function generateCatalogPlan(payload, restrictions = {}, ctx = {}) 
 
 const RED_MEAT = /\b(steak|lamb|beef|veal|minced meat)\b/
 
-function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}, highProtein = false) {
+/**
+ * Everything that decides whether a dish suits one client, and the form it takes
+ * for them: diet, allergy and condition swaps, portion caps, protein additions,
+ * foods to avoid, and the carb/fat limits of their conditions. Shared by plan
+ * generation and the editor's meal picker, so a dish added by hand passes
+ * exactly the checks a generated one does.
+ * @param r {diet?, allergyNames?, conditionNames?, dislikedIngredients?}
+ */
+export function clientRules({ diet = '', allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}) {
   const tokens = canonicalTokens([...allergyNames, ...conditionNames])
-  const isIF = payload.secondaryTypeId === 'IntermittentFasting'
-  const diet = payload.dietaryTypeId
-  const daily = ctx.dailyKcal || 0
-  const substitutions = []
-  // Share of the dish's calories that come from protein (4 kcal per gram).
-  const proteinDensity = (o) => (o.kcal ? ((o.macros?.protein || 0) * 4) / o.kcal : 0)
+  const kind = (slot) => (slot === 'snack' ? 'snack' : 'main')
 
   // Review §4.2 — foods to avoid. Matched by food family (avoiding almonds
   // removes almond milk too; see makeDislikeMatcher) and against the ORIGINAL
-  // name, so an allergy swap can't smuggle a disliked food back in. A dish
-  // containing one is left out; it only returns as a last resort, when a meal
-  // would otherwise have fewer than MIN_OPTIONS_PER_MEAL options.
+  // name, so an allergy swap can't smuggle a disliked food back in.
   const avoids = makeDislikeMatcher(dislikedIngredients)
   const isDisliked = (opt) => (opt.ingredients?.length
     ? opt.ingredients.some((ing) => avoids(ing.name_en) || avoids(ing.original_en))
@@ -83,6 +84,8 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
   // Fatty liver: red meat kept occasional (the condition rules already leave
   // out steak and lamb; this limits the lean cuts that remain).
   const limitRedMeat = /fatty liver/i.test(condText)
+  const isRedMeat = (opt) => (opt.ingredients?.length ? opt.ingredients.map((i) => i.name_en) : [opt.name_en])
+    .some((n) => RED_MEAT.test(norm(n)))
   const capFns = [/diabet/i.test(condText) && diabeticMaxGrams, /gout/i.test(condText) && goutMaxGrams].filter(Boolean)
   const scaleOpts = capFns.length
     ? { maxGrams: (name) => capFns.map((f) => f(name)).filter((v) => v != null).reduce((a, b) => Math.min(a, b), Infinity) }
@@ -133,41 +136,72 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
     return (out.macros?.protein || 0) < floor ? add(PROTEIN_SCOOP_GRAMS) : out
   }
 
+  const inCarbRange = (opt, slot) => {
+    const [lo, hi] = carbRule?.[kind(slot)] || []
+    const c = opt.macros?.carbs ?? 0
+    return (lo == null || c >= lo) && (hi == null || c <= hi)
+  }
+
+  // A catalog (or custom) dish as this client would get it at `target` kcal in
+  // `slot`, or null when it doesn't suit their diet or has an unsuitable
+  // ingredient with no safe swap.
+  function prepare(entry, slot, target) {
+    if (diet && (entry.diets || []).length && !(entry.diets || []).includes(diet)) return null
+    let opt = optionFromCatalog(entry)
+    if (tokens.size) {
+      const { swaps, conflicts } = processOption(opt, tokens)
+      if (conflicts.length) return null
+      opt._swaps = swaps
+    }
+    // Scale AFTER swaps so macros/kcal reflect the final ingredient set.
+    opt = scaleOptionToKcal(opt, target, scaleOpts)
+    const proteinFloor = VEGAN_PROTEIN_FLOOR[kind(slot)]
+    if (veganTopUp && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinScoop(opt, target, proteinFloor)
+    else if (vegSide && slot !== 'snack' && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinSide(opt, target, proteinFloor)
+    // Diabetes: every meal and snack up to its protein floor (keto plans are
+    // high in protein already, and their carbs are not ranged). A side that
+    // would push the option out of the carb range isn't added: on small snacks
+    // the two limits can't both fit, and carbs come first.
+    const diabetesMin = diabetesFloor?.[kind(slot)]
+    if (diabetesMin && diet !== 'Keto' && (opt.macros?.protein || 0) < diabetesMin) {
+      const sided = withProteinSide(opt, target, diabetesMin, sideFor(opt))
+      if (inCarbRange(sided, slot) || !inCarbRange(opt, slot)) opt = sided
+    }
+    return opt
+  }
+
+  // The client's carb (blood-sugar) and fat (GERD, pancreatitis) limits for one
+  // option in `slot`.
+  const withinLimits = (opt, slot) => (!carbRule || inCarbRange(opt, slot))
+    && (!fatRule || (opt.macros?.fats ?? 0) <= fatRule[kind(slot)])
+
+  return { isDisliked, carbRule, fatRule, limitRedMeat, isRedMeat, diabetesFloor, prepare, withinLimits }
+}
+
+function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dislikedIngredients = [] } = {}, ctx = {}, highProtein = false) {
+  const rules = clientRules({ diet: payload.dietaryTypeId, allergyNames, conditionNames, dislikedIngredients })
+  const { isDisliked, carbRule, fatRule, limitRedMeat, isRedMeat, diabetesFloor } = rules
+  const isIF = payload.secondaryTypeId === 'IntermittentFasting'
+  const daily = ctx.dailyKcal || 0
+  const substitutions = []
+  // Share of the dish's calories that come from protein (4 kcal per gram).
+  const proteinDensity = (o) => (o.kcal ? ((o.macros?.protein || 0) * 4) / o.kcal : 0)
+
   // ── Phase 1: rank each meal's candidates against its own calorie target ─────
   // Most catalog dishes belong to more than one category (a steak is both lunch
   // and dinner), so these pools overlap heavily; phase 2 resolves that.
+  // A dish the client avoids is left out; it only returns as a last resort, when
+  // a meal would otherwise have fewer than MIN_OPTIONS_PER_MEAL options.
   const slots = MEAL_DEFS.filter((m) => !(isIF && m.id === 'breakfast')).map((m) => {
     const target = slotTargetKcal(m.id, daily, isIF)
     const options = []
     const seen = new Set()
     for (const entry of mealCatalog) {
       if (!(entry.categories || []).includes(m.id)) continue
-      // dietary type filter (empty diets = suitable for any diet)
-      if (diet && (entry.diets || []).length && !(entry.diets || []).includes(diet)) continue
       const key = norm(entry.name_en)
       if (!key || seen.has(key)) continue
-      let opt = optionFromCatalog(entry)
-      if (tokens.size) {
-        const { swaps, conflicts } = processOption(opt, tokens)
-        if (conflicts.length) continue // unfixable for this client — drop it
-        opt._swaps = swaps
-      }
-      // Scale AFTER swaps so macros/kcal reflect the final ingredient set.
-      opt = scaleOptionToKcal(opt, target, scaleOpts)
-      const proteinFloor = VEGAN_PROTEIN_FLOOR[m.id === 'snack' ? 'snack' : 'main']
-      if (veganTopUp && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinScoop(opt, target, proteinFloor)
-      else if (vegSide && m.id !== 'snack' && (opt.macros?.protein || 0) < proteinFloor) opt = withProteinSide(opt, target, proteinFloor)
-      // Diabetes: every meal and snack up to its protein floor (keto plans are
-      // high in protein already, and their carbs are not ranged).
-      const diabetesMin = diabetesFloor?.[m.id === 'snack' ? 'snack' : 'main']
-      // A side that would push the option out of the carb range isn't added:
-      // on small snacks the two limits can't both fit, and carbs come first.
-      if (diabetesMin && diet !== 'Keto' && (opt.macros?.protein || 0) < diabetesMin) {
-        const sided = withProteinSide(opt, target, diabetesMin, sideFor(opt))
-        const [lo, hi] = carbRule?.[m.id === 'snack' ? 'snack' : 'main'] || []
-        const inCarbs = (o) => (lo == null || (o.macros?.carbs ?? 0) >= lo) && (hi == null || (o.macros?.carbs ?? 0) <= hi)
-        if (inCarbs(sided) || !inCarbs(opt)) opt = sided
-      }
+      const opt = rules.prepare(entry, m.id, target)
+      if (!opt) continue // unsuitable diet, or unfixable for this client — drop it
       seen.add(key)
       options.push(opt)
     }
@@ -267,10 +301,8 @@ function buildCatalogPlan(payload, { allergyNames = [], conditionNames = [], dis
     // At most one red-meat option per meal for fatty liver: the rest move to
     // the back of the pool and only come back if the meal would be thin.
     if (limitRedMeat) {
-      const isRed = (o) => (o.ingredients?.length ? o.ingredients.map((i) => i.name_en) : [o.name_en])
-        .some((n) => RED_MEAT.test(norm(n)))
-      const first = pool.findIndex(isRed)
-      if (first >= 0) pool = [...pool.filter((o, i) => !isRed(o) || i === first), ...pool.filter((o, i) => isRed(o) && i !== first)]
+      const first = pool.findIndex(isRedMeat)
+      if (first >= 0) pool = [...pool.filter((o, i) => !isRedMeat(o) || i === first), ...pool.filter((o, i) => isRedMeat(o) && i !== first)]
     }
     return { def: m, target, pool, sorted }
   })

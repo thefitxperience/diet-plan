@@ -9,19 +9,18 @@ import { useI18n } from '../lib/i18n'
 import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../components/ui'
 import DeepFitTemplate, { planPageList, MEAL_PRESENTATION, PAGE_WIDTH, displayTitle } from '../components/DeepFitTemplate'
 import {
-  blankOption, optionFromCatalog, scaleOptionToKcal, mealTargetKcal,
+  blankOption, scaleOptionToKcal, mealTargetKcal,
   optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
   goalAdjustedKcal, recomputeOptionNutrition, ingredientHasMeta, KNOWN_INGREDIENTS,
   mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT, planCalorieWarnings, MIN_SAFE_KCAL,
   stampPlanChecks, mealShares, setMealShare, mealServings,
 } from '../lib/planModel'
-import { canonicalTokens, processOption } from '../lib/dietaryRules'
 import { dislikeLabel } from '../components/PreferenceFields'
 import { planRestrictions } from '../lib/foodGroups'
 import { GOAL_LABELS, activityDisplayName } from '../lib/lookups'
 import mealCatalog from '../data/mealCatalog.json'
 import { arDigits } from '../lib/digits'
-import { generateCatalogPlan } from '../lib/catalogGenerator'
+import { generateCatalogPlan, clientRules } from '../lib/catalogGenerator'
 import { renderPlanPdf, downloadBlob } from '../lib/pdfExport'
 import { useAuth } from '../auth/AuthProvider'
 import { listCustomMeals, saveCustomMeal } from '../lib/customMeals'
@@ -651,11 +650,10 @@ export default function PlanEditor() {
         <MealPicker
           mealLabel={t(`meal.${picker}`)}
           slot={picker}
-          diet={row.questionnaire?.dietaryTypeId || ''}
+          restrictions={planRestrictions(plan, row.questionnaire) || {}}
           targetKcal={plan.meals.find((m) => m.id === picker)?.targetKcal || mealTargetKcal(picker, plan.header?.dailyKcal)}
           used={new Set(plan.meals.flatMap((m) => m.options.map((o) => (o.name_en || '').trim().toLowerCase())))}
-          allergyNames={row.questionnaire?.allergyNames || []}
-          conditionNames={row.questionnaire?.conditionNames || []}
+          mealOptions={plan.meals.find((m) => m.id === picker)?.options || []}
           customMeals={customMeals}
           onPick={(opt) => addOption(picker, opt)}
           onClose={() => setPicker(null)}
@@ -1211,32 +1209,38 @@ function PlanSettings({
 
 // Searchable catalog of the gym's real meals (src/data/mealCatalog.json).
 // Picking one inserts a fully-populated option; "blank" starts a manual one.
-function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, conditionNames, customMeals = [], onPick, onClose }) {
+function MealPicker({ mealLabel, slot, restrictions, targetKcal, used, mealOptions = [], customMeals = [], onPick, onClose }) {
   const { t, lang } = useI18n() // follow the site language, not the plan-preview toggle
   const [q, setQ] = useState('')
   const query = q.trim().toLowerCase()
 
-  // Vet every catalog meal (plus the gym's saved custom meals) against the
-  // client's conditions/allergies: build the option, scale its quantities/macros
-  // to this meal's calorie target, apply safe ingredient swaps, and drop any dish
-  // that still has an unsuitable ingredient with no safe alternative.
-  const vetted = useMemo(() => {
-    const tokens = canonicalTokens([...(allergyNames || []), ...(conditionNames || [])])
-    return [...customMeals, ...mealCatalog].map((entry) => {
-      const opt = scaleOptionToKcal(optionFromCatalog(entry), targetKcal)
-      const { swaps, conflicts } = tokens.size ? processOption(opt, tokens) : { swaps: [], conflicts: [] }
-      return { entry, opt, swaps, safe: conflicts.length === 0 }
-    })
-  }, [allergyNames, conditionNames, targetKcal, customMeals])
+  // The same rules plan generation applies (catalogGenerator → clientRules):
+  // every catalog meal and saved custom meal is built as this client would get
+  // it — diet, allergy and condition swaps, portion caps, protein additions —
+  // and dishes that can't be made safe come back null.
+  const rules = useMemo(() => clientRules({
+    diet: restrictions.diet || '',
+    allergyNames: restrictions.allergies || [],
+    conditionNames: restrictions.conditions || [],
+    dislikedIngredients: restrictions.dislikes || [],
+    // keyed on content: for older plans this object is rebuilt on every render
+  }), [JSON.stringify(restrictions)])
+  const vetted = useMemo(() => [...customMeals, ...mealCatalog]
+    .map((entry) => ({ entry, opt: rules.prepare(entry, slot, targetKcal) })),
+  [rules, slot, targetKcal, customMeals])
 
-  // Show only meals valid for this slot AND the client's dietary type (empty
-  // categories/diets = allowed anywhere, until harvested); hide unfixable meals
-  // and ones already in the plan.
-  const available = vetted.filter((v) =>
-    v.safe &&
+  // Meals for this slot (empty categories = allowed anywhere) not already in the
+  // plan; of those, only the ones that suit the client: safe, not a food they
+  // avoid, within their conditions' carb/fat limits, and — for fatty liver — no
+  // second red-meat option in a meal that already has one.
+  const redMeatTaken = rules.limitRedMeat && mealOptions.some(rules.isRedMeat)
+  const suits = (opt) => !!opt && !rules.isDisliked(opt) && rules.withinLimits(opt, slot)
+    && !(redMeatTaken && rules.isRedMeat(opt))
+  const forSlot = vetted.filter((v) =>
     !used?.has((v.entry.name_en || '').trim().toLowerCase()) &&
-    (!v.entry.categories?.length || v.entry.categories.includes(slot)) &&
-    (!diet || !v.entry.diets?.length || v.entry.diets.includes(diet)))
+    (!v.entry.categories?.length || v.entry.categories.includes(slot)))
+  const available = forSlot.filter((v) => suits(v.opt))
+  const hidden = forSlot.length - available.length
   // Realistic portions first: dishes whose scaled serving fits the weight cap
   // keep alphabetical order; oversized ones (for this meal's calories) sink down.
   available.sort((a, b) => {
@@ -1266,11 +1270,13 @@ function MealPicker({ mealLabel, slot, diet, targetKcal, used, allergyNames, con
         <input type="text" autoFocus placeholder={t('editor.searchMeals')}
           value={q} onChange={(e) => setQ(e.target.value)} style={{ marginBottom: '0.75rem' }} />
         <div className="meal-picker-list">
+          {hidden > 0 && !query && <div className="muted small" style={{ marginBottom: 6 }}>{t('editor.mealsHidden', { n: arDigits(hidden, lang) })}</div>}
           {results.length === 0 && <div className="muted small">{t('editor.noMealsFound')}</div>}
-          {results.map(({ entry: m, opt, swaps }) => {
+          {results.map(({ entry: m, opt }) => {
+            const { _swaps: swaps = [], ...option } = opt
             const name = lang === 'ar' && m.name_ar ? m.name_ar : m.name_en
             return (
-              <button key={m.id} className="meal-picker-item" onClick={() => onPick(opt)}>
+              <button key={m.id} className="meal-picker-item" onClick={() => onPick(option)}>
                 <div className="row between">
                   <b>{name}{m.isCustom ? <span className="badge sm" style={{ marginInlineStart: 6 }}>{t('editor.customBadge')}</span> : ''}</b>
                   <span className="muted small">{arDigits(opt.kcal, lang)} {lang === 'ar' ? 'كيلو سعرة' : 'kcal'}</span>
