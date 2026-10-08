@@ -57,9 +57,9 @@ export default function InBodyUpload() {
     try {
       const isPdf = f.type === 'application/pdf' || f.name.toLowerCase().endsWith('.pdf')
       setPreviewUrl(isPdf ? await renderPdfFirstPage(f) : URL.createObjectURL(f))
-      const { text, ocr } = await extractInBody(f, setProgress)
+      const { text, ocr, layoutFields } = await extractInBody(f, setProgress)
       setSourceType(ocr ? 'ocr' : 'pdf_text')
-      const result = parseInBodyText(text, { ocr })
+      const result = parseInBodyText(text, { ocr, layoutFields })
       setModel(result.model)
       setExtracted({ ...result.fields, _text_sample: text.slice(0, 2000) })
       setValues({ ...result.fields })

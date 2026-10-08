@@ -32,7 +32,7 @@ export default function NewPlan() {
 
   const [form, setForm] = useState({
     goal: 'maintain', planStyle: 'normal', activityId: '', dietaryTypeId: '',
-    inbodyId: '', height: '', weight: '', muscle: '', fat: '', lbm: '', bmr: '',
+    inbodyId: '', height: '', weight: '', muscle: '', fat: '', pbf: '', lbm: '', bmr: '',
     calories: '', caloriesTouched: false,
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
     dislikes: [],   // §4.2 food preferences
@@ -59,6 +59,7 @@ export default function NewPlan() {
       weight: v.weight ?? f.weight,
       muscle: v.smm ?? f.muscle,
       fat: v.fatMass ?? f.fat,
+      pbf: v.pbf ?? f.pbf,
       lbm: v.lbm ?? f.lbm,
       bmr: v.bmr ?? f.bmr,
     }))
@@ -125,6 +126,7 @@ export default function NewPlan() {
         weight: parseFloat(form.weight) || 0,
         muscleMass: parseFloat(form.muscle) || 0,
         fatMass: parseFloat(form.fat) || 0,
+        pbf: parseFloat(form.pbf) || 0, // the sheet's own %; buildAssessment checks it against the kg
         bmr: String(form.bmr || '0'),
         lbm: String(form.lbm || '0'),
         kilocalorieNeeded: parseFloat(form.calories) || 0,

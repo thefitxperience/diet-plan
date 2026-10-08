@@ -1,0 +1,4 @@
+# Client InBody scans and working documents stay local: they hold client health data.
+InBody/
+Extra Files/
+.DS_Store

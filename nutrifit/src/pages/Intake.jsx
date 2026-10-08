@@ -129,9 +129,9 @@ export default function Intake({ slug }) {
     if (!f) return
     setError(null); setParsing(true)
     try {
-      const { text, ocr } = await extractInBody(f, setProgress)
+      const { text, ocr, layoutFields } = await extractInBody(f, setProgress)
       setSourceType(ocr ? 'ocr' : 'pdf_text')
-      const result = parseInBodyText(text, { ocr })
+      const result = parseInBodyText(text, { ocr, layoutFields })
       const fields = result.fields || {}
       // The scan must give us at least weight + height. We don't make the client
       // verify numbers — if the read is too poor, ask for a clearer file instead.
@@ -199,6 +199,7 @@ export default function Intake({ slug }) {
         typeId, secondaryTypeId,
         height: parseFloat(values.height) || 0, weight: parseFloat(values.weight) || 0,
         muscleMass: parseFloat(values.smm) || 0, fatMass: parseFloat(values.fatMass) || 0,
+        pbf: parseFloat(values.pbf) || 0,
         bmr: String(bmr || '0'), lbm: String(values.lbm || '0'),
         kilocalorieNeeded: calories,
         conditionIdSet: [], conditionNote: '', allergyIdSet: [], // restrictions handled our side

@@ -224,6 +224,12 @@ export function buildAssessment(payload = {}, ctx = {}) {
   }
   const weight = num(payload.weight)
   const fatMass = num(payload.fatMass)
+  // The InBody prints PBF from unrounded values, so fat ÷ weight from the
+  // rounded kg can land 0.1 off (7.4 ÷ 60.4 = 12.3% where the sheet says 12.2%).
+  // The sheet's figure is kept while it still matches the kg to within rounding;
+  // if the weight or fat was edited since, the percentage follows the new kg.
+  const derivedPbf = weight && fatMass ? Math.round((fatMass / weight) * 1000) / 10 : 0
+  const printedPbf = num(payload.pbf)
   const goal = ctx.goal || 'maintain'
   const maintenanceKcal = Math.round(num(payload.kilocalorieNeeded))
   return {
@@ -231,9 +237,7 @@ export function buildAssessment(payload = {}, ctx = {}) {
     height: num(payload.height),
     fatMass,
     muscleMass: num(payload.muscleMass),
-    // Body-fat % is derived rather than stored: the intake captures fat mass in
-    // kg, but percentage is what a client recognizes from an InBody sheet.
-    bodyFatPct: weight && fatMass ? Math.round((fatMass / weight) * 1000) / 10 : 0,
+    bodyFatPct: printedPbf && Math.abs(printedPbf - derivedPbf) <= 0.25 ? printedPbf : derivedPbf,
     bmr: Math.round(num(payload.bmr)),
     activityMultiplier: num(ctx.activityMultiplier),
     maintenanceKcal,
