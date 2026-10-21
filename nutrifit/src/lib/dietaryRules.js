@@ -253,9 +253,14 @@ export function isSafeFor(name, tokens) {
 
 // Candidate swaps for an ingredient: our condition swaps for the restrictions
 // it breaks, then the FIT table's designed alternatives.
+// A rule of ours that leaves the dish out (null) wins over the FIT table's
+// alternative for that restriction: lactose-free labneh is no answer to
+// pancreatitis, which needs less fat, not less lactose.
 function alternativesOf(name, entry, violated) {
-  const local = localRulesFor(norm(name))
-    .filter((r) => r.alt && r.alt !== REMOVE && violated.includes(r.tok))
+  const rules = localRulesFor(norm(name)).filter((r) => violated.includes(r.tok))
+  if (rules.some((r) => r.alt === null)) return []
+  const local = rules
+    .filter((r) => r.alt && r.alt !== REMOVE)
     .map((r) => ({ name: r.alt, restrictions: entryFor(r.alt)?.restrictions || [] }))
   return [...local, ...(entry?.alternatives || [])]
 }
