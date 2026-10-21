@@ -94,6 +94,7 @@ const RESTRICTION_EXCLUDES = {
   'favism': ['fava'],
   'hyperkalemia': ['potassium'],
   'ibs': ['fodmap'],
+  'hyperthyroidism': ['shellfish'],
 }
 
 const EN_SEP = /(, | \/ | & )/

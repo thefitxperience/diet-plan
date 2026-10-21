@@ -13,17 +13,21 @@ const list = (field, names) => names.map((name) => ({
 
 // Phenylketonuria is deliberately not offered: it needs a phenylalanine-measured
 // diet with a medical formula, which generated plans can't provide safely.
-// Hyperthyroidism isn't offered either: it has no food rules of its own, and
-// clients can still report a thyroid issue via "Thyroid Dysfunction".
+// Thyroid is offered as two conditions (dietitian review, Maya Mouawad): the
+// rules differ. Hypothyroidism keeps the goitrogen and soy limits; hyperthyroidism
+// limits iodine and always goes to the dietitian (calorie needs change with
+// treatment). Plans that recorded the old "Thyroid Dysfunction" keep its rules.
+// Diabetes is offered by type for the same reason: type 2 keeps carbs closer to
+// 45 g a meal. Plans that recorded plain "Diabetes" are treated as type 2.
 // Not offered for the same reasons: low blood pressure (nothing to filter — the
 // advice is more fluids and not cutting salt) and chronic kidney disease
 // (protein, potassium and phosphorus limits set from blood tests and stage).
 export const CONDITIONS = list('condition', [
-  'Cardiovascular Disease', 'Celiac Disease', 'Diabetes', 'Fatty Liver Disease', 'Favism',
+  'Cardiovascular Disease', 'Celiac Disease', 'Diabetes Type 1', 'Diabetes Type 2', 'Fatty Liver Disease', 'Favism',
   'GERD (Acid Reflux)', 'Gout', 'Hemochromatosis', 'Histamine Intolerance', 'Hypercholesterolemia',
   'Hypertriglyceridemia',
-  'Hyperkalemia', 'Hypertension', 'Hypoglycemia', 'IBS', 'Kidney Stones',
-  'Lactose Intolerance', 'Pancreatitis', 'Thyroid Dysfunction', "Wilson's Disease",
+  'Hyperkalemia', 'Hypertension', 'Hyperthyroidism', 'Hypoglycemia', 'Hypothyroidism', 'IBS', 'Kidney Stones',
+  'Lactose Intolerance', 'Pancreatitis', "Wilson's Disease",
 ])
 
 export const ALLERGIES = list('allergy', [
@@ -42,6 +46,8 @@ const AR = {
   'Celiac disease': 'الداء البطني (حساسية القمح)',
   'Chronic Kidney Disease': 'مرض الكلى المزمن',
   'Diabetes': 'السكري',
+  'Diabetes Type 1': 'السكري من النوع الأول',
+  'Diabetes Type 2': 'السكري من النوع الثاني',
   'Diabetes Mellitus': 'داء السكري',
   'Fatty Liver Disease': 'مرض الكبد الدهني',
   'Favism': 'التفويل (فقر دم الفول)',
@@ -56,6 +62,7 @@ const AR = {
   'hyperkaliemia': 'ارتفاع بوتاسيوم الدم',
   'Hypertension': 'ارتفاع ضغط الدم',
   'Hyperthyroidism': 'فرط نشاط الغدة الدرقية',
+  'Hypothyroidism': 'قصور الغدة الدرقية',
   'Hypoglycemia': 'انخفاض سكر الدم',
   'IBS': 'القولون العصبي',
   'Kidney Stones': 'حصى الكلى',

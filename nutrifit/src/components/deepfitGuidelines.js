@@ -114,12 +114,12 @@ export const VEG_FRUIT = {
 
 // Condition-specific advice for page 6, shown only for the client's own
 // conditions (canonical restriction tokens). From the dietitian review
-// (Myriam Chehab, 28.09.2026); the egg allowance (3–4 a week) is ours to confirm.
+// (Myriam Chehab, 28.09.2026), updated from Maya Mouawad's review (10.2026).
 export const CONDITION_ADVICE_SECTION = titled("Advice for your health conditions", "Advice for your health conditions")
 export const CONDITION_ADVICE = [
-  { token: "hypercholesterolemia", ...titled("High cholesterol", "High cholesterol"), body: "Keep whole eggs to about 3\u20134 a week (egg whites are fine), eat oily fish such as salmon twice a week, choose low-fat dairy, and keep red meat and fried food occasional." },
+  { token: "hypercholesterolemia", ...titled("High cholesterol", "High cholesterol"), body: "Keep whole eggs to 4 to 7 a week (egg whites are fine), eat oily fish such as salmon twice a week, choose low-fat dairy, and keep red meat and fried food occasional." },
   { token: "hypertriglyceridemia", ...titled("High triglycerides", "High triglycerides"), body: "Limit sugar, sweets, honey, juices and sugary drinks, choose whole grains over white bread and rice, eat oily fish such as salmon twice a week, and avoid alcohol." },
-  { token: "hypertension", ...titled("High blood pressure", "High blood pressure"), body: "Keep salt low: choose low-salt cheese, labneh and bread, avoid pickles, olives and salty snacks, and season with herbs, lemon and spices instead of salt." },
+  { token: "hypertension", ...titled("High blood pressure", "High blood pressure"), body: "Keep salt low: choose low-salt cheese, labneh and bread, avoid pickles, olives and salty snacks, and season with herbs, lemon and spices instead of salt. For fats, choose olive oil, avocado, unsalted nuts and oily fish such as salmon over coconut oil, fatty red meat and full-fat dairy." },
   { token: "diabetes", ...titled("Diabetes", "Diabetes"), body: "Keep the amount of carbohydrate steady from meal to meal, pair carbohydrates with protein or vegetables, choose whole grains, and avoid sugary drinks and sweets." },
   { token: "hypoglycemia", ...titled("Low blood sugar", "Low blood sugar"), body: "Eat at regular times and don't skip meals or snacks; each one includes carbohydrates. Keep a quick source of sugar with you in case your blood sugar drops." },
   { token: "gout", ...titled("Gout", "Gout"), body: "Limit red meat, organ meats and shellfish, choose chicken, turkey, eggs, dairy or tofu instead, keep portions moderate, and drink plenty of water through the day." },
@@ -131,6 +131,9 @@ export const CONDITION_ADVICE = [
   { token: "favism", ...titled("Favism (G6PD deficiency)", "Favism (G6PD deficiency)"), body: "Never eat fava beans, foul or falafel made with fava beans, and avoid any medicine your doctor has listed as unsafe for G6PD deficiency." },
   { token: "wilson's disease", ...titled("Wilson's disease", "Wilson's disease"), body: "Limit foods rich in copper: shellfish, nuts, chocolate, mushrooms and liver." },
   { token: "hyperkalemia", ...titled("High potassium", "High potassium"), body: "Limit high-potassium foods such as bananas, potatoes, tomatoes, oranges and spinach, and follow your doctor's advice on potassium." },
+  { token: "hypothyroidism", ...titled("Underactive thyroid", "Underactive thyroid"), body: "Take your thyroid medicine on an empty stomach, 30 to 60 minutes before breakfast, and keep it apart from coffee, soy, calcium and iron. Keep raw cabbage, kale and Brussels sprouts occasional; cooked, they're fine." },
+  { token: "hyperthyroidism", ...titled("Overactive thyroid", "Overactive thyroid"), body: "Your energy needs can be higher than usual and change with treatment, so your dietitian reviews your plan. Limit iodine-rich foods such as seaweed, shellfish and iodised salt, and cut down on coffee and energy drinks." },
+  { token: "latex-fruit cross-reactivity", ...titled("Latex-fruit allergy", "Latex-fruit allergy"), body: "Your plan leaves out the fruits most linked to latex allergy, such as banana, avocado and kiwi. Carrot and celery cause a reaction in some people: avoid them if they give you symptoms." },
   { token: "lactose intolerance", ...titled("Lactose intolerance", "Lactose intolerance"), body: "Your plan uses lactose-free dairy. Hard, aged cheeses are naturally very low in lactose and are usually well tolerated." },
 ]
 

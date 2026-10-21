@@ -23,41 +23,48 @@ export const ACTIVITIES = [
 
 // ── Display-name mappings ported from the demo ───────────────────────
 
+// Multipliers on the InBody BMR. Calibrated on Maya Mouawad's review of 50
+// plans (10.2026): the lower three levels were too low (10 clients she found
+// underestimated) and "very active" a little high. Close to the standard
+// factors (1.2 / 1.375 / 1.55 / 1.725 / 1.9), lower at the top, where
+// self-reported activity tends to run high.
 export const ACTIVITY_MULTIPLIERS = {
-  'extra active': 1.75,
-  'very active': 1.575,
-  sedentary: 1.05,
-  light: 1.2,
-  lightly: 1.2,
-  moderate: 1.3,
-  active: 1.75,
+  'extra active': 1.7,
+  'very active': 1.55,
+  sedentary: 1.25,
+  light: 1.375,
+  lightly: 1.375,
+  moderate: 1.45,
+  active: 1.7,
 }
 
 const ACTIVITY_DISPLAY = [
-  ['highly active', 'Peak Performance (Hard exercise, sports, or physically demanding activity 6–7 days per week)'],
-  ['extra active', 'Peak Performance (Hard exercise, sports, or physically demanding activity 6–7 days per week)'],
-  ['very active', 'Committed Intense (Exercise 5–6 days per week)'],
-  ['moderately active', 'Consistent Moderate (Exercise 3–4 days per week)'],
-  ['moderate', 'Consistent Moderate (Exercise 3–4 days per week)'],
-  ['lightly active', 'Building Momentum (Light exercise or physical activity 1–2 days per week)'],
-  ['light', 'Building Momentum (Light exercise or physical activity 1–2 days per week)'],
-  ['sedentary', 'Getting Started (Very little or no exercise)'],
+  ['highly active', 'Peak Performance (Hard training every day like an athlete, or hard exercise plus a physical job)'],
+  ['extra active', 'Peak Performance (Hard training every day like an athlete, or hard exercise plus a physical job)'],
+  ['very active', 'Committed Intense (Hard exercise 5 to 6 days a week, or a physically demanding job)'],
+  ['moderately active', 'Consistent Moderate (Exercise 3 to 4 days a week, or on your feet and moving most of the day)'],
+  ['moderate', 'Consistent Moderate (Exercise 3 to 4 days a week, or on your feet and moving most of the day)'],
+  ['lightly active', 'Building Momentum (Light exercise 1 to 2 days a week, or on your feet for part of the day)'],
+  ['light', 'Building Momentum (Light exercise 1 to 2 days a week, or on your feet for part of the day)'],
+  ['sedentary', 'Getting Started (Little or no exercise, and sitting most of the day, like a desk job)'],
 ]
 
 const ACTIVITY_ORDER = ['sedentary', 'light', 'lightly active', 'moderate', 'moderately active', 'very active', 'highly active', 'extra active']
 
-// Arabic for each distinct activity display label.
+// Arabic for each distinct activity display label. The brackets count daily
+// movement as well as exercise (review, Maya Mouawad: a job on your feet
+// burns more than a desk job), so clients pick the level that fits their day.
 const ACTIVITY_AR = {
-  'Peak Performance (Hard exercise, sports, or physically demanding activity 6–7 days per week)':
-    'الأداء الأقصى (تمارين شاقة أو رياضة أو نشاط بدني مكثّف ٦–٧ أيام في الأسبوع)',
-  'Committed Intense (Exercise 5–6 days per week)':
-    'التزام مكثّف (تمارين ٥–٦ أيام في الأسبوع)',
-  'Consistent Moderate (Exercise 3–4 days per week)':
-    'نشاط معتدل منتظم (تمارين ٣–٤ أيام في الأسبوع)',
-  'Building Momentum (Light exercise or physical activity 1–2 days per week)':
-    'بناء الزخم (تمارين خفيفة أو نشاط بدني ١–٢ يوم في الأسبوع)',
-  'Getting Started (Very little or no exercise)':
-    'بداية الطريق (تمارين قليلة جداً أو بدون)',
+  'Peak Performance (Hard training every day like an athlete, or hard exercise plus a physical job)':
+    'الأداء الأقصى (تدريب قوي يوميًا مثل الرياضيين، أو تمارين قوية مع عمل يتطلب جهدًا بدنيًا)',
+  'Committed Intense (Hard exercise 5 to 6 days a week, or a physically demanding job)':
+    'التزام مكثّف (تمارين قوية ٥ إلى ٦ أيام في الأسبوع، أو عمل يتطلب جهدًا بدنيًا)',
+  'Consistent Moderate (Exercise 3 to 4 days a week, or on your feet and moving most of the day)':
+    'نشاط معتدل منتظم (تمارين ٣ إلى ٤ أيام في الأسبوع، أو الوقوف والحركة معظم اليوم)',
+  'Building Momentum (Light exercise 1 to 2 days a week, or on your feet for part of the day)':
+    'بناء الزخم (تمارين خفيفة يومًا أو يومين في الأسبوع، أو الوقوف جزءًا من اليوم)',
+  'Getting Started (Little or no exercise, and sitting most of the day, like a desk job)':
+    'بداية الطريق (تمارين قليلة أو بدون، مع الجلوس معظم اليوم مثل العمل المكتبي)',
 }
 
 export function activityDisplayName(description, lang) {

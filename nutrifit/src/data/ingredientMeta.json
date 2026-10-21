@@ -233,6 +233,12 @@
     "min": 80,
     "max": 300
   },
+  "Pasta, Wheat, Whole grain, Boiled": {
+    "category": "carb",
+    "per100g": { "kcal": 149, "protein": 6, "carbs": 30, "fats": 1.7 },
+    "min": 80,
+    "max": 300
+  },
   "Cooked pasta": {
     "category": "carb",
     "per100g": { "kcal": 158, "protein": 5.8, "carbs": 31, "fats": 0.9 },
@@ -280,6 +286,12 @@
     "per100g": { "kcal": 282, "protein": 2.5, "carbs": 75, "fats": 0.4 },
     "min": 20,
     "max": 80
+  },
+  "Edamame": {
+    "category": "protein",
+    "per100g": { "kcal": 121, "protein": 11.9, "carbs": 8.9, "fats": 5.2 },
+    "min": 50,
+    "max": 150
   },
   "Egg, white, boiled": {
     "category": "protein",
@@ -392,7 +404,7 @@
   "Labneh": {
     "category": "dairy",
     "per100g": { "kcal": 145, "protein": 7, "carbs": 5, "fats": 11 },
-    "min": 30,
+    "min": 60,
     "max": 90
   },
   "Lamb, cooked": {
@@ -515,6 +527,12 @@
     "min": 10,
     "max": 40
   },
+  "Pear Fresh": {
+    "category": "fruit",
+    "per100g": { "kcal": 57, "protein": 0.4, "carbs": 12.1, "fats": 0.1 },
+    "min": 60,
+    "max": 200
+  },
   "Pesto sauce": {
     "category": "condiment",
     "per100g": { "kcal": 418, "protein": 4.5, "carbs": 6, "fats": 42 },
@@ -568,6 +586,12 @@
     "per100g": { "kcal": 387, "protein": 8.2, "carbs": 82, "fats": 2.8 },
     "min": 20,
     "max": 80
+  },
+  "Rice Brown, Whole grain, boiled": {
+    "category": "carb",
+    "per100g": { "kcal": 123, "protein": 2.7, "carbs": 25.6, "fats": 1 },
+    "min": 80,
+    "max": 300
   },
   "Rice, boiled": {
     "category": "carb",
@@ -706,6 +730,12 @@
     "per100g": { "kcal": 250, "protein": 13, "carbs": 43, "fats": 3.5 },
     "min": 30,
     "max": 120
+  },
+  "Yellow Melon": {
+    "category": "fruit",
+    "per100g": { "kcal": 34, "protein": 0.8, "carbs": 7.3, "fats": 0.2 },
+    "min": 60,
+    "max": 250
   },
   "Yogurt sauce": {
     "category": "condiment",

@@ -10,9 +10,9 @@ import { Field, Alert, Loading, Spinner, StatusBadge, BackButton } from '../comp
 import DeepFitTemplate, { planPageList, MEAL_PRESENTATION, PAGE_WIDTH, displayTitle } from '../components/DeepFitTemplate'
 import {
   blankOption, scaleOptionToKcal, mealTargetKcal,
-  optionWeight, MEAL_WEIGHT_CAP, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
+  optionWeight, mealWeightCap, kcalWarning, allergenWarnings, MAX_OPTIONS_PER_MEAL,
   goalAdjustedKcal, recomputeOptionNutrition, ingredientHasMeta, KNOWN_INGREDIENTS,
-  mealTargetsFor, validatePlan, GOAL_KCAL_SHIFT, planCalorieWarnings, MIN_SAFE_KCAL,
+  mealTargetsFor, validatePlan, maintenanceFromDaily, planCalorieWarnings, MIN_SAFE_KCAL,
   stampPlanChecks, mealShares, setMealShare, mealServings,
 } from '../lib/planModel'
 import { dislikeLabel } from '../components/PreferenceFields'
@@ -446,7 +446,7 @@ export default function PlanEditor() {
         // header.dailyKcal is already goal-adjusted; undo the shift to recover
         // the maintenance figure the generator expects.
         const daily = plan.assessment?.maintenanceKcal ||
-          (plan.header.dailyKcal ? plan.header.dailyKcal - (GOAL_KCAL_SHIFT[goal] || 0) : 0)
+          (plan.header.dailyKcal ? maintenanceFromDaily(plan.header.dailyKcal, goal) : 0)
         q.kilocalorieNeeded = daily
       }
       if (!q.kilocalorieNeeded) throw new Error(t('editor.regenerateNoTarget'))
@@ -651,6 +651,7 @@ export default function PlanEditor() {
           mealLabel={t(`meal.${picker}`)}
           slot={picker}
           restrictions={planRestrictions(plan, row.questionnaire) || {}}
+          goal={plan.assessment?.goal || row.questionnaire?.goal || ''}
           targetKcal={plan.meals.find((m) => m.id === picker)?.targetKcal || mealTargetKcal(picker, plan.header?.dailyKcal)}
           used={new Set(plan.meals.flatMap((m) => m.options.map((o) => (o.name_en || '').trim().toLowerCase())))}
           mealOptions={plan.meals.find((m) => m.id === picker)?.options || []}
@@ -1209,7 +1210,7 @@ function PlanSettings({
 
 // Searchable catalog of the gym's real meals (src/data/mealCatalog.json).
 // Picking one inserts a fully-populated option; "blank" starts a manual one.
-function MealPicker({ mealLabel, slot, restrictions, targetKcal, used, mealOptions = [], customMeals = [], onPick, onClose }) {
+function MealPicker({ mealLabel, slot, restrictions, goal, targetKcal, used, mealOptions = [], customMeals = [], onPick, onClose }) {
   const { t, lang } = useI18n() // follow the site language, not the plan-preview toggle
   const [q, setQ] = useState('')
   const query = q.trim().toLowerCase()
@@ -1220,22 +1221,24 @@ function MealPicker({ mealLabel, slot, restrictions, targetKcal, used, mealOptio
   // and dishes that can't be made safe come back null.
   const rules = useMemo(() => clientRules({
     diet: restrictions.diet || '',
+    goal,
     allergyNames: restrictions.allergies || [],
     conditionNames: restrictions.conditions || [],
     dislikedIngredients: restrictions.dislikes || [],
     // keyed on content: for older plans this object is rebuilt on every render
-  }), [JSON.stringify(restrictions)])
+  }), [JSON.stringify(restrictions), goal])
   const vetted = useMemo(() => [...customMeals, ...mealCatalog]
     .map((entry) => ({ entry, opt: rules.prepare(entry, slot, targetKcal) })),
   [rules, slot, targetKcal, customMeals])
 
   // Meals for this slot (empty categories = allowed anywhere) not already in the
   // plan; of those, only the ones that suit the client: safe, not a food they
-  // avoid, within their conditions' carb/fat limits, and — for fatty liver — no
-  // second red-meat option in a meal that already has one.
+  // avoid, within their conditions' carb/fat limits, legumes only at lunch for
+  // Wilson's disease, and — for fatty liver — no second red-meat option in a
+  // meal that already has one.
   const redMeatTaken = rules.limitRedMeat && mealOptions.some(rules.isRedMeat)
   const suits = (opt) => !!opt && !rules.isDisliked(opt) && rules.withinLimits(opt, slot)
-    && !(redMeatTaken && rules.isRedMeat(opt))
+    && rules.legumeAllowed(opt, slot) && !(redMeatTaken && rules.isRedMeat(opt))
   const forSlot = vetted.filter((v) =>
     !used?.has((v.entry.name_en || '').trim().toLowerCase()) &&
     (!v.entry.categories?.length || v.entry.categories.includes(slot)))
@@ -1244,7 +1247,8 @@ function MealPicker({ mealLabel, slot, restrictions, targetKcal, used, mealOptio
   // Realistic portions first: dishes whose scaled serving fits the weight cap
   // keep alphabetical order; oversized ones (for this meal's calories) sink down.
   available.sort((a, b) => {
-    const oa = optionWeight(a.opt) > MEAL_WEIGHT_CAP, ob = optionWeight(b.opt) > MEAL_WEIGHT_CAP
+    const cap = mealWeightCap(targetKcal)
+    const oa = optionWeight(a.opt) > cap, ob = optionWeight(b.opt) > cap
     if (oa !== ob) return oa ? 1 : -1
     if (oa) return optionWeight(a.opt) - optionWeight(b.opt)
     return 0

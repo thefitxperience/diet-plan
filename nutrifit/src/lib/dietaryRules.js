@@ -27,12 +27,22 @@ export function norm(s) {
 
 // Map the client's selected restriction display names (allergies + conditions,
 // in the API's spelling) to the canonical tokens used inside dietaryData.json.
+// Our own names the FIT table doesn't know: hypothyroidism follows the table's
+// "thyroid" rules, plus a token of its own for its advice.
+// Diabetes is offered by type (review, Maya Mouawad): both carry the diabetes
+// rules; the carb range differs (CARB_RULES in planModel).
+const LOCAL_EXPAND = {
+  hypothyroidism: ['thyroid', 'hypothyroidism'],
+  'diabetes type 1': ['diabetes', 'diabetes type 1'],
+  'diabetes type 2': ['diabetes', 'diabetes type 2'],
+}
+
 export function canonicalTokens(names = []) {
   const set = new Set()
   for (const nm of names) {
     const n = norm(nm)
     if (!n) continue
-    const expand = data.restrictionExpand[n]
+    const expand = LOCAL_EXPAND[n] || data.restrictionExpand[n]
     if (expand) expand.forEach((tok) => set.add(tok))
     else set.add(data.restrictionCanonical[n] ?? n)
   }
@@ -80,7 +90,29 @@ export const LOCAL_ALLERGENS = {
 export const REMOVE = '(remove)'
 const REDS = /^(grilled steak|lamb, cooked|beef strips|lean minced meat)/
 const NUTS = /^(almonds|almond butter|almond flour|cashews|walnuts|mixed nuts)/
+// Teriyaki sauce is made with soy sauce (soy and wheat) and is acidic and
+// salty; the FIT table lists no restrictions for it at all (review, Maya
+// Mouawad 10.2026: it was being offered to celiac and soy-allergic clients).
+const TERIYAKI = [/^teriyaki sauce$/, null]
 const LOCAL_CONDITION_RULES = {
+  'soy allergy': [TERIYAKI],
+  'wheat allergy': [TERIYAKI],
+  'gluten sensitivity': [TERIYAKI],
+  'celiac disease': [TERIYAKI],
+  // Fish allergy: shellfish too — cross-contact, and hidden fish derivatives
+  // (review, Maya Mouawad).
+  'fish allergy': [[/^shellfish/, null]],
+  // GERD: fatty, garlicky or acidic flavourings (fat per option is also capped).
+  'gerd': [TERIYAKI, [/^(pesto sauce|za'atar)$/, null]],
+  // Oral allergy syndrome: the pollen-related foods the review flagged.
+  'oral allergy syndrome': [
+    [/^(almonds|almond butter|almond flour|almond milk)/, null], [/^honey$/, REMOVE], [/^broccoli/, null], [/^cabbage$/, null],
+  ],
+  // Hypothyroidism (and the older "Thyroid Dysfunction"): soy (tofu) interferes
+  // with thyroid medication; the FIT table adds raw goitrogens (cabbage, kale).
+  'thyroid': [[/^(tofu|edamame)/, null]],
+  // Hyperthyroidism: iodine-rich shellfish out.
+  'hyperthyroidism': [[/^shellfish/, null]],
   // Plant protein powder (added to vegan plans) is usually pea protein: a
   // legume, and far too much protein for PKU. Never added for those clients.
   'legume family cross-reactivity': [[/plant protein powder/, null]],
@@ -90,31 +122,49 @@ const LOCAL_CONDITION_RULES = {
   // Favism: fava beans (the FIT table flagged green beans instead), and falafel,
   // which in Lebanon is often made with fava beans.
   'favism': [[/fava/, null], [/falafel/, null]],
-  // IBS (low-FODMAP): onion and honey out, low-FODMAP swaps for apple and wheat.
+  // IBS (low-FODMAP): onion and honey out, low-FODMAP swaps for apple and wheat;
+  // sauces built on onion and garlic, and chickpeas, are left out.
   'ibs': [
     [/^(onions raw|onions cooked|red onion)$/, REMOVE],
     [/^honey$/, REMOVE],
+    [/^(caesar dressing|curry sauce|tomato sauce)$/, null],
+    [/^(chickpeas|hummus|falafel)/, null],
     [/^apple/, 'Strawberries'],
     [/^bulgur/, 'Quinoa (cooked, plain)'],
     [/^cooked pasta$/, 'Pasta, Gluten Free, boiled'],
     [/^cooked noodles$/, 'Rice noodles, cooked'],
   ],
   // Hypertension: low-salt cheese, no olives, no salty sauces.
+  // Fat (review, Maya Mouawad): low-fat dairy, no coconut oil or fatty red
+  // meat (fat per option is also capped, see HYPERTENSION_FAT_SHARE).
   'hypertension': [
     [/^cheese feta$/, 'Cheese Feta, Low-Salt'],
     [/^olives/, REMOVE],
     [/^(teriyaki sauce|caesar dressing)$/, null],
+    [/^cheddar$/, 'Cheese Feta, Low-Salt'],
+    [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+    [/^coconut oil/, null],
+    [/^(lamb, cooked|grilled steak)$/, null],
   ],
-  // Hyperkalemia: potato dishes out (tomatoes are already in the FIT table).
-  'hyperkalemia': [[/potatoes/, null]],
+  // Hyperkalemia: potato dishes out (tomatoes are already in the FIT table), and
+  // the other high-potassium foods the review named: dates, lentils, tofu.
+  'hyperkalemia': [[/potatoes/, null], [/^dates/, null], [/^lentils/, null], [/^(tofu|edamame)/, null]],
   // Histamine intolerance: aged cheese out, fresh cheese in.
   'histamine intolerance': [[/^cheddar$/, 'Cheese Mozzarella']],
   // Egg allergy: egg noodles become rice noodles.
   'egg allergy': [[/^cooked noodles$/, 'Rice noodles, cooked']],
   // Lactose intolerance: lactose-free cheddar.
   'lactose intolerance': [[/^cheddar$/, 'Cheddar, Lactose-Free']],
-  // Gout: no shellfish or red meat (poultry/fish portions are capped separately).
-  'gout': [[/^shellfish/, null], [REDS, null]],
+  // Gout: no shellfish or red meat (poultry/fish portions are capped
+  // separately), and low-fat dairy rather than full-fat.
+  'gout': [
+    [/^shellfish/, null], [REDS, null],
+    [/^cheddar$/, 'Cheese Feta'],
+    [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
+    [/^milk, full fat$/, 'Milk, half Skimmed'],
+    [/^butter$/, 'Butter, Reduced-fat'],
+  ],
   // Wilson's disease: copper-rich foods out.
   "wilson's disease": [
     [/^(peanut butter|salmon|cocoa)$/, null], [/^shellfish/, null], [NUTS, null], [/^mushrooms/, REMOVE],
@@ -139,10 +189,13 @@ const LOCAL_CONDITION_RULES = {
     [/^milk, full fat$/, 'Milk, half Skimmed'],
     [/^(lamb, cooked|grilled steak)$/, null],
   ],
-  // Pancreatitis: low fat — fat-free dairy, no full-fat cheese or butter
-  // (fat per option is also capped, see FAT_RULES).
+  // Pancreatitis: low fat — fat-free dairy, no full-fat cheese, labneh or
+  // butter, no whole nuts or nut butters (fat per option is also capped, see
+  // FAT_RULES).
   'pancreatitis': [
     [/^(cheddar|cheese halloum|cream cheese|butter)/, null],
+    [/^(labneh|cottage cheese \(full-fat\))$/, null],
+    [NUTS, null], [/^peanut butter$/, null],
     [/^(greek yogurt full fat|plain greek yogurt)$/, 'Greek Yogurt 0% Fat'],
     [/^milk, full fat$/, 'Milk, half Skimmed'],
   ],
@@ -160,6 +213,26 @@ const LOCAL_CONDITION_RULES = {
     [/^(lamb, cooked|grilled steak)$/, null],
   ],
 }
+// Preferred swaps: made when the client can eat the replacement, otherwise the
+// original stays (unlike the rules above, these never drop a dish). Diabetes:
+// whole-grain rice and pasta (review, Maya Mouawad: carbs from whole grains).
+const PREFERRED_SWAPS = {
+  diabetes: [
+    [/^rice, boiled$/, 'Rice Brown, Whole grain, boiled'],
+    [/^cooked pasta$/, 'Pasta, Wheat, Whole grain, Boiled'],
+  ],
+}
+/** The ingredient this client should get in place of `name`, or `name` itself. */
+export function preferredFor(name, tokens) {
+  const n = norm(name)
+  for (const [tok, rules] of Object.entries(PREFERRED_SWAPS)) {
+    if (!tokens.has(tok)) continue
+    const hit = rules.find(([re]) => re.test(n))
+    if (hit && isSafeFor(hit[1], tokens)) return hit[1]
+  }
+  return name
+}
+
 const localRulesFor = (n) => Object.entries(LOCAL_CONDITION_RULES)
   .flatMap(([tok, rules]) => rules.filter(([re]) => re.test(n)).map(([, alt]) => ({ tok, alt })))
 
@@ -201,8 +274,9 @@ const QUALIFIERS = new Set(['whole', 'cooked', 'raw', 'boiled', 'grilled', 'bake
 const CATEGORY_HEADS = new Set(['fish', 'shellfish', 'oil', 'cheese'])
 // One-word foods that plant products borrow ("almond milk" is not milk).
 const BORROWED = new Set(['milk', 'butter', 'cream', 'yogurt', 'latte', 'cheese', 'flour'])
-// Words that make a different food of the same name (sweet potato ≠ potato).
-const DISTINCT = new Set(['sweet'])
+// Words that make a different food of the same name (sweet potato ≠ potato;
+// olive oil ≠ olives: avoiding olives hid every dish cooked in olive oil).
+const DISTINCT = new Set(['sweet', 'oil'])
 
 const singular = (w) => (w.endsWith('ies') ? `${w.slice(0, -3)}y`
   : w.endsWith('oes') ? w.slice(0, -2)
@@ -271,7 +345,17 @@ export function processOption(opt, tokens) {
     const name = slot.get()
     const entry = entryFor(name)
     const violated = conflicts(restrictionsOf(name, entry?.restrictions || []))
-    if (!violated.length) continue
+    if (!violated.length) {
+      const better = preferredFor(name, tokens)
+      if (better !== name) {
+        const reasons = Object.keys(PREFERRED_SWAPS).filter((tok) => tokens.has(tok))
+        slot.orig(name)
+        slot.set(better)
+        slot.mark(reasons)
+        swaps.push({ from: name, to: better, reasons })
+      }
+      continue
+    }
     const safeAlt = alternativesOf(name, entry, violated).find((alt) => conflicts(restrictionsOf(alt.name, alt.restrictions)).length === 0)
     const removable = slot.remove && opt.ingredients.length > 1
       && localRulesFor(norm(name)).some((r) => r.alt === REMOVE && violated.includes(r.tok))
