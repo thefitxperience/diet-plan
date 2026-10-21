@@ -182,11 +182,10 @@ export const FAT_RULES = {
   gerd: { main: 20, snack: 5 },
   pancreatitis: { main: 15, snack: 8 },
 }
-// Hypertension: fat up to 27% of calories (review, Maya Mouawad), held per
-// main-meal option since options are alternatives. Snacks are left free: they
-// are where the healthy fats she recommends (unsalted nuts, avocado) fit, and
-// are a small part of the day. Not on keto, which is high-fat by design and
-// would lose every option.
+// Hypertension: fat up to 27% of calories (review, Maya Mouawad: "too much fat
+// for hypertensive even in snacks"), held per option, snacks included, since
+// options are alternatives. Not on keto, which is high-fat by design and would
+// lose every option.
 export const HYPERTENSION_FAT_SHARE = 0.27
 export function fatRuleFor(conditionNames = [], diet = '') {
   const text = conditionNames.join(' ').toLowerCase()
@@ -201,7 +200,7 @@ export function fatCapFor(rule, slot, opt) {
   if (!rule) return Infinity
   const grams = rule[slot === 'snack' ? 'snack' : 'main'] ?? Infinity
   const kcal = parseFloat(opt?.kcal) || 0
-  return Math.min(grams, rule.share && kcal && slot !== 'snack' ? (kcal * rule.share) / 9 : Infinity)
+  return Math.min(grams, rule.share && kcal ? (kcal * rule.share) / 9 : Infinity)
 }
 
 // Gout: smaller poultry and fish portions (the review flagged 210 g chicken).
