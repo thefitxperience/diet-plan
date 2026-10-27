@@ -78,7 +78,7 @@ export default function Intake({ slug }) {
   // Details + questionnaire
   const [form, setForm] = useState({
     firstName: '', lastName: '', dob: '', gender: '', phone: '', email: '', consent: false,
-    goal: '', planStyle: 'normal', activityId: '', dietaryTypeId: '',
+    goal: '', planStyle: '', activityId: '', dietaryTypeId: '',
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
     // §4.2 preferences: language persists on the client, dislikes are a per-plan
     // answer. Language mirrors whatever they're reading the form in until they
@@ -175,7 +175,7 @@ export default function Intake({ slug }) {
   const stepValid = {
     2: form.firstName && form.lastName && form.dob && !dobTooYoung && form.gender &&
       (form.phone || '').replace(/\D/g, '').length >= 8,
-    3: form.goal && form.activityId && form.dietaryTypeId,
+    3: form.goal && form.activityId && form.dietaryTypeId && form.planStyle,
     4: form.consent,
   }
 
@@ -422,6 +422,13 @@ export default function Intake({ slug }) {
                   placeholder={t('wizard.selectDietary')}
                   onChange={(v) => setForm({ ...form, dietaryTypeId: v })}
                   options={dietaryTypes.map((d) => ({ id: d.dietaryTypeId, ...dietaryInfo(d.dietaryTypeName, lang) }))} />
+
+                <PickerField label={t('wizard.planStyle')} value={form.planStyle}
+                  placeholder={t('intake.selectPlanStyle')}
+                  onChange={(v) => setForm({ ...form, planStyle: v })}
+                  options={Object.keys(PLAN_STYLE_IDS).map((s) => ({
+                    id: s, label: t(`wizard.planStyle.${s}`), desc: t(`intake.planStyleDesc.${s}`),
+                  }))} />
 
                 <div className="row between" style={{ marginTop: '1rem' }}>
                   <button className="btn secondary" onClick={() => setStep(2)}>{t('common.previous')}</button>
