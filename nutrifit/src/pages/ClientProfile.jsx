@@ -74,6 +74,9 @@ export default function ClientProfile() {
             <div><div className="muted small">{t('clients.gender')}</div><b>{client.gender === 'F' ? t('clients.female') : t('clients.male')}</b></div>
             <div><div className="muted small">{t('clients.phone')}</div><b dir="ltr">{client.phone || '—'}</b></div>
             <div><div className="muted small">{t('clients.email')}</div><b>{client.email || '—'}</b></div>
+            {client.membership_id && (
+              <div><div className="muted small">{t('clients.membershipId')}</div><b dir="ltr">{client.membership_id}</b></div>
+            )}
           </div>
           {client.notes && <p className="muted" style={{ marginBottom: 0 }}>{client.notes}</p>}
           {canEdit && (

@@ -1,4 +1,6 @@
-// Public, no-login client intake (shared link /#/intake/<token>).
+// Public, no-login client intake (shared link /#/intake/<token>). The token is
+// the gym's, or a personal link from the trainer app (UDRA, migration 018) that
+// opens pre-filled and works once.
 // Step 1: InBody upload — parsed automatically, the client is NOT asked to
 // review/edit the numbers. Step 2: personal details + questionnaire.
 // On submit we generate a restriction-safe plan client-side and hand everything
@@ -29,6 +31,24 @@ function estimateBmr({ weight, height, age, gender }) {
   if (!w || !h) return 0
   const base = 10 * w + 6.25 * h - 5 * a
   return Math.round(gender === 'F' ? base - 161 : base + 5)
+}
+
+// The form with a personal link's pre-fill (UDRA's field names) over it; only
+// what the trainer actually knows is filled in.
+function prefilled(form, p) {
+  const pick = (v, fallback) => (typeof v === 'string' && v.trim() ? v.trim() : fallback)
+  const language = p.language === 'ar' || p.language === 'en' ? p.language : null
+  return {
+    ...form,
+    firstName: pick(p.first_name, form.firstName),
+    lastName: pick(p.last_name, form.lastName),
+    dob: pick(p.dob, form.dob),
+    gender: p.gender === 'M' || p.gender === 'F' ? p.gender : form.gender,
+    phone: pick(p.phone, form.phone),
+    email: pick(p.email, form.email),
+    membershipId: pick(p.membership_id, form.membershipId),
+    ...(language ? { language, languageTouched: true } : {}),
+  }
 }
 
 // Labelled DescribedSelect for the intake's step 3 (goal / activity / diet).
@@ -77,7 +97,7 @@ export default function Intake({ slug }) {
 
   // Details + questionnaire
   const [form, setForm] = useState({
-    firstName: '', lastName: '', dob: '', gender: '', phone: '', email: '', consent: false,
+    firstName: '', lastName: '', dob: '', gender: '', phone: '', email: '', membershipId: '', consent: false,
     goal: '', planStyle: '', activityId: '', dietaryTypeId: '',
     conditionIds: [], allergyIds: [], noConditions: false, noAllergies: false,
     // §4.2 preferences: language persists on the client, dislikes are a per-plan
@@ -113,6 +133,8 @@ export default function Intake({ slug }) {
       const g = Array.isArray(data) ? data[0] : data
       if (error || !g) { setGymError(true); return }
       setGym(g)
+      // A personal link from the trainer's app (UDRA) knows who the client is.
+      if (g.personal && g.prefill) setForm((f) => prefilled(f, g.prefill))
     })
   }, [token])
 
@@ -233,7 +255,7 @@ export default function Intake({ slug }) {
         p_client: {
           first_name: form.firstName, last_name: form.lastName, dob: form.dob,
           gender: form.gender, phone: form.phone, email: form.email, consent: form.consent, notes: '',
-          language: form.language,
+          language: form.language, membership_id: form.membershipId.trim(),
         },
         p_inbody: { source_type: sourceType, model, extracted: extracted || {}, confirmed, test_date: testDate || null },
         p_questionnaire: {
@@ -280,7 +302,12 @@ export default function Intake({ slug }) {
           </button>
         </div>
 
-        {done ? (
+        {gym.used && !done ? (
+          <div className="intake-body intake-done">
+            <h2>{t('intake.usedTitle')}</h2>
+            <p className="muted">{t('intake.usedBody')}</p>
+          </div>
+        ) : done ? (
           <div className="intake-body intake-done">
             <div className="intake-done-mark" aria-hidden="true">
               <svg viewBox="0 0 52 52" width="29" height="29">
@@ -385,6 +412,9 @@ export default function Intake({ slug }) {
                   </Field>
                   <Field label={t('clients.email')}>
                     <input type="email" value={form.email} onChange={set('email')} />
+                  </Field>
+                  <Field label={t('clients.membershipId')} hint={t('intake.membershipHint')}>
+                    <input type="text" inputMode="numeric" dir="ltr" value={form.membershipId} onChange={set('membershipId')} />
                   </Field>
                   <Field label={t('pref.language')}>
                     <select value={form.language}
