@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- Root-absolute (Vite prefixes the build base): relative "./" paths broke on
+         nested routes like /diet/<gym>, where the browser fell back to an old
+         /favicon.ico left on the server. public/favicon.ico is the same icon. -->
+    <link rel="icon" type="image/x-icon" href="/diet-plan/icon.ico" />
+    <link rel="icon" type="image/png" href="/diet-plan/icon.png" />
+    <link rel="apple-touch-icon" href="/diet-plan/icon.png" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#122649" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <title>UDRA</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Sora is the UDRA brand typeface, used by both the app and the plan PDF.
+         JetBrains Mono sets every figure in the plan PDF (see deepfit.css).
+         Tajawal covers Arabic, which neither of the other two has a cut for. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&family=Tajawal:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script type="module" crossorigin src="/diet-plan/assets/index-BFCz9zs5.js"></script>
+    <link rel="stylesheet" crossorigin href="/diet-plan/assets/index-Cjszs1Oa.css">
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
